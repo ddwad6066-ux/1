@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>智能客服与知识问答智能体｜前端展示</title>
+<style>
+:root{
+  --bg:#f4f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#e5e7eb;
+  --primary:#2563eb;--soft:#eff6ff;--shadow:0 18px 46px rgba(15,23,42,.08);--radius:20px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;height:100vh;overflow:hidden;color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+  background:radial-gradient(circle at 16% 8%,rgba(37,99,235,.08),transparent 26%),
+  radial-gradient(circle at 84% 16%,rgba(6,182,212,.08),transparent 24%),
+  linear-gradient(135deg,#f8fbff 0%,#eef5ff 46%,#f8fafc 100%);
+}
+button,textarea{font-family:inherit}button{cursor:pointer}
+.layout{display:flex;height:100vh;width:100vw}
+.sidebar{
+  width:310px;background:rgba(255,255,255,.88);backdrop-filter:blur(18px);
+  border-right:1px solid rgba(226,232,240,.95);padding:18px;display:flex;flex-direction:column;gap:16px;
+}
+.brand{display:flex;gap:12px;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.logo{
+  width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#06b6d4);
+  display:grid;place-items:center;color:#fff;font-weight:900;font-size:21px;box-shadow:0 12px 28px rgba(37,99,235,.24);
+}
+.brand h1{font-size:17px;line-height:1.25;margin:0}.brand p{font-size:12px;color:var(--muted);margin:4px 0 0}
+.new-btn{width:100%;border:0;border-radius:16px;background:#111827;color:#fff;font-weight:800;padding:14px 16px}
+.section-title{font-size:12px;color:#98a2b3;font-weight:900;letter-spacing:.08em;margin:2px 2px -2px}
+.history{overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:2px}
+.history-item{
+  border:1px solid transparent;border-radius:15px;background:transparent;color:#344054;padding:12px;
+  display:flex;gap:10px;text-align:left;align-items:center;transition:.16s;
+}
+.history-item:hover{background:#f8fafc;border-color:#e2e8f0}
+.history-item.active{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;font-weight:800}
+.history-icon{width:28px;height:28px;border-radius:10px;background:#eef2ff;display:grid;place-items:center;flex:0 0 auto}
+.history-text span{display:block;font-size:13px}.history-text small{display:block;color:#98a2b3;font-size:11px;margin-top:4px}
+.side-card{margin-top:auto;border:1px solid #dbeafe;background:#eff6ff;border-radius:18px;padding:14px;color:#1e3a8a;font-size:12px;line-height:1.65}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh}
+.topbar{
+  height:74px;background:rgba(255,255,255,.76);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(226,232,240,.95);display:flex;align-items:center;padding:0 26px;
+}
+.top-title h2{margin:0;font-size:19px}.top-title p{margin:5px 0 0;color:var(--muted);font-size:12px}
+.content{flex:1;min-height:0;padding:20px;display:block}
+.chat-card{
+  height:100%;background:rgba(255,255,255,.9);border:1px solid rgba(226,232,240,.95);
+  border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;
+}
+.chat-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}
+.chat-head h3{margin:0;font-size:17px}.chat-head p{margin:5px 0 0;font-size:12px;color:var(--muted)}
+.intent-box{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.intent{padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900;background:#f8fafc;border:1px solid #e2e8f0;color:#475467}
+.intent.active{background:#dbeafe;border-color:#bfdbfe;color:#1d4ed8}
+
+.process-zone{
+  display:grid;
+  grid-template-columns:1.35fr .95fr;
+  gap:12px;
+  padding:14px 20px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#fbfdff,#f8fbff);
+}
+.process-box{
+  border:1px solid #dbeafe;
+  background:#eff6ff;
+  border-radius:16px;
+  padding:12px 14px;
+}
+.process-box h4{margin:0 0 8px;font-size:14px;color:#1d4ed8}
+.flow-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.flow-step{
+  padding:7px 10px;border-radius:999px;background:#fff;border:1px solid #bfdbfe;
+  color:#1d4ed8;font-size:12px;font-weight:800;
+}
+.arrow{color:#60a5fa;font-weight:900}
+.process-box p{margin:0;color:#475467;font-size:12px;line-height:1.65}
+@media(max-width:980px){.process-zone{grid-template-columns:1fr}}
+
+.messages{
+  flex:1;overflow:auto;padding:24px 20px;display:flex;flex-direction:column;gap:18px;
+  background:radial-gradient(circle at 16% 20%,rgba(37,99,235,.06),transparent 25%),
+  radial-gradient(circle at 86% 30%,rgba(6,182,212,.08),transparent 22%),#fbfdff;
+}
+.msg{display:flex;gap:12px;max-width:900px}.msg.user{margin-left:auto;flex-direction:row-reverse}
+.avatar{
+  width:36px;height:36px;border-radius:13px;display:grid;place-items:center;font-weight:900;
+  background:#e0e7ff;color:#3730a3;flex:0 0 auto;
+}
+.msg.user .avatar{background:#dbeafe;color:#1d4ed8}
+.bubble{
+  padding:14px 16px;border-radius:18px;background:#fff;border:1px solid #e5e7eb;
+  box-shadow:0 8px 24px rgba(15,23,42,.05);font-size:14px;line-height:1.75;
+}
+.msg.user .bubble{background:linear-gradient(135deg,#2563eb,#1d4ed8);border-color:#2563eb;color:#fff}
+.bubble h4{margin:0 0 8px;font-size:15px}.bubble ul{margin:8px 0 0;padding-left:20px}
+.source{margin-top:12px;border:1px solid #e2e8f0;background:#f8fafc;color:#475467;border-radius:14px;padding:10px 12px;font-size:12px}
+.source b{color:#1d4ed8}.feedback{display:flex;gap:8px;margin-top:10px}
+.feedback button{border:1px solid #e5e7eb;border-radius:999px;background:#fff;padding:6px 10px;color:#475467;font-size:12px;font-weight:800}
+.composer{padding:16px;background:#fff;border-top:1px solid var(--line)}
+.quick-row{display:flex;gap:8px;overflow:auto;padding-bottom:10px}
+.quick-row button{border:1px solid #dbeafe;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:8px 11px;font-size:12px;font-weight:800;flex:0 0 auto}
+.input-wrap{display:flex;gap:10px;align-items:flex-end;border:1px solid #cbd5e1;border-radius:18px;padding:10px;background:#fff;transition:.16s}
+.input-wrap:focus-within{border-color:#60a5fa;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+.input-wrap textarea{flex:1;min-height:42px;max-height:130px;border:0;outline:0;resize:none;font-size:14px;line-height:1.6}
+.round-btn{width:42px;height:42px;border:0;border-radius:14px;display:grid;place-items:center;font-weight:900;flex:0 0 auto}
+.round-btn.voice{background:#f1f5f9;color:#475467}.round-btn.send{background:var(--primary);color:#fff}
+
+.kb-entry{
+  width:100%;
+  border:1px solid #bfdbfe;
+  background:#eff6ff;
+  color:#1d4ed8;
+  border-radius:16px;
+  padding:13px 14px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  transition:.16s;
+}
+.kb-entry:hover{background:#dbeafe;border-color:#93c5fd}
+.kb-entry span:first-child{display:flex;align-items:center;gap:8px}
+.kb-entry small{font-size:12px;color:#2563eb;font-weight:800}
+.kb-modal-mask{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.42);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  z-index:80;
+}
+.kb-modal-mask.show{display:flex}
+.kb-modal{
+  width:min(980px,96vw);
+  max-height:88vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:24px;
+  box-shadow:0 28px 90px rgba(15,23,42,.28);
+  border:1px solid #e5e7eb;
+}
+.kb-modal-head{
+  padding:20px 22px;
+  border-bottom:1px solid #e5e7eb;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+}
+.kb-modal-head h3{margin:0;font-size:20px}
+.kb-modal-head p{margin:6px 0 0;color:#667085;font-size:13px;line-height:1.6}
+.kb-close{
+  width:40px;height:40px;border:1px solid #e5e7eb;background:#fff;border-radius:13px;font-weight:900;color:#475467;
+}
+.kb-modal-body{padding:20px 22px;display:flex;flex-direction:column;gap:16px}
+.kb-search-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+}
+.kb-search-row input{
+  width:100%;
+  border:1px solid #d0d5dd;
+  border-radius:14px;
+  padding:12px 14px;
+  outline:none;
+  font-size:14px;
+}
+.kb-search-row button{
+  border:0;
+  background:#2563eb;
+  color:#fff;
+  border-radius:14px;
+  padding:0 18px;
+  font-weight:900;
+}
+.kb-tags{display:flex;flex-wrap:wrap;gap:8px}
+.kb-tag{
+  padding:8px 11px;
+  border-radius:999px;
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  color:#1d4ed8;
+  font-size:12px;
+  font-weight:900;
+}
+.kb-cloud-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+.kb-cloud-card{
+  border:1px solid #e5e7eb;
+  border-radius:17px;
+  padding:14px;
+  background:#fff;
+  transition:.16s;
+  cursor:pointer;
+}
+.kb-cloud-card:hover{border-color:#93c5fd;box-shadow:0 10px 24px rgba(37,99,235,.08)}
+.kb-cloud-card h4{margin:0 0 8px;font-size:15px}
+.kb-cloud-card p{margin:0;color:#667085;font-size:12px;line-height:1.6}
+.kb-cloud-card .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.kb-cloud-card .meta span{
+  padding:4px 7px;border-radius:999px;background:#f1f5f9;color:#475467;font-size:11px;font-weight:800;
+}
+.kb-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  border-top:1px solid #e5e7eb;
+  padding-top:16px;
+}
+.kb-actions button{
+  border-radius:13px;
+  padding:10px 13px;
+  font-weight:900;
+  border:1px solid #e5e7eb;
+  background:#fff;
+}
+.kb-actions .primary{border-color:#2563eb;background:#2563eb;color:#fff}
+@media(max-width:980px){.kb-cloud-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.kb-search-row,.kb-cloud-grid{grid-template-columns:1fr}}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 16px;border-radius:14px;box-shadow:0 16px 38px rgba(0,0,0,.2);font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:50}
+.toast.show{opacity:1;bottom:34px}
+@media(max-width:760px){
+  body{height:auto;overflow:auto}.layout{height:auto;min-height:100vh;flex-direction:column}
+  .sidebar{width:100%;min-height:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .main{height:auto}.topbar{height:auto;align-items:flex-start;flex-direction:column;padding:16px}
+  .content{padding:12px}.chat-card{min-height:75vh;height:auto}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">智</div>
+      <div>
+        <h1>智能客服与知识问答智能体</h1>
+        <p>多式联运业务 · 私有化问答入口</p>
+      </div>
+    </div>
+
+    <button class="new-btn" onclick="newChat()">＋ 新建业务咨询</button>
+
+    <button class="kb-entry" onclick="openKbModal()">
+      <span>📚 知识库管理</span>
+      <small>云端知识库</small>
+    </button>
+
+    <div class="section-title">历史对话</div>
+    <div class="history">
+      <button class="history-item active"><span class="history-icon">船</span><span class="history-text"><span>船闸通行要求咨询</span><small>刚刚更新</small></span></button>
+      <button class="history-item"><span class="history-icon">价</span><span class="history-text"><span>运价标准与收费规则</span><small>今日 10:21</small></span></button>
+      <button class="history-item"><span class="history-icon">泊</span><span class="history-text"><span>码头泊位申请流程</span><small>昨日 17:08</small></span></button>
+      <button class="history-item"><span class="history-icon">车</span><span class="history-text"><span>车船资源调配规范</span><small>昨日 14:33</small></span></button>
+      <button class="history-item"><span class="history-icon">诉</span><span class="history-text"><span>装卸异常投诉反馈</span><small>06-20 09:46</small></span></button>
+    </div>
+
+    <div class="side-card">
+      <b>数据库与权限管理</b><br/>
+      所有业务数据、用户交互记录、知识库内容均实现本地化存储，部署于业务方数据中心内，数据不出内网。知识库按业务维度进行权限分区管理，不同角色仅可访问被授权分区的知识内容。
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="top-title">
+        <h2>智能客服与知识问答智能体</h2>
+        <p>前端问答展示页面｜支持文本、语音、多轮对话、权限校验与知识来源引用。</p>
+      </div>
+    </header>
+
+    <section class="content">
+      <section class="chat-card">
+        <div class="chat-head">
+          <div>
+            <h3>业务咨询窗口</h3>
+            <p>系统基于 AI 大模型语义理解能力，自动识别用户意图并按业务流程进行智能响应。</p>
+          </div>
+        </div>
+
+        <div class="messages" id="messages">
+          <div class="msg">
+            <div class="avatar">智</div>
+            <div class="bubble">
+              <h4>您好，我是智能客服与知识问答智能体。</h4>
+              我可以基于业务方专属私有化知识库，为您解答港口作业流程、水公铁联运规则、运价标准、车船资源调配、码头泊位管理、船闸通行要求、航道状态说明等问题。也可以协助您进行需求提报、方案查询、进度跟踪和问题投诉。
+            </div>
+          </div>
+          <div class="msg user"><div class="avatar">我</div><div class="bubble">船闸通行需要满足哪些条件？</div></div>
+          <div class="msg">
+            <div class="avatar">智</div>
+            <div class="bubble">
+              <h4>船闸通行条件说明</h4>
+              根据当前私有化知识库，船闸通行通常需要同时满足以下条件：
+              <ul>
+                <li>船舶资料、申报信息、货物信息完整，并符合船闸预约规则；</li>
+                <li>船舶尺度、吨位、吃水等参数满足对应船闸通行限制；</li>
+                <li>未处于限航、禁航、检修或特殊调度管制时段；</li>
+                <li>按照排队状态、预约顺序和调度指令完成通行。</li>
+              </ul>
+              若您需要查询某一艘船的当前排队状态，请补充船名、航次或申报编号。
+              <div class="source"><b>引用来源：</b>《船闸通行要求说明》/《水公铁联运操作规范》/《航道状态维护表》</div>
+              <div class="feedback"><button onclick="toast('已记录：有用')">有用</button><button onclick="toast('已记录：无用，进入优化清单')">无用</button><button onclick="toast('已收藏该回答')">收藏</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="composer">
+          <div class="input-wrap">
+            <button class="round-btn voice" onclick="voiceInput()">🎙</button>
+            <textarea id="chatInput" placeholder="请输入业务问题，例如：散货从水运转铁路需要哪些流程？"></textarea>
+            <button class="round-btn send" onclick="sendMsg()">➤</button>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+
+<div class="kb-modal-mask" id="kbModal">
+  <div class="kb-modal">
+    <div class="kb-modal-head">
+      <div>
+        <h3>本业务云端知识库</h3>
+        <p>用于查看当前业务范围内可调用的云端知识库内容，包括港口作业流程、水公铁联运规则、运价标准、车船资源调配、码头泊位管理、船闸通行要求、航道状态说明等知识分区。</p>
+      </div>
+      <button class="kb-close" onclick="closeKbModal()">×</button>
+    </div>
+    <div class="kb-modal-body">
+      <div class="kb-search-row">
+        <input placeholder="搜索知识库内容，例如：船闸预约、泊位申请、运价标准、航道状态"/>
+        <button onclick="toast('已在云端知识库中检索')">检索</button>
+      </div>
+
+      <div class="kb-tags">
+        <span class="kb-tag">港口作业流程</span>
+        <span class="kb-tag">水公铁联运规则</span>
+        <span class="kb-tag">运价标准</span>
+        <span class="kb-tag">车船资源调配规范</span>
+        <span class="kb-tag">码头泊位管理</span>
+        <span class="kb-tag">船闸通行要求</span>
+        <span class="kb-tag">航道状态说明</span>
+      </div>
+
+      <div class="kb-cloud-grid">
+        <div class="kb-cloud-card" onclick="toast('已打开：港口作业流程知识库')">
+          <h4>港口作业流程知识库</h4>
+          <p>覆盖泊位申请、装卸作业规范、堆场管理规则、进出港手续等内容。</p>
+          <div class="meta"><span>结构化知识</span><span>流程</span><span>全文检索</span></div>
+        </div>
+        <div class="kb-cloud-card" onclick="toast('已打开：水公铁联运规则知识库')">
+          <h4>水公铁联运规则知识库</h4>
+          <p>覆盖联运条件、转运操作规范、联运单证要求、多式联运责任划分等内容。</p>
+          <div class="meta"><span>规则</span><span>向量检索</span><span>精准召回</span></div>
+        </div>
+        <div class="kb-cloud-card" onclick="toast('已打开：运价标准知识库')">
+          <h4>运价标准知识库</h4>
+          <p>覆盖水运、铁路、公路各段运价、港口收费、过闸费用和附加费。</p>
+          <div class="meta"><span>敏感分区</span><span>表格知识</span><span>权限控制</span></div>
+        </div>
+        <div class="kb-cloud-card" onclick="toast('已打开：车船资源调配知识库')">
+          <h4>车船资源调配知识库</h4>
+          <p>覆盖可用船舶、车辆信息查询、运力调度规则和资源预约流程。</p>
+          <div class="meta"><span>资源调度</span><span>规则知识</span><span>实体抽取</span></div>
+        </div>
+        <div class="kb-cloud-card" onclick="toast('已打开：码头泊位管理知识库')">
+          <h4>码头泊位管理知识库</h4>
+          <p>覆盖泊位申请、靠泊计划、泊位状态、码头作业协同规则等内容。</p>
+          <div class="meta"><span>泊位</span><span>流程</span><span>实时状态</span></div>
+        </div>
+        <div class="kb-cloud-card" onclick="toast('已打开：船闸与航道状态知识库')">
+          <h4>船闸与航道状态知识库</h4>
+          <p>覆盖船闸通行条件、排队状态、预约规则、限航通知、航道水深等内容。</p>
+          <div class="meta"><span>船闸</span><span>航道</span><span>状态说明</span></div>
+        </div>
+      </div>
+
+      <div class="kb-actions">
+        <button onclick="toast('已刷新云端知识库')">刷新知识库</button>
+        <button class="primary" onclick="toast('已选择当前业务知识库范围')">使用当前知识库范围</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">操作成功</div>
+<script>
+const answers = [
+  {keys:['泊位','申请'], title:'泊位申请流程', text:'泊位申请一般包括提交靠泊需求、填写船舶与货物信息、系统校验泊位资源、调度人员审核确认、生成靠泊计划、进港作业执行等步骤。若涉及特殊货物或超限船舶，还需补充安全评估材料。', source:'《码头泊位管理规范》/《进出港手续办理指引》'},
+  {keys:['联运','单证','水公铁'], title:'水公铁联运单证要求', text:'水公铁联运通常需要提供货物信息、托运委托、提单或运单、铁路/公路转运单据、装卸作业单、费用结算信息以及特殊货物所需的安全或环保材料。系统可根据货类、起终点和运输方式自动提示所需单证。', source:'《水公铁联运操作规范》/《多式联运单证清单》'},
+  {keys:['车船','资源','预约','调配'], title:'车船资源预约规则', text:'车船资源预约需明确货物类型、数量、起运地、到达地、计划时间、车辆或船舶需求。系统会结合可用资源、泊位计划、船闸通行和线路时效进行匹配，并将需求流转至调度人员确认。', source:'《车船资源调配规范》/《多式联运路径规划规则》'},
+  {keys:['航道','状态'], title:'航道状态查询', text:'航道状态可查询当前通航情况、限航通知、水深参数、维护施工、特殊管制等信息。若您需要具体航段状态，请补充航段名称、日期或船舶计划通行时间。', source:'《航道状态说明》/《限航通知维护表》'},
+  {keys:['需求','提报','物流'], title:'需求提报受理', text:'请补充货物名称、货量、起点、终点、计划发运时间、时效要求、是否需要仓储或装卸服务。信息完整后，系统将自动转入多式联运方案生成流程。', source:'《物流需求提报流程》/《方案生成字段规范》'},
+  {keys:['投诉','异常','反馈'], title:'异常问题投诉反馈', text:'请说明异常类型、发生时间、涉及单号或船名车号、现场情况和诉求。系统将生成投诉工单，并按问题类型流转至装卸、调度、客服或安全管理部门。', source:'《问题投诉处理流程》/《异常工单流转规范》'}
+];
+function escapeHtml(str){ return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+function addMsg(role, html){
+  const box = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = role === 'user' ? 'msg user' : 'msg';
+  div.innerHTML = `<div class="avatar">${role === 'user' ? '我' : '智'}</div><div class="bubble">${html}</div>`;
+  box.appendChild(div); box.scrollTop = box.scrollHeight;
+}
+function buildAnswer(q){
+  const hit = answers.find(item => item.keys.some(k => q.includes(k)));
+  if(hit){
+    return `<h4>${hit.title}</h4>${hit.text}<div class="source"><b>引用来源：</b>${hit.source}</div><div class="feedback"><button onclick="toast('已记录：有用')">有用</button><button onclick="toast('已记录：无用，进入优化清单')">无用</button><button onclick="toast('已收藏该回答')">收藏</button></div>`;
+  }
+  return `<h4>需要补充信息</h4>我已识别到您的问题，但当前信息还不够完整。请补充业务场景、货物类型、起终点、时间或对应单号，我将继续基于私有化知识库为您检索并生成答案。<div class="source"><b>处理方式：</b>已记录为待澄清问题；若知识库无充分依据，将进入待更新知识清单。</div>`;
+}
+function sendMsg(){
+  const input = document.getElementById('chatInput');
+  const q = input.value.trim();
+  if(!q){toast('请输入问题后再发送');return;}
+  addMsg('user', escapeHtml(q)); input.value = '';
+  setTimeout(()=>addMsg('bot', buildAnswer(q)), 260);
+}
+function quickAsk(text){ document.getElementById('chatInput').value = text; sendMsg(); }
+function voiceInput(){ toast('语音输入演示：已启用回声消除、降噪与自动增益控制'); }
+function newChat(){
+  document.getElementById('messages').innerHTML = `<div class="msg"><div class="avatar">智</div><div class="bubble"><h4>已开启新的业务咨询。</h4>请描述您的问题，例如：港口作业流程、联运规则、运价标准、车船调配、泊位管理、船闸通行、航道状态、需求提报或问题投诉。<div class="source"><b>提示：</b>系统将先进行意图识别，再执行权限校验与知识检索。</div></div></div>`;
+  toast('已新建业务咨询');
+}
+function openKbModal(){
+  document.getElementById('kbModal').classList.add('show');
+}
+function closeKbModal(){
+  document.getElementById('kbModal').classList.remove('show');
+}
+function toast(text){
+  const t = document.getElementById('toast');
+  t.innerText = text; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1700);
+}
+document.getElementById('chatInput').addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.shiftKey){e.preventDefault();sendMsg();} });
+</script>
+</body>
+</html>

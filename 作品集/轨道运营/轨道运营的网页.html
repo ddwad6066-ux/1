@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>轨道运营安防指挥中心 - CCTV</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:"Microsoft YaHei",Arial,sans-serif;background:#f4f7fb;color:#1f2d3d}button,input,select{font-family:inherit}.app{height:100vh;display:flex;flex-direction:column;overflow:hidden}.top{height:62px;background:linear-gradient(90deg,#0d75f0,#004ed4);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 28px;box-shadow:0 2px 12px rgba(0,49,146,.22)}.brand{display:flex;align-items:center;gap:14px;font-size:21px;font-weight:700}.logo{width:32px;height:32px;border-radius:8px;background:#fff;display:grid;place-items:center;color:#0767e7;font-size:22px}.top-right{display:flex;align-items:center;gap:18px;font-size:14px}.warn{background:#f72e24;border-radius:16px;padding:5px 10px;font-weight:700}.dot{width:8px;height:8px;background:#ff9b21;border-radius:50%;display:inline-block;margin-right:5px}.avatar{width:28px;height:28px;border-radius:50%;background:#fff;color:#256ddf;display:grid;place-items:center}.main{flex:1;display:flex;min-height:0}.nav{width:250px;background:#fff;border-right:1px solid #e3eaf5;padding:18px 16px}.nav-item{height:46px;border-radius:5px;display:flex;align-items:center;gap:12px;padding:0 14px;margin:4px 0;color:#455a70;font-size:15px}.nav-item.active{background:#0878ee;color:#fff}.nav-item .arr{margin-left:auto;color:inherit}.content{flex:1;min-width:0;padding:30px 28px 22px;background:#fff}.tabs{height:38px;display:flex;align-items:flex-start;gap:28px;border-bottom:1px solid #dfe8f3;margin-bottom:18px}.tab{font-size:16px;color:#586b82;padding-bottom:12px}.tab.active{color:#0878ee;border-bottom:3px solid #0878ee}.toolbar{min-height:48px;height:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.linebox{display:flex;align-items:center;gap:10px;white-space:nowrap}.linebox select{width:124px;height:38px;border:1px solid #d6e0ec;border-radius:4px;padding:0 12px;background:white}.tool-right{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:nowrap;min-width:0}.tool-right span{white-space:nowrap}.station-select{width:132px;height:38px;border:1px solid #d6e0ec;border-radius:4px;padding:0 10px;background:#fff;flex:0 0 132px}.station-label{margin-left:2px}.seg{display:flex;border:1px solid #d6e0ec;border-radius:4px;overflow:hidden;height:38px;background:#fff}.seg button{width:56px;border:0;border-right:1px solid #d6e0ec;background:#fff;cursor:pointer}.seg button:last-child{border-right:0}.seg button.active{background:#0878ee;color:#fff}.btn{height:38px;border:1px solid #d6e0ec;background:#fff;border-radius:4px;padding:0 12px;cursor:pointer;color:#34495e;white-space:nowrap;min-width:72px}.btn.primary{background:#0878ee;border-color:#0878ee;color:#fff}.btn.danger{background:#e82521;border-color:#e82521;color:#fff}.work{height:calc(100vh - 62px - 30px - 38px - 18px - 48px - 14px - 22px);display:grid;grid-template-columns:340px 1fr;gap:14px;min-height:520px}.panel{background:#fff;border:1px solid #dfe6ef;border-radius:5px;overflow:hidden}.device-panel{display:flex;flex-direction:column}.panel-head{height:52px;border-bottom:1px solid #eef2f7;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:17px;font-weight:700}.refresh{font-size:13px;color:#0878ee;background:none;border:0;cursor:pointer}.device-body{padding:14px;overflow:auto}.switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.switch button{height:36px;border:1px solid #d8e1ec;background:#fff;border-radius:4px;cursor:pointer;color:#4b5f73}.switch button.active{background:#0878ee;color:#fff;border-color:#0878ee}.search{width:100%;height:36px;border:1px solid #d8e1ec;border-radius:4px;padding:0 12px;margin-bottom:10px}.fullbtn{width:100%;height:38px;margin-bottom:8px;border:0;border-radius:4px;background:#1689ea;color:#fff;cursor:pointer;font-size:15px}.tree{font-size:15px}.tree-row{height:36px;display:flex;align-items:center;gap:6px;border-radius:4px;padding:0 4px;position:relative;cursor:pointer}.tree-row:hover{background:#f4f8ff}.tree-row.active{background:#eaf4ff;color:#0878ee}.folder{color:#f6b72d}.camera-icon{color:#888}.tree-name{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.count{color:#516273}.mini-plus{width:22px;height:22px;border:1px solid #d6e0ec;background:#fff;color:#0878ee;border-radius:3px;cursor:pointer;font-weight:700}.more{width:24px;height:22px;border:0;background:transparent;border-radius:3px;cursor:pointer;font-weight:700;color:#6d7d8d}.more:hover{background:#e8eef7}.children{margin-left:18px;border-left:1px dashed #cbd7e5;padding-left:8px}.cam-card{min-height:58px;border-radius:5px;padding:9px 10px;margin:7px 0;background:#f8fbff;border:1px solid transparent;display:grid;grid-template-columns:1fr auto;gap:2px 8px;cursor:pointer}.cam-card:hover,.cam-card.active{border-color:#6bb6ff;background:#ecf7ff}.cam-name{font-weight:700;color:#27394b}.cam-code{font-size:12px;color:#7b8ea1}.state{align-self:center;font-size:12px;border-radius:4px;padding:2px 7px}.state.on{background:#d9f8e4;color:#0ca447}.state.off{background:#e7eaef;color:#8290a0}.inline-actions{grid-column:1/3;display:flex;gap:8px;margin-top:7px}.link{border:0;background:none;color:#0878ee;cursor:pointer;font-size:12px;padding:0}.context{position:fixed;z-index:30;background:#fff;border:1px solid #dce4ef;box-shadow:0 6px 22px rgba(37,61,92,.18);border-radius:4px;width:158px;padding:6px 0;display:none}.context button{width:100%;height:34px;border:0;background:#fff;text-align:left;padding:0 15px;cursor:pointer;color:#34495e}.context button:hover{background:#f0f6ff}.context button.del{color:#e82521}.video-area{display:flex;flex-direction:column;min-width:0}.video-grid{flex:1;background:#07101c;border:5px solid #07101c;border-radius:5px;display:grid;gap:5px;min-height:0}.grid-1{grid-template-columns:1fr;grid-template-rows:1fr}.grid-4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}.grid-8{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr)}.window{position:relative;background:#07101c;border:1px solid #13283d;overflow:hidden;color:#fff;min-width:0;min-height:0}.window.selected{border:2px solid #0878ee}.v-head{position:absolute;top:0;left:0;right:0;height:38px;background:#02050a;z-index:4;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:14px;font-weight:700}.close{background:none;border:0;color:#fff;cursor:pointer;font-weight:700}.screen{height:100%;position:relative;background:radial-gradient(circle at 70% 40%,#616161,#242424 45%,#111 78%);overflow:hidden}.screen:before{content:"";position:absolute;left:9%;top:-16%;width:130px;height:130%;background:repeating-linear-gradient(0deg,#eaeaea 0 8px,#111 8px 16px);transform:rotate(-14deg);opacity:.9;box-shadow:0 0 30px rgba(0,0,0,.45)}.screen.station{background:linear-gradient(135deg,#777,#202020)}.screen.station:before{left:0;top:40%;width:100%;height:30px;transform:none;background:repeating-linear-gradient(90deg,#a0a0a0 0 40px,#d6d6d6 40px 55px);opacity:.55}.timestamp{position:absolute;top:50px;left:12px;color:#fff;font-size:13px;text-shadow:0 1px 2px #000}.tag-on{position:absolute;top:48px;right:14px;background:rgba(58,170,94,.9);padding:2px 8px;border-radius:3px;font-size:13px}.offline,.empty{height:100%;display:grid;place-items:center;text-align:center;color:#89a1b9;font-size:14px}.offline{color:#e2ad54}.patrol{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 8px}.statusbar{background:#fff;border:1px solid #e1e8f1;border-radius:4px;padding:11px 16px;color:#3b4d60;min-width:420px}.patrol select{height:36px;border:1px solid #d6e0ec;border-radius:4px;padding:0 9px}.muted{color:#8da0b3}.modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:50}.modal{width:430px;background:#fff;border-radius:6px;box-shadow:0 10px 40px rgba(0,0,0,.22);overflow:hidden}.modal h3{margin:0;height:52px;line-height:52px;padding:0 18px;border-bottom:1px solid #edf1f6}.modal-body{padding:18px}.modal input,.modal select{width:100%;height:38px;border:1px solid #d8e1ec;border-radius:4px;padding:0 10px;margin:8px 0 14px}.modal-foot{height:56px;border-top:1px solid #edf1f6;display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:0 18px}.toast{position:fixed;top:74px;right:26px;background:#10243a;color:#fff;padding:10px 16px;border-radius:4px;display:none;z-index:80}.max-back-btn{display:none;position:absolute;top:12px;right:14px;z-index:25;height:34px;padding:0 18px;box-shadow:0 6px 16px rgba(0,0,0,.22)}.max-mode .device-panel,.max-mode .toolbar,.max-mode .tabs,.max-mode .nav{display:none}.max-mode .content{padding:0;position:relative}.max-mode .work{height:calc(100vh - 62px);grid-template-columns:1fr;gap:0;min-height:0}.max-mode .video-area{position:relative}.max-mode .video-grid{border-radius:0}.max-mode .patrol{display:none}.max-mode .max-back-btn{display:inline-flex;align-items:center;justify-content:center}@media(max-width:1200px){.nav{width:210px}.work{grid-template-columns:300px 1fr}.grid-8{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(4,1fr)}}
+
+
+/* ===== final rounded layout fix ===== */
+html,body{height:100%;}
+.app::before{height:150px;border-radius:0 0 0 0;}
+.main{gap:18px !important;padding:10px 94px 14px !important;}
+.nav{border-radius:10px !important;overflow:hidden !important;margin-top:0 !important;}
+.content{border-radius:10px !important;overflow:hidden !important;background:#fff !important;border:1px solid #e8eef6 !important;box-shadow:0 8px 22px rgba(0,38,95,.08) !important;}
+.panel,.device-panel{border-radius:8px !important;overflow:hidden !important;}
+.video-grid{border-radius:8px !important;overflow:hidden !important;background:#07101c !important;}
+.window{border-radius:4px !important;overflow:hidden !important;}
+.window.selected{box-shadow:0 0 0 1px #0878ee inset;}
+.v-head{border-radius:4px 4px 0 0 !important;}
+.nav-item{border-radius:6px !important;}
+.cam-card{border-radius:6px !important;}.search-result{display:none;margin:-2px 0 10px;padding:8px;border:1px solid #dbe7f5;border-radius:6px;background:#f8fbff;}.search-title{font-size:12px;color:#60758c;margin-bottom:6px}.search-hit{padding:7px 8px;border-radius:5px;background:#fff;border:1px solid #edf2f8;margin-bottom:6px}.search-hit:last-child{margin-bottom:0}.search-hit-name{font-weight:700;color:#27394b;margin-bottom:4px}.dir-list{display:flex;flex-wrap:wrap;gap:5px}.dir-link{font-size:12px;color:#0878ee;background:#edf6ff;border:1px solid #cfe6ff;border-radius:4px;padding:2px 6px;cursor:pointer;text-align:left}.dir-link:hover{background:#dff0ff}.search-empty{font-size:12px;color:#8da0b3;padding:5px 2px;}
+.toolbar .btn,.seg,.linebox select,.search,.fullbtn,.switch button{border-radius:5px !important;}
+.close{position:relative;z-index:20;min-width:42px;height:28px;line-height:28px;text-align:center;border-radius:4px;}
+.close:hover{background:rgba(255,255,255,.16);}
+.max-mode .main{padding:0 !important;gap:0 !important;}
+.max-mode .content{border-radius:0 !important;border:0 !important;box-shadow:none !important;}
+.max-mode .work{grid-template-columns:1fr !important;gap:0 !important;}
+.max-mode .video-grid{border-radius:0 !important;}
+.max-mode .window{border-radius:0 !important;}
+
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top"><div class="brand"><div class="logo">◆</div><span>轨道运营安防指挥中心</span></div><div class="top-right"><b>上班 13:00</b><span><i class="dot"></i>未打卡</span><span class="warn">22条 事件提醒</span><span>🔔</span><span class="avatar">👤</span><b>超级管理员，你好⌄</b></div></header>
+  <div class="main">
+    <aside class="nav">
+      <div class="nav-item">▣ 数据大屏</div><div class="nav-item active">▣ 安防视频</div><div class="nav-item">♙ 安检设备设施</div><div class="nav-item">▧ 历史记录 <span class="arr">⌄</span></div><div class="nav-item">▧ 安检告警系统 <span class="arr">⌄</span></div><div class="nav-item">▧ 中心值班管理系统 <span class="arr">⌄</span></div><div class="nav-item">▧ 事件管理系统 <span class="arr">⌄</span></div><div class="nav-item">⚑ 消息管理</div><div class="nav-item">▣ 知识库管理</div><div class="nav-item">⚙ 系统管理 <span class="arr">⌄</span></div><div class="nav-item">▤ 日志管理 <span class="arr">⌄</span></div>
+    </aside>
+    <section class="content">
+      <div class="tabs"><span class="tab">安防视频</span><span class="tab active">CCTV</span></div>
+      <div class="toolbar"><div class="linebox"><span>线路</span><select><option>19号线</option></select></div><div class="tool-right"><span>画面数量</span><div class="seg"><button data-grid="1">1个</button><button class="active" data-grid="4">4个</button><button data-grid="8">8个</button></div><button class="btn" id="maxBtn">最大化</button><button class="btn" id="patrolCfg">轮巡配置</button><span class="station-label">站点</span><select id="stationSel" class="station-select"><option value="all">全部站点</option></select><button class="btn primary" id="startPatrol">开始轮巡</button><button class="btn danger" id="stopPatrol">停止轮巡</button></div></div>
+      <div class="work">
+        <aside class="panel device-panel"><div class="panel-head"><span>设备目录</span><button class="refresh" onclick="renderAll()">刷新</button></div><div class="device-body"><div class="switch"><button id="allTab">全部设备</button><button id="groupTab" class="active">分组目录</button></div><input class="search" id="search" placeholder="搜索设备/别名/编号"><div id="searchResult" class="search-result"></div><button class="fullbtn" id="newGroup">新增摄像头目录</button><div id="tree"></div><div id="list"></div></div></aside>
+        <main class="video-area"><button class="btn primary max-back-btn" id="backBtn">返回</button><div id="videoGrid" class="video-grid grid-4"></div><div class="patrol"><div class="statusbar" id="patrolState">未轮巡｜当前分组：19号线重点区域｜间隔：5秒｜第 0 / 0 轮</div><div><select id="intervalSel"><option value="5">5秒</option><option value="10">10秒</option><option value="30">30秒</option></select> <button class="btn" id="prevBatch">上一轮</button> <button class="btn" id="nextBatch">下一轮</button></div></div></main>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="context" id="ctx"></div><div class="toast" id="toast"></div>
+<div class="modal-mask" id="modalMask"><div class="modal"><h3 id="modalTitle">标题</h3><div class="modal-body" id="modalBody"></div><div class="modal-foot"><button class="btn" onclick="closeModal()">取消</button><button class="btn primary" id="modalOk">确定</button></div></div></div>
+<script>
+const cameras=[
+{id:'c1',name:'Camera 01',alias:'站厅南侧广角',code:'113001130001',online:true,group:['g1','g2'],type:'station'},
+{id:'c2',name:'Camera 02',alias:'站厅北侧广角',code:'113001130002',online:true,group:['g1','g2'],type:'station'},
+{id:'c3',name:'Camera 03',alias:'A口出入口通道',code:'113001130003',online:true,group:['g1','g3','g31'],type:'station'},
+{id:'c4',name:'Camera 04',alias:'B口出入口通道',code:'113001130004',online:true,group:['g1','g3','g31'],type:'station'},
+{id:'c5',name:'Camera 05',alias:'C口扶梯口',code:'113001130005',online:false,group:['g1','g3','g32'],type:'bar'},
+{id:'c6',name:'Camera 06',alias:'D口闸机口',code:'113001130006',online:true,group:['g1','g3','g32'],type:'station'},
+{id:'c7',name:'Camera 07',alias:'安检一号',code:'113001130007',online:true,group:['g4'],type:'bar'},
+{id:'c8',name:'Camera 08',alias:'安检二号',code:'113001130008',online:true,group:['g4'],type:'bar'},
+{id:'c9',name:'Camera 09',alias:'站台东端',code:'113001130009',online:true,group:['g5'],type:'bar'},
+{id:'c10',name:'Camera 10',alias:'站台西端',code:'113001130010',online:false,group:['g5'],type:'bar'},
+{id:'c11',name:'Camera 11',alias:'设备房走廊',code:'113001130011',online:true,group:['g1'],type:'bar'},
+{id:'c12',name:'Camera 12',alias:'客服中心',code:'113001130012',online:true,group:['g1'],type:'station'}
+];
+let groups=[{id:'g1',name:'19号线重点区域',parent:null},{id:'g2',name:'站厅摄像头',parent:null},{id:'g3',name:'出入口摄像头',parent:null},{id:'g31',name:'A/B口区域',parent:'g3'},{id:'g32',name:'C/D口区域',parent:'g3'},{id:'g4',name:'安检区域',parent:null},{id:'g5',name:'站台区域',parent:null}];
+const stations=[{id:'s1',name:'小圆站',cams:['c1','c2','c3','c4']},{id:'s2',name:'中心站',cams:['c5','c6','c11','c12']},{id:'s3',name:'东门站',cams:['c7','c8','c3','c4']},{id:'s4',name:'南广场站',cams:['c9','c10','c1','c2']}];
+let selectedGroupId='g1',selectedWindow=0,gridCount=4,mode='group',windows=Array(8).fill(null),patrolTimer=null,patrolIndex=0,stationPatrolIndex=0,stationCamPatrolIndex=0,patrolRunning=false,patrolMode='camera',ctxTarget=null;
+let expandedGroups = new Set(['g1']);
+
+function camLabel(c){return c.alias||c.name}
+function groupName(id){return groups.find(g=>g.id===id)?.name||'未选择'}
+function groupAndChildIds(id){const ids=[id];for(let i=0;i<ids.length;i++){groups.filter(g=>g.parent===ids[i]).forEach(g=>{if(!ids.includes(g.id))ids.push(g.id)})}return ids}
+function groupCamCount(id){return groupAndChildIds(id).reduce((sum,gid)=>sum+cameras.filter(c=>c.group.includes(gid)).length,0)}
+function groupCams(id){const ids=groupAndChildIds(id);return cameras.filter(c=>c.group.some(gid=>ids.includes(gid)))}
+function groupPath(id){const names=[];let g=groups.find(x=>x.id===id);while(g){names.unshift(g.name);g=groups.find(x=>x.id===g.parent)}return names.join(' / ')}
+function expandToGroup(id){let g=groups.find(x=>x.id===id);while(g){expandedGroups.add(g.id);g=groups.find(x=>x.id===g.parent)}}
+function renderGroupOptions(parent=null,level=0){return groups.filter(g=>g.parent===parent).map(g=>{const prefix=level?'　'.repeat(level)+'└ ':'';return `<option value="${g.id}">${prefix}${g.name}</option>`+renderGroupOptions(g.id,level+1)}).join('')}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',1600)}
+function stationList(){return stations}
+function stationName(id){return stations.find(s=>s.id===id)?.name||'全部站点'}
+function stationCams(id){const s=stations.find(x=>x.id===id);return s?cameras.filter(c=>s.cams.includes(c.id)):[]}
+function renderStationOptions(){const sel=document.getElementById('stationSel');if(!sel)return;const old=sel.value;sel.innerHTML='<option value="all">全部站点</option>'+stationList().map(s=>`<option value="${s.id}">${s.name}</option>`).join('');sel.value=[...sel.options].some(o=>o.value===old)?old:'all'}
+function selectedStationId(){return document.getElementById('stationSel')?.value||'all'}
+function stopPatrol(silent){if(patrolTimer)clearInterval(patrolTimer);patrolTimer=null;patrolRunning=false;patrolIndex=0;stationPatrolIndex=0;stationCamPatrolIndex=0;patrolMode='camera';updatePatrol();if(!silent)toast('已停止轮巡')}
+function updatePatrol(){const isStation=patrolMode==='station';const stationId=selectedStationId();const selectedStation=stationId!=='all';const cams=selectedStation?stationCams(stationId):[];const total=Math.max(1,isStation?(selectedStation?Math.ceil(cams.length/gridCount):stationList().length):Math.ceil(groupCams(selectedGroupId).length/gridCount));const current=patrolRunning?(isStation?(selectedStation?stationCamPatrolIndex+1:stationPatrolIndex+1):patrolIndex+1):0;const label=isStation?(selectedStation?'当前站点：'+stationName(stationId):'当前站点：全部站点'):'当前分组：'+groupName(selectedGroupId);document.getElementById('patrolState').textContent=(patrolRunning?'轮巡中':'未轮巡')+'｜'+label+'｜间隔：'+document.getElementById('intervalSel').value+'秒｜第 '+current+' / '+total+' 轮'}
+function playGroup(){stopPatrol(true);const arr=groupCams(selectedGroupId);windows=Array(8).fill(null);for(let i=0;i<gridCount;i++)windows[i]=arr[i]?.id||null;renderVideos();updatePatrol()}
+
+function renderTree(){const root=document.getElementById('tree');const btn=document.getElementById('newGroup');if(btn)btn.style.display=mode==='group'?'block':'none';root.style.display=mode==='group'?'block':'none';root.innerHTML='<div class="tree">'+renderChildren(null)+'</div>';}
+function renderChildren(parent){return groups.filter(g=>g.parent===parent).map(g=>{const count=groupCamCount(g.id);const isExpanded = expandedGroups.has(g.id);return `<div class="tree-row ${g.id===selectedGroupId?'active':''}" data-gid="${g.id}"><span>${isExpanded?'⌄':'›'}</span><span class="folder">📁</span><span class="tree-name">${g.name}</span><span class="count">(${count})</span><button class="mini-plus" data-plus="${g.id}">+</button><button class="more" data-more="${g.id}">•••</button></div>` + (isExpanded ? `<div class="children">${renderChildren(g.id)}${g.id===selectedGroupId?renderGroupCameraList(g.id):''}</div>` : '')}).join('')}
+function renderGroupCameraList(id){return groupCams(id).map(c=>`<div class="cam-card" data-cam="${c.id}"><div class="cam-name">📹 ${camLabel(c)}</div><span class="state ${c.online?'on':'off'}">${c.online?'ON':'OFF'}</span><div class="cam-code">${c.code}</div><div class="inline-actions"><button class="link" data-alias="${c.id}">改别名</button><button class="link" data-remove="${c.id}">移出分组</button></div></div>`).join('')}
+
+// ================== 核心修改：全部设备里的按钮改为【选择添加摄像头目录】 ==================
+function renderSearchResult(){
+  const box=document.getElementById('searchResult');
+  if(!box)return;
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  if(mode!=='group'||!q){box.style.display='none';box.innerHTML='';return}
+  const arr=cameras.filter(c=>(c.name+c.alias+c.code).toLowerCase().includes(q));
+  box.style.display='block';
+  if(!arr.length){box.innerHTML='<div class="search-title">目录位置</div><div class="search-empty">未找到匹配摄像头</div>';return}
+  box.innerHTML='<div class="search-title">目录位置</div>'+arr.map(c=>`<div class="search-hit"><div class="search-hit-name">📹 ${camLabel(c)} <span class="muted">${c.code}</span></div><div class="dir-list">${c.group.map(gid=>`<button class="dir-link" data-goto-group="${gid}">${groupPath(gid)}</button>`).join('')}</div></div>`).join('');
+}
+
+function renderList(){
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  const box=document.getElementById('list');
+  box.style.display=mode==='all'?'block':'none';
+  const stationId=selectedStationId();
+  let source=stationId==='all'?cameras:stationCams(stationId);
+  let arr=source.filter(c=>(c.name+c.alias+c.code).toLowerCase().includes(q));
+  box.innerHTML=arr.map(c=>`
+    <div class="cam-card" data-cam="${c.id}">
+      <div class="cam-name">📹 ${camLabel(c)}</div>
+      <span class="state ${c.online?'on':'off'}">${c.online?'ON':'OFF'}</span>
+      <div class="cam-code">${c.code}</div>
+      <div class="inline-actions">
+        <button class="link" data-alias="${c.id}">改别名</button>
+        <button class="link" data-addto="${c.id}">选择添加摄像头目录</button>
+      </div>
+    </div>`).join('')
+}
+
+function renderVideos(){const grid=document.getElementById('videoGrid');grid.className='video-grid grid-'+gridCount;grid.innerHTML='';for(let i=0;i<gridCount;i++){const c=cameras.find(x=>x.id===windows[i]);let html='';if(c){html=`<div class="screen ${c.type==='station'?'station':''}"><div class="v-head"><span>${camLabel(c)}</span><button class="close" data-close="${i}">关闭</button></div>${c.online?`<div class="timestamp">CCTV CH05 2026-05-21 11:14:59</div><div class="tag-on">ON</div>`:`<div class="v-head"><span>${camLabel(c)}</span><button class="close" data-close="${i}">关闭</button></div><div class="offline">设备离线，无法播放<br><span class="muted">${c.code}</span></div>`}</div>`}else{html=`<div class="empty"><div>选择窗口${i+1}<br><span class="muted">单击左侧设备开始播放</span></div></div>`}grid.innerHTML+=`<div class="window ${i===selectedWindow?'selected':''}" data-win="${i}">${html}</div>`}}
+function renderAll(){renderTree();renderList();renderSearchResult();renderStationOptions();renderVideos();updatePatrol()}
+function openModal(title,body,ok){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=body;document.getElementById('modalMask').style.display='flex';document.getElementById('modalOk').onclick=ok}
+function closeModal(){document.getElementById('modalMask').style.display='none'}
+function editAlias(id){const c=cameras.find(x=>x.id===id);openModal('修改摄像头别名',`<label>当前设备：${c.name}（${c.code}）</label><input id="aliasInput" value="${camLabel(c)}" placeholder="请输入别名">`,()=>{c.alias=document.getElementById('aliasInput').value.trim()||c.name;closeModal();renderAll();toast('别名已修改')})}
+function newGroup(parent=null){openModal(parent?'新增子目录':'新增摄像头目录',`<label>目录名称</label><input id="gName" placeholder="请输入目录名称">`,()=>{const n=document.getElementById('gName').value.trim();if(!n)return;groups.push({id:'g'+Date.now(),name:n,parent});closeModal();renderAll();toast('目录已新增')})}
+function renameGroup(id){const g=groups.find(x=>x.id===id);openModal('编辑目录名称',`<input id="gName" value="${g.name}">`,()=>{g.name=document.getElementById('gName').value.trim()||g.name;closeModal();renderAll();})}
+function deleteGroup(id){const ids=groupAndChildIds(id);const childNames=ids.filter(x=>x!==id).map(groupName);const affected=cameras.filter(c=>c.group.some(gid=>ids.includes(gid)));const affectedNames=affected.slice(0,6).map(camLabel).join('、')+(affected.length>6?'等':'');const body=`<p>确认删除“${groupName(id)}”吗？</p><p><b>影响范围：</b></p><p>1. 将删除 ${ids.length} 个目录${childNames.length?'（含子目录：'+childNames.join('、')+'）':''}。</p><p>2. 将从 ${affected.length} 个摄像头中移除这些目录关系${affected.length?'：'+affectedNames:''}。</p><p class="muted">摄像头本身不会被删除；已在播放窗口中的画面不受影响。</p>`;openModal('删除目录',body,()=>{groups=groups.filter(g=>!ids.includes(g.id));cameras.forEach(c=>c.group=c.group.filter(x=>!ids.includes(x)));selectedGroupId=groups[0]?.id||null;closeModal();playGroup();renderAll();})}
+function addCameraModal(){const q=document.getElementById('search').value.trim().toLowerCase();const opts=cameras.filter(c=>(c.name+c.alias+c.code).toLowerCase().includes(q)).map(c=>`<option value="${c.id}">${camLabel(c)}｜${c.code}｜${c.online?'ON':'OFF'}</option>`).join('');openModal('添加摄像头到当前目录',`<label>当前目录：${groupName(selectedGroupId)}</label><select id="camSelect">${opts}</select>`,()=>{const id=document.getElementById('camSelect').value;const c=cameras.find(x=>x.id===id);if(!c.group.includes(selectedGroupId))c.group.push(selectedGroupId);closeModal();playGroup();renderAll();toast('已添加到当前目录')})}
+
+// ================== 新增：选择任意目录添加摄像头 ==================
+function openAddToGroup(camId) {
+  const options = renderGroupOptions();
+  openModal('选择添加摄像头目录', `
+    <label>选择要添加到的目录</label>
+    <select id="targetGroup">${options}</select>
+  `, () => {
+    const targetId = document.getElementById('targetGroup').value;
+    const c = cameras.find(x => x.id === camId);
+    if (!c.group.includes(targetId)) {
+      c.group.push(targetId);
+    }
+    closeModal();
+    renderAll();
+    toast('已添加到指定目录');
+  });
+}
+
+function openPatrolConfig() {
+  openModal('轮巡配置', `
+    <label>轮巡间隔时间</label>
+    <select id="patrolIntervalConfig">
+      <option value="5">5秒</option>
+      <option value="10">10秒</option>
+      <option value="30">30秒</option>
+    </select>
+  `, () => {
+    const newInterval = document.getElementById('patrolIntervalConfig').value;
+    document.getElementById('intervalSel').value = newInterval;
+    if (patrolRunning) startPatrolFn();
+    updatePatrol();
+    closeModal();
+    toast('轮巡间隔已设置为 ' + newInterval + ' 秒');
+  });
+  document.getElementById('patrolIntervalConfig').value = document.getElementById('intervalSel').value;
+}
+
+function startPatrolFn(){const stationId=selectedStationId();const list=stationList();if(stationId==='all'&&!list.length){toast('当前线路没有可轮巡站点');return}if(stationId!=='all'&&!stationCams(stationId).length){toast('当前站点没有摄像头');return}stopPatrol(true);patrolRunning=true;patrolMode='station';stationPatrolIndex=0;stationCamPatrolIndex=0;const run=()=>{if(stationId==='all'){const s=list[stationPatrolIndex%list.length];const cams=stationCams(s.id);windows=Array(8).fill(null);for(let i=0;i<gridCount;i++)windows[i]=cams[i]?.id||null;mode='all';allTab.classList.add('active');groupTab.classList.remove('active');renderAll();document.getElementById('stationSel').value='all';stationPatrolIndex=(stationPatrolIndex+1)%list.length}else{const cams=stationCams(stationId);windows=Array(8).fill(null);const start=stationCamPatrolIndex*gridCount;for(let i=0;i<gridCount;i++)windows[i]=cams[(start+i)%cams.length]?.id||null;mode='all';allTab.classList.add('active');groupTab.classList.remove('active');renderAll();document.getElementById('stationSel').value=stationId;stationCamPatrolIndex=(stationCamPatrolIndex+1)%Math.ceil(cams.length/gridCount)}};run();patrolTimer=setInterval(run,Number(document.getElementById('intervalSel').value)*1000);toast('轮巡已开始')}
+
+document.addEventListener('click',e=>{
+  const closeBtn=e.target.closest('[data-close]');
+  if(closeBtn){e.preventDefault();e.stopPropagation();const idx=Number(closeBtn.dataset.close);windows[idx]=null;stopPatrol(true);renderVideos();updatePatrol();return;}
+  document.getElementById('ctx').style.display='none';
+  const gid=e.target.closest('.tree-row')?.dataset.gid;
+  if(gid && !e.target.dataset.more && !e.target.dataset.plus){
+    if(expandedGroups.has(gid)) expandedGroups.delete(gid);
+    else expandedGroups.add(gid);
+    selectedGroupId=gid;playGroup();renderAll();return;
+  }
+  if(e.target.dataset.plus){newGroup(e.target.dataset.plus);return}
+  if(e.target.dataset.more){ctxTarget=e.target.dataset.more;const c=document.getElementById('ctx');c.innerHTML='<button onclick="renameGroup(ctxTarget)">✎ 重命名</button><button class="del" onclick="deleteGroup(ctxTarget)">🗑 删除目录</button><button onclick="newGroup(ctxTarget)">⊞ 添加子目录</button><button onclick="addCameraModal()">▣ 添加摄像头</button>';c.style.left=e.clientX+'px';c.style.top=e.clientY+'px';c.style.display='block';return}
+  if(e.target.dataset.alias){editAlias(e.target.dataset.alias);return}
+  if(e.target.dataset.remove){const c=cameras.find(x=>x.id===e.target.dataset.remove);c.group=c.group.filter(x=>x!==selectedGroupId);playGroup();renderAll();return}
+  
+  // ================== 绑定：选择添加摄像头目录 ==================
+  if(e.target.dataset.addto){openAddToGroup(e.target.dataset.addto);return}
+  if(e.target.dataset.gotoGroup){selectedGroupId=e.target.dataset.gotoGroup;expandToGroup(selectedGroupId);mode='group';groupTab.classList.add('active');allTab.classList.remove('active');playGroup();renderAll();return}
+  
+  const card=e.target.closest('.cam-card');
+  if(card&&!e.target.classList.contains('link')){if(windows.some((w,i)=>i<gridCount&&w===card.dataset.cam))return;const c=cameras.find(x=>x.id===card.dataset.cam);let idx=selectedWindow;if(windows[idx])idx=windows.findIndex((w,i)=>i<gridCount&&!w);if(idx<0)idx=selectedWindow;windows[idx]=c.id;selectedWindow=idx;stopPatrol(true);renderVideos();return}
+  const win=e.target.closest('.window');
+  if(win){selectedWindow=Number(win.dataset.win);renderVideos();return}
+});
+
+document.addEventListener('dblclick',e=>{const card=e.target.closest('.cam-card');if(card){if(windows.some((w,i)=>i<gridCount&&w===card.dataset.cam))return;windows[selectedWindow]=card.dataset.cam;stopPatrol(true);renderVideos()}})
+document.querySelectorAll('[data-grid]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-grid]').forEach(x=>x.classList.remove('active'));b.classList.add('active');gridCount=Number(b.dataset.grid);selectedWindow=0;stopPatrol(true);renderVideos();updatePatrol()});
+document.getElementById('allTab').onclick=()=>{mode='all';allTab.classList.add('active');groupTab.classList.remove('active');renderAll()};
+document.getElementById('groupTab').onclick=()=>{mode='group';groupTab.classList.add('active');allTab.classList.remove('active');renderAll()};
+document.getElementById('search').oninput=()=>{renderList();renderTree();renderSearchResult()};
+document.getElementById('newGroup').onclick=()=>newGroup(null);
+document.getElementById('startPatrol').onclick=startPatrolFn;
+document.getElementById('stationSel').onchange=()=>{const stationId=selectedStationId();if(stationId!=='all'){const cams=stationCams(stationId);windows=Array(8).fill(null);for(let i=0;i<gridCount;i++)windows[i]=cams[i]?.id||null;mode='all';allTab.classList.add('active');groupTab.classList.remove('active');renderList();renderTree();renderVideos()}if(patrolRunning)startPatrolFn();else updatePatrol()};
+document.getElementById('stopPatrol').onclick=()=>stopPatrol(false);
+document.getElementById('intervalSel').onchange=()=>{if(patrolRunning)startPatrolFn();else updatePatrol()};
+document.getElementById('nextBatch').onclick=()=>{if(!patrolRunning)startPatrolFn()};
+document.getElementById('prevBatch').onclick=()=>toast('轮巡状态下自动循环，手动上一轮可在停止后重新开始');
+function enterMaxMode(){document.getElementById('app').classList.add('max-mode')}
+function exitMaxMode(){document.getElementById('app').classList.remove('max-mode')}
+document.getElementById('maxBtn').onclick=enterMaxMode;
+document.getElementById('backBtn').onclick=exitMaxMode;
+document.getElementById('patrolCfg').onclick = openPatrolConfig;
+
+renderAll();
+playGroup();
+</script>
+</body>
+</html>

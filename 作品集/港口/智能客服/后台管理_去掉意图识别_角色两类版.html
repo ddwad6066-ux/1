@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>智能客服与知识问答智能体｜后台管理模块版</title>
+<style>
+:root{
+  --bg:#f4f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#e5e7eb;
+  --primary:#2563eb;--primary2:#1d4ed8;--soft:#eff6ff;--green:#16a34a;--orange:#f59e0b;--red:#ef4444;--purple:#7c3aed;
+  --shadow:0 18px 46px rgba(15,23,42,.08);--radius:20px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;height:100vh;overflow:hidden;color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+  background:radial-gradient(circle at 16% 8%,rgba(37,99,235,.08),transparent 26%),
+  radial-gradient(circle at 84% 16%,rgba(6,182,212,.08),transparent 24%),
+  linear-gradient(135deg,#f8fbff 0%,#eef5ff 46%,#f8fafc 100%);
+}
+button,input,textarea,select{font-family:inherit}button{cursor:pointer}
+.layout{display:flex;height:100vh;width:100vw}
+.sidebar{
+  width:292px;height:100vh;background:rgba(255,255,255,.88);backdrop-filter:blur(18px);
+  border-right:1px solid rgba(226,232,240,.95);padding:18px;display:flex;flex-direction:column;gap:16px;flex:0 0 auto;
+}
+.brand{display:flex;gap:12px;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.logo{
+  width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#06b6d4);
+  display:grid;place-items:center;color:#fff;font-weight:900;font-size:21px;box-shadow:0 12px 28px rgba(37,99,235,.24);flex:0 0 auto;
+}
+.brand h1{font-size:17px;line-height:1.25;margin:0}.brand p{font-size:12px;color:var(--muted);margin:4px 0 0}
+.menu-title{font-size:12px;color:#98a2b3;letter-spacing:.08em;font-weight:900;margin:2px 2px -2px}
+.menu{display:flex;flex-direction:column;gap:8px}
+.menu button{
+  border:1px solid transparent;background:transparent;border-radius:15px;color:#344054;padding:12px;
+  display:flex;gap:10px;align-items:center;text-align:left;transition:.16s;
+}
+.menu button:hover{background:#f8fafc;border-color:#e2e8f0}
+.menu button.active{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;font-weight:900}
+.menu button span{width:28px;height:28px;border-radius:10px;background:#eef2ff;display:grid;place-items:center;flex:0 0 auto}
+.side-card{margin-top:auto;border:1px solid #dbeafe;background:#eff6ff;border-radius:18px;padding:14px;color:#1e3a8a;font-size:12px;line-height:1.65}
+.main{flex:1;min-width:0;height:100vh;display:flex;flex-direction:column}
+.topbar{
+  height:74px;background:rgba(255,255,255,.76);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(226,232,240,.95);display:flex;align-items:center;padding:0 26px;
+}
+.top-title h2{margin:0;font-size:19px}.top-title p{margin:5px 0 0;color:var(--muted);font-size:12px}
+.content{flex:1;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:18px}
+.module{display:none;animation:fade .18s ease}.module.active{display:flex;flex-direction:column;gap:18px}
+@keyframes fade{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{
+  background:rgba(255,255,255,.9);border:1px solid rgba(226,232,240,.95);
+  border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;overflow:hidden;
+}
+.stat{position:relative;min-height:124px}.stat:after{content:"";position:absolute;right:-34px;top:-38px;width:124px;height:124px;border-radius:50%;background:rgba(37,99,235,.08)}
+.stat h4{margin:0 0 10px;color:var(--muted);font-size:13px}.stat strong{display:block;font-size:28px}.stat p{margin:9px 0 0;color:#16a34a;font-weight:900;font-size:12px}
+.card-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.card-title h3{margin:0;font-size:16px}.card-title p{margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+.btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.primary,.ghost,.danger{
+  border-radius:12px;padding:9px 12px;font-weight:900;border:1px solid var(--line);background:#fff;color:#344054;
+}
+.primary{border-color:var(--primary);background:var(--primary);color:#fff}.danger{border-color:#fecaca;background:#fff1f2;color:#dc2626}
+.two-col{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;margin-bottom:6px;color:#475467;font-size:12px;font-weight:900}
+input,select,textarea{width:100%;border:1px solid #d0d5dd;border-radius:13px;background:#fff;padding:10px 12px;outline:none;font-size:13px}
+textarea{min-height:104px;resize:vertical;line-height:1.6}
+input:focus,select:focus,textarea:focus{border-color:#60a5fa;box-shadow:0 0 0 4px rgba(59,130,246,.1)}
+.upload{border:1.5px dashed #93c5fd;background:#eff6ff;border-radius:18px;text-align:center;padding:20px;margin-top:12px}
+.upload b{color:#1d4ed8}.upload p{margin:8px 0 0;color:#475467;font-size:12px}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{border:1px solid #e5e7eb;background:#fff;border-radius:16px;padding:13px}
+.item-row{display:flex;justify-content:space-between;align-items:center;gap:10px}.item b{font-size:13px}.item p{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+.tag{display:inline-flex;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:900;background:#f1f5f9;color:#475467;white-space:nowrap}
+.tag.green{background:#dcfce7;color:#15803d}.tag.blue{background:#dbeafe;color:#1d4ed8}.tag.orange{background:#ffedd5;color:#c2410c}.tag.red{background:#fee2e2;color:#dc2626}.tag.purple{background:#ede9fe;color:#6d28d9}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:7px 10px;border-radius:999px;border:1px solid #dbeafe;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:800;cursor:pointer}.chip.active{background:#2563eb;color:#fff;border-color:#2563eb}
+.table-wrap{border:1px solid #e5e7eb;border-radius:17px;overflow:auto;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:13px 14px;border-bottom:1px solid #edf2f7;text-align:left;white-space:nowrap}
+th{background:#f8fafc;color:#475467;font-size:12px}tr:last-child td{border-bottom:0}
+.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.role{border:1px solid #e5e7eb;background:#fff;border-radius:16px;padding:14px;transition:.16s;cursor:pointer}
+.role:hover{border-color:#93c5fd;box-shadow:0 8px 24px rgba(37,99,235,.08)}
+.role.active{border-color:#3b82f6;background:#eff6ff}.role b{display:block;margin-bottom:7px}.role p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+.perm-layout{display:grid;grid-template-columns:320px 1fr;gap:18px}
+.perm-group{display:flex;flex-direction:column;gap:12px}.perm-panel{border:1px solid #e5e7eb;border-radius:16px;background:#fff;padding:14px}.perm-panel h4{margin:0 0 10px;font-size:14px}
+.perm-line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9}.perm-line:last-child{border-bottom:0}.perm-line small{display:block;color:#98a2b3;margin-top:4px}
+.toggle{display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.toggle button{border:1px solid #d0d5dd;background:#fff;color:#475467;padding:6px 10px;border-radius:10px;font-size:12px;font-weight:800}.toggle button.on{background:#eff6ff;color:#1d4ed8;border-color:#93c5fd}
+.checkbox-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.check{border:1px solid #e5e7eb;border-radius:14px;padding:12px;background:#fff;display:flex;justify-content:space-between;gap:10px;align-items:flex-start;cursor:pointer}
+.check:hover{border-color:#93c5fd}.check.active{background:#eff6ff;border-color:#3b82f6}.check b{font-size:13px;display:block;margin-bottom:4px}.check p{margin:0;color:#667085;font-size:12px;line-height:1.55}
+.check .tick{width:22px;height:22px;border-radius:7px;border:1px solid #cbd5e1;display:grid;place-items:center;font-size:12px;color:#fff;background:#fff;flex:0 0 auto}.check.active .tick{background:#2563eb;border-color:#2563eb}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{padding:8px 12px;border-radius:999px;border:1px solid #dbeafe;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:800;cursor:pointer}.tab.active{background:#2563eb;color:#fff;border-color:#2563eb}
+
+.tag-panel{border:1px solid #dbeafe;background:#eff6ff;border-radius:16px;padding:14px;margin-top:12px}
+.tag-panel h4{margin:0 0 8px;color:#1d4ed8;font-size:14px}
+.tag-group{margin-top:10px}
+.tag-group b{font-size:12px;color:#475467;display:block;margin-bottom:6px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 16px;border-radius:14px;box-shadow:0 16px 38px rgba(0,0,0,.2);font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:50}.toast.show{opacity:1;bottom:34px}
+@media(max-width:1200px){.grid4{grid-template-columns:repeat(2,1fr)}.two-col,.perm-layout{grid-template-columns:1fr}.role-grid{grid-template-columns:repeat(2,1fr)}.checkbox-grid{grid-template-columns:1fr}}
+@media(max-width:760px){body{height:auto;overflow:auto}.layout{height:auto;min-height:100vh;flex-direction:column}.sidebar{width:100%;height:auto;border-right:0;border-bottom:1px solid var(--line)}.main{height:auto}.topbar{height:auto;align-items:flex-start;flex-direction:column;padding:16px}.content{padding:12px}.grid4,.form-grid,.role-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">管</div>
+      <div>
+        <h1>智能客服与知识问答智能体</h1>
+        <p>后台管理中心</p>
+      </div>
+    </div>
+
+    <div class="menu-title">后台模块</div>
+    <div class="menu">
+      <button class="active" onclick="switchModule('dashboard',this)"><span>总</span>运营总览</button>
+      <button onclick="switchModule('knowledge',this)"><span>库</span>知识库管理</button>
+      <button onclick="switchModule('permission',this)"><span>权</span>角色权限管理</button>
+      <button onclick="switchModule('feedback',this)"><span>学</span>反馈与自学习</button>
+      <button onclick="switchModule('audit',this)"><span>审</span>安全审计日志</button>
+    </div>
+
+    <div class="side-card">
+      <b>模块说明</b><br/>
+      后台是一个完整页面，左侧菜单点击后在当前页面内切换模块，不跳转、不生成多个后台 HTML。
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="top-title">
+        <h2 id="pageTitle">运营总览</h2>
+        <p id="pageDesc">查看知识库、问答命中率、权限拦截、待更新知识等核心运营数据。</p>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="module active" id="dashboard">
+        <section class="grid4">
+          <div class="card stat"><h4>知识总量</h4><strong>8,642</strong><p>较上周 +328 条</p></div>
+          <div class="card stat"><h4>问答命中率</h4><strong>96.8%</strong><p>较上周 +1.7%</p></div>
+          <div class="card stat"><h4>权限拦截</h4><strong>73</strong><p>敏感信息无泄露</p></div>
+          <div class="card stat"><h4>待更新知识</h4><strong>26</strong><p>需管理员处理</p></div>
+        </section>
+
+        <section class="two-col">
+          <div class="card">
+            <div class="card-title">
+              <div>
+                <h3>待办事项</h3>
+                <p>集中展示后台需要处理的知识补充、权限审批和反馈优化任务。</p>
+              </div>
+              <button class="primary" onclick="toast('已刷新待办事项')">刷新</button>
+            </div>
+            <div class="list">
+              <div class="item"><div class="item-row"><b>知识补充</b><span class="tag orange">26条</span></div><p>船闸通行、运价标准、航道状态等知识待更新。</p></div>
+              <div class="item"><div class="item-row"><b>权限申请</b><span class="tag blue">8条</span></div><p>调度人员、市场人员申请访问运价与资源调配知识。</p></div>
+              <div class="item"><div class="item-row"><b>高频未命中问题</b><span class="tag red">42条</span></div><p>需补充新能源车辆进港、散改集时效估算等新场景知识。</p></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <div>
+                <h3>知识分区状态</h3>
+                <p>展示各业务板块知识覆盖和更新状态。</p>
+              </div>
+            </div>
+            <div class="list">
+              <div class="item"><div class="item-row"><b>港口作业流程</b><span class="tag green">1,236条</span></div><p>泊位申请、装卸作业、堆场规则、进出港手续。</p></div>
+              <div class="item"><div class="item-row"><b>水公铁联运规则</b><span class="tag green">986条</span></div><p>转运条件、单证要求、责任划分、操作规范。</p></div>
+              <div class="item"><div class="item-row"><b>运价标准</b><span class="tag orange">敏感</span></div><p>水运、铁路、公路、港口收费、过闸费用，启用权限控制。</p></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      
+      <div class="module" id="knowledge">
+        <section class="card" id="knowledgeList">
+          <div class="card-title">
+            <div>
+              <h3>知识库目录</h3>
+              <p>统一管理港口作业、联运规则、运价标准、资源调配、泊位、船闸、航道等业务知识。</p>
+            </div>
+            <button class="primary" onclick="showKnowledgeForm()">＋ 新增知识库</button>
+          </div>
+
+          <div class="chips" style="margin-bottom:14px">
+            <span class="chip active" onclick="chipActive(this)">全部</span>
+            <span class="chip" onclick="chipActive(this)">港口作业流程</span>
+            <span class="chip" onclick="chipActive(this)">水公铁联运规则</span>
+            <span class="chip" onclick="chipActive(this)">运价标准</span>
+            <span class="chip" onclick="chipActive(this)">车船资源调配</span>
+            <span class="chip" onclick="chipActive(this)">码头泊位管理</span>
+            <span class="chip" onclick="chipActive(this)">船闸通行要求</span>
+            <span class="chip" onclick="chipActive(this)">航道状态说明</span>
+          </div>
+
+          <div class="list">
+            <div class="item" onclick="toast('已打开：船闸通行要求说明')">
+              <div class="item-row"><b>船闸通行要求说明</b><span class="tag blue">船闸通行要求</span></div>
+              <p>覆盖船闸预约、通行条件、排队状态、限航通知等知识。</p>
+              <div><span class="tag purple">向量检索</span><span class="tag green">全文检索</span><span class="tag blue">操作规程</span><span class="tag orange">实体关系抽取</span></div>
+            </div>
+            <div class="item" onclick="toast('已打开：港口收费标准表')">
+              <div class="item-row"><b>港口收费标准表</b><span class="tag orange">运价标准</span></div>
+              <p>覆盖水运、铁路、公路、港口收费、过闸费用与附加费等标准。</p>
+              <div><span class="tag purple">表格知识</span><span class="tag green">全文检索</span><span class="tag blue">收费标准</span><span class="tag orange">敏感分区</span></div>
+            </div>
+            <div class="item" onclick="toast('已打开：联运单证清单')">
+              <div class="item-row"><b>联运单证清单</b><span class="tag green">水公铁联运规则</span></div>
+              <p>覆盖联运条件、单证要求、责任划分、操作规范等内容。</p>
+              <div><span class="tag purple">结构化知识</span><span class="tag blue">流程知识</span><span class="tag green">精准检索</span><span class="tag orange">分类标注</span></div>
+            </div>
+            <div class="item" onclick="toast('已打开：车船资源调配规范')">
+              <div class="item-row"><b>车船资源调配规范</b><span class="tag blue">车船资源调配</span></div>
+              <p>覆盖可用船舶、车辆信息、运力调度规则与资源预约流程。</p>
+              <div><span class="tag purple">非结构化文档</span><span class="tag green">向量数据库</span><span class="tag blue">规则知识</span><span class="tag orange">数据清洗</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" id="knowledgeForm" style="display:none">
+          <div class="card-title">
+            <div>
+              <h3>新增知识库</h3>
+              <p>新增知识库时配置业务标签、检索方式、知识类型和入库预处理规则。</p>
+            </div>
+            <div class="btns">
+              <button class="ghost" onclick="backKnowledgeList()">返回目录</button>
+              <button class="primary" onclick="saveKnowledge()">保存入库</button>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div><label>知识库名称</label><input value="港口作业与船闸通行知识库"/></div>
+            <div><label>业务主标签</label><select><option>船闸通行要求</option><option>港口作业流程</option><option>水公铁联运规则</option><option>运价标准</option><option>车船资源调配规范</option><option>码头泊位管理</option><option>航道状态说明</option></select></div>
+            <div><label>知识类型</label><select><option>规则 / 标准 / 流程</option><option>文档 / 手册 / 政策文件</option><option>表格 / 收费标准</option><option>常见问题 FAQ</option></select></div>
+            <div><label>检索架构</label><select><option>向量数据库 + 全文检索引擎</option><option>仅向量数据库</option><option>仅全文检索引擎</option></select></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <label>知识库说明</label>
+            <textarea>知识库核心内容覆盖业务方港口作业流程、水公铁联运规则、运价标准、车船资源调配规范、码头泊位管理、船闸通行要求、航道状态说明等全业务板块知识。</textarea>
+          </div>
+
+          <div class="tag-panel">
+            <h4>知识库标签配置</h4>
+            <div class="tag-group">
+              <b>核心业务板块</b>
+              <span class="tag blue">港口作业流程</span><span class="tag blue">水公铁联运规则</span><span class="tag blue">运价标准</span><span class="tag blue">车船资源调配规范</span><span class="tag blue">码头泊位管理</span><span class="tag blue">船闸通行要求</span><span class="tag blue">航道状态说明</span>
+            </div>
+            <div class="tag-group">
+              <b>双引擎检索架构</b>
+              <span class="tag purple">向量数据库</span><span class="tag purple">全文检索引擎</span><span class="tag green">结构化知识</span><span class="tag green">非结构化知识</span><span class="tag green">精准检索</span>
+            </div>
+            <div class="tag-group">
+              <b>入库预处理流程</b>
+              <span class="tag orange">数据清洗</span><span class="tag orange">分类标注</span><span class="tag orange">实体关系抽取</span><span class="tag orange">规范性校验</span><span class="tag orange">可用性校验</span>
+            </div>
+          </div>
+
+          <div class="upload">
+            <b>＋ 点击或拖拽上传知识文件</b>
+            <p>支持结构化知识（规则、标准、流程）与非结构化知识（文档、手册、政策文件）统一入库。</p>
+          </div>
+        </section>
+      </div>
+      
+<div class="module" id="permission">
+        <section class="perm-layout">
+          <div class="perm-group">
+            <div class="card">
+              <div class="card-title">
+                <div>
+                  <h3>角色大类</h3>
+                  <p>系统只划分为业务人员与管理员两类，点击后右侧展示对应权限。</p>
+                </div>
+              </div>
+
+              <div class="role-grid" style="grid-template-columns:1fr">
+                <div class="role active role-item" onclick="selectRoleType(this,'业务人员')">
+                  <b>业务人员</b>
+                  <p>面向一线业务咨询、需求提报、方案查询、进度跟踪、问题投诉等使用场景。</p>
+                </div>
+                <div class="role role-item" onclick="selectRoleType(this,'管理员')">
+                  <b>管理员</b>
+                  <p>面向知识库维护、权限分配、日志审计、反馈处理和系统配置等管理场景。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">
+                <div>
+                  <h3>权限分配说明</h3>
+                  <p>业务人员默认只使用前端能力；管理员可进入后台进行管理维护。</p>
+                </div>
+              </div>
+              <div class="list">
+                <div class="item">
+                  <div class="item-row"><b>业务人员</b><span class="tag blue">前端使用</span></div>
+                  <p>可进行业务咨询、需求提报、进度跟踪、问题投诉，并按授权范围访问知识库。</p>
+                </div>
+                <div class="item">
+                  <div class="item-row"><b>管理员</b><span class="tag purple">后台管理</span></div>
+                  <p>可维护知识库、配置权限、处理反馈、查看日志，并管理业务知识分区。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <div class="card">
+              <div class="card-title">
+                <div>
+                  <h3 id="roleTitle">角色权限明细：业务人员</h3>
+                  <p id="roleDesc">业务人员主要使用前端问答、需求提报、进度查询和问题投诉能力；知识访问范围受业务分区控制。</p>
+                </div>
+                <div class="btns">
+                  <button class="ghost" onclick="toast('已恢复默认权限')">恢复默认</button>
+                  <button class="primary" onclick="toast('已保存权限配置')">保存权限</button>
+                </div>
+              </div>
+
+              <div class="tabs" style="margin-bottom:12px">
+                <button class="tab active" onclick="tabActive(this)">知识访问权限</button>
+                <button class="tab" onclick="tabActive(this)">功能操作权限</button>
+                <button class="tab" onclick="tabActive(this)">数据安全权限</button>
+              </div>
+
+              <div class="perm-panel" style="margin-bottom:14px">
+                <h4>知识分区访问范围</h4>
+                <div class="checkbox-grid">
+                  <div class="check active" onclick="toggleCheck(this)">
+                    <div><b>港口作业流程</b><p>泊位申请、装卸作业、堆场规则、进出港手续。</p></div><div class="tick">✓</div>
+                  </div>
+                  <div class="check active" onclick="toggleCheck(this)">
+                    <div><b>水公铁联运规则</b><p>转运条件、单证要求、责任划分、操作规范。</p></div><div class="tick">✓</div>
+                  </div>
+                  <div class="check" onclick="toggleCheck(this)">
+                    <div><b>运价标准</b><p>水运、铁路、公路、港口收费及附加费信息。</p></div><div class="tick">✓</div>
+                  </div>
+                  <div class="check active" onclick="toggleCheck(this)">
+                    <div><b>车船资源调配规范</b><p>可用船舶、车辆信息、运力调度规则和资源预约流程。</p></div><div class="tick">✓</div>
+                  </div>
+                  <div class="check active" onclick="toggleCheck(this)">
+                    <div><b>码头泊位管理</b><p>泊位状态、靠泊规则与泊位申请流程。</p></div><div class="tick">✓</div>
+                  </div>
+                  <div class="check active" onclick="toggleCheck(this)">
+                    <div><b>船闸通行要求</b><p>通行条件、预约规则、排队状态与限航通知。</p></div><div class="tick">✓</div>
+                  </div>
+                  <div class="check active" onclick="toggleCheck(this)">
+                    <div><b>航道状态说明</b><p>水深、通航状态、维护施工与特殊管制。</p></div><div class="tick">✓</div>
+                  </div>
+                  <div class="check" onclick="toggleCheck(this)">
+                    <div><b>敏感合同与底价</b><p>合同条款、客户价格、运费底价等敏感数据。</p></div><div class="tick">✓</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="perm-panel" style="margin-bottom:14px">
+                <h4>功能操作权限</h4>
+                <div class="perm-line">
+                  <div><b>前台业务问答</b><small>是否允许使用智能问答入口进行业务咨询</small></div>
+                  <div class="toggle"><button class="on" onclick="toggleBtn(this)">允许</button></div>
+                </div>
+                <div class="perm-line">
+                  <div><b>需求提报</b><small>是否允许提交新的物流需求并进入方案生成流程</small></div>
+                  <div class="toggle"><button class="on" onclick="toggleBtn(this)">可提交</button><button onclick="toggleBtn(this)">需审批</button></div>
+                </div>
+                <div class="perm-line">
+                  <div><b>方案查询</b><small>是否允许查询已有多式联运方案详情</small></div>
+                  <div class="toggle"><button class="on" onclick="toggleBtn(this)">可查询</button></div>
+                </div>
+                <div class="perm-line">
+                  <div><b>进度跟踪</b><small>是否允许对接物流系统查看货物实时状态</small></div>
+                  <div class="toggle"><button class="on" onclick="toggleBtn(this)">可查看</button></div>
+                </div>
+                <div class="perm-line">
+                  <div><b>问题投诉</b><small>是否允许提交异常问题与投诉工单</small></div>
+                  <div class="toggle"><button class="on" onclick="toggleBtn(this)">可提交</button></div>
+                </div>
+                <div class="perm-line admin-only" style="display:none">
+                  <div><b>知识库管理</b><small>是否允许新增、编辑、发布和维护知识库内容</small></div>
+                  <div class="toggle"><button class="on" onclick="toggleBtn(this)">允许</button></div>
+                </div>
+                <div class="perm-line admin-only" style="display:none">
+                  <div><b>权限管理</b><small>是否允许配置业务人员与管理员权限范围</small></div>
+                  <div class="toggle"><button class="on" onclick="toggleBtn(this)">允许</button></div>
+                </div>
+                <div class="perm-line admin-only" style="display:none">
+                  <div><b>安全审计日志</b><small>是否允许查看操作日志、权限日志与越权拦截记录</small></div>
+                  <div class="toggle"><button class="on" onclick="toggleBtn(this)">允许</button></div>
+                </div>
+              </div>
+
+              <div class="perm-panel">
+                <h4>数据安全与敏感信息控制</h4>
+                <div class="perm-line">
+                  <div><b>业务数据本地化</b><small>所有业务数据、交互记录、知识库内容均部署在业务方数据中心</small></div>
+                  <div class="toggle"><button class="on" onclick="toggleBtn(this)">启用</button></div>
+                </div>
+                <div class="perm-line">
+                  <div><b>无权限知识过滤</b><small>检索阶段自动排除当前角色无权限访问的知识分区</small></div>
+                  <div class="toggle"><button class="on" onclick="toggleBtn(this)">启用</button></div>
+                </div>
+                <div class="perm-line">
+                  <div><b>敏感信息脱敏</b><small>涉及底价、合同、客户专属条款时自动隐藏或提示无权限</small></div>
+                  <div class="toggle"><button class="on" onclick="toggleBtn(this)">启用</button></div>
+                </div>
+                <div class="perm-line">
+                  <div><b>权限操作日志</b><small>记录权限修改、申请、审批、驳回等关键追溯信息</small></div>
+                  <div class="toggle"><button class="on" onclick="toggleBtn(this)">启用</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+<div class="module" id="feedback">
+        <section class="card">
+          <div class="card-title">
+            <div><h3>问答反馈与知识自学习</h3><p>高频未命中问题、低满意回答、人工修正建议统一沉淀到优化中心。</p></div>
+            <div class="btns"><button class="ghost" onclick="toast('已同步到待更新知识清单')">同步入库</button><button class="primary" onclick="toast('已生成本周优化建议')">生成优化建议</button></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>问题类型</th><th>用户问题</th><th>次数</th><th>处理建议</th><th>状态</th></tr></thead>
+              <tbody>
+                <tr><td>未命中</td><td>新能源车辆进港预约需要什么材料？</td><td>18</td><td>补充进港车辆规则</td><td><span class="tag orange">待补充</span></td></tr>
+                <tr><td>低满意</td><td>铁路转运异常如何追责？</td><td>11</td><td>补充责任划分案例</td><td><span class="tag blue">审核中</span></td></tr>
+                <tr><td>新场景</td><td>散改集联运方案如何估算时效？</td><td>9</td><td>沉淀方案模板</td><td><span class="tag green">已入库</span></td></tr>
+                <tr><td>人工修正</td><td>过闸费用计算口径有误</td><td>6</td><td>更新运价标准表</td><td><span class="tag purple">待复核</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <div class="module" id="audit">
+        <section class="card">
+          <div class="card-title">
+            <div><h3>安全审计日志</h3><p>完整记录角色创建、权限修改、权限申请、审批通过/驳回、知识发布、越权拦截等操作。</p></div>
+            <button class="ghost" onclick="toast('日志已导出')">导出日志</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>时间</th><th>操作人</th><th>操作类型</th><th>操作内容</th><th>结果</th></tr></thead>
+              <tbody>
+                <tr><td>10:42</td><td>admin01</td><td>权限审批</td><td>授予运价标准访问权限</td><td><span class="tag green">成功</span></td></tr>
+                <tr><td>10:18</td><td>system</td><td>越权拦截</td><td>外部客户访问合同底价</td><td><span class="tag red">已拦截</span></td></tr>
+                <tr><td>09:55</td><td>kb_admin</td><td>知识发布</td><td>更新船闸通行要求说明</td><td><span class="tag green">成功</span></td></tr>
+                <tr><td>09:21</td><td>system</td><td>知识同步</td><td>同步航道状态说明</td><td><span class="tag blue">完成</span></td></tr>
+                <tr><td>08:48</td><td>ops_admin</td><td>角色创建</td><td>新增审计人员角色</td><td><span class="tag green">成功</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast">操作成功</div>
+<script>
+const titleMap = {
+  dashboard:['运营总览','查看知识库、问答命中率、权限拦截、待更新知识等核心运营数据。'],
+  knowledge:['知识库管理','管理知识库目录、业务标签、双引擎检索、知识入库与预处理流程。'],
+  permission:['角色权限管理','配置不同角色可访问的知识分区、功能权限、审批权限与敏感信息控制。'],
+  feedback:['反馈与自学习','沉淀高频未命中问题、用户反馈和人工修正建议，持续优化问答质量。'],
+  audit:['安全审计日志','查看角色创建、权限变更、审批通过/驳回、知识发布和越权拦截等日志记录。']
+};
+function switchModule(id,btn){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pageTitle').innerText = titleMap[id][0];
+  document.getElementById('pageDesc').innerText = titleMap[id][1];
+  document.querySelector('.content').scrollTop = 0;
+}
+
+function showKnowledgeForm(){
+  document.getElementById('knowledgeList').style.display = 'none';
+  document.getElementById('knowledgeForm').style.display = 'block';
+  toast('已进入新增知识库页面');
+}
+function backKnowledgeList(){
+  document.getElementById('knowledgeForm').style.display = 'none';
+  document.getElementById('knowledgeList').style.display = 'block';
+  toast('已返回知识库目录');
+}
+function saveKnowledge(){
+  document.getElementById('knowledgeForm').style.display = 'none';
+  document.getElementById('knowledgeList').style.display = 'block';
+  toast('知识库已保存入库');
+}
+
+function toast(text){
+  const t = document.getElementById('toast');
+  t.innerText = text;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1700);
+}
+function chipActive(el){
+  const parent = el.parentElement;
+  parent.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  toast('已切换筛选：' + el.innerText);
+}
+function tabActive(el){
+  el.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  toast('已切换：' + el.innerText);
+}
+function toggleCheck(el){el.classList.toggle('active');toast(el.classList.contains('active')?'已开启该权限':'已关闭该权限')}
+function toggleBtn(el){el.classList.toggle('on');toast('权限状态已调整')}
+function selectRoleType(el,type){
+  document.querySelectorAll('.role-item').forEach(r=>r.classList.remove('active'));
+  el.classList.add('active');
+
+  const isAdmin = type === '管理员';
+  document.getElementById('roleTitle').innerText = '角色权限明细：' + type;
+  document.getElementById('roleDesc').innerText = isAdmin
+    ? '管理员负责知识库维护、权限配置、反馈处理、安全审计和后台模块管理。'
+    : '业务人员主要使用前端问答、需求提报、方案查询、进度跟踪和问题投诉能力；知识访问范围受业务分区控制。';
+
+  document.querySelectorAll('.admin-only').forEach(item=>{
+    item.style.display = isAdmin ? 'flex' : 'none';
+  });
+
+  toast('已切换到：' + type);
+}
+</script>
+</body>
+</html>

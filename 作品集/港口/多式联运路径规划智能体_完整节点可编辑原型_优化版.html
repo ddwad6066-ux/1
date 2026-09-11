@@ -1,0 +1,1283 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>多式联运路径规划智能体 · 完整交互原型</title>
+<style>
+:root{
+  --bg:#f4f7fb;
+  --panel:#ffffff;
+  --line:#d9e4f2;
+  --text:#172033;
+  --sub:#6b7a90;
+  --blue:#2563eb;
+  --blue2:#1d4ed8;
+  --light:#eef5ff;
+  --green:#16a34a;
+  --greenbg:#ecfdf5;
+  --orange:#f59e0b;
+  --orangebg:#fff7ed;
+  --red:#ef4444;
+  --redbg:#fef2f2;
+  --purple:#7c3aed;
+  --shadow:0 18px 50px rgba(22,42,76,.10);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 10% 8%, #dcecff 0, transparent 30%),
+    radial-gradient(circle at 82% 12%, #e3f3ff 0, transparent 26%),
+    radial-gradient(circle at 55% 100%, #e7efff 0, transparent 22%),
+    linear-gradient(135deg,#f8fbff,#edf4fb);
+  overflow:hidden;
+}
+button,input,select,textarea{font-family:inherit}
+.app{
+  height:100vh;
+  display:grid;
+  grid-template-columns:288px minmax(660px,1fr) 390px;
+  gap:14px;
+  padding:14px;
+}
+.sidebar,.main,.right{
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(210,224,242,.88);
+  box-shadow:var(--shadow);
+  border-radius:var(--radius);
+  overflow:hidden;
+  backdrop-filter: blur(12px);
+}
+.sidebar{display:flex;flex-direction:column}
+.brand{
+  padding:18px 18px 14px;
+  border-bottom:1px solid var(--line);
+}
+.logo-row{display:flex;gap:12px;align-items:center}
+.logo{
+  width:44px;height:44px;border-radius:15px;
+  background:linear-gradient(135deg,#1d4ed8,#60a5fa);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;font-size:20px;
+  box-shadow:0 10px 22px rgba(37,99,235,.28);
+}
+.brand h1{margin:0;font-size:17px;line-height:1.25}
+.brand p{margin:8px 0 0;color:var(--sub);font-size:12px;line-height:1.55}
+.newchat{
+  margin:14px 16px 9px;
+  border:none;background:#1d4ed8;color:white;
+  height:42px;border-radius:12px;cursor:pointer;
+  font-size:14px;font-weight:750;
+  box-shadow:0 10px 22px rgba(37,99,235,.24);
+}
+.newchat:hover,.sendbtn:hover{background:#1747ad}
+.side-section{padding:6px 14px}
+.side-title{font-size:12px;color:var(--sub);padding:8px 4px}
+.history-item{
+  padding:11px 12px;border-radius:12px;cursor:pointer;margin:4px 0;
+  font-size:13px;display:flex;gap:8px;align-items:flex-start;color:#26364f;
+}
+.history-item:hover,.history-item.active{background:#eef5ff}
+.dot{width:8px;height:8px;border-radius:50%;background:#60a5fa;margin-top:6px;flex:none}
+.badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:3px 7px;border-radius:999px;background:#eef5ff;color:#1d4ed8;
+  font-size:11px;font-weight:750;
+}
+.side-bottom{
+  margin-top:auto;padding:14px 16px 16px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--sub);line-height:1.6;
+}
+.main{display:flex;flex-direction:column}
+.topbar{
+  height:68px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.72);
+}
+.topbar h2{font-size:18px;margin:0}
+.status{display:flex;align-items:center;gap:8px;color:var(--sub);font-size:13px;margin-top:4px}
+.pulse{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 6px rgba(22,163,74,.12)}
+.top-actions{display:flex;gap:8px;align-items:center}
+.chat{flex:1;overflow:auto;padding:20px 24px 16px;scroll-behavior:smooth}
+.msg{display:flex;gap:12px;margin:0 0 18px}
+.msg.user{justify-content:flex-end}
+.avatar{
+  width:34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  flex:none;font-weight:800;color:white;font-size:13px;
+}
+.bot .avatar{background:linear-gradient(135deg,#1d4ed8,#93c5fd)}
+.user .avatar{background:#111827;order:2}
+.bubble{
+  max-width:min(820px,84%);
+  background:#fff;border:1px solid var(--line);border-radius:18px;
+  padding:14px 16px;line-height:1.72;font-size:14px;
+  box-shadow:0 8px 22px rgba(15,23,42,.05);
+}
+.user .bubble{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+.bubble h3{margin:0 0 8px;font-size:15px}
+.bubble p{margin:6px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{
+  border:1px solid #c9dcf5;background:#f4f8ff;color:#1d4ed8;
+  padding:8px 10px;border-radius:999px;font-size:12px;cursor:pointer;user-select:none;
+}
+.chip:hover{background:#e7f0ff}
+.composer-wrap{padding:13px 22px 18px;border-top:1px solid var(--line);background:rgba(255,255,255,.76)}
+.composer-shortcuts{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 8px}
+.composer{
+  display:flex;gap:10px;align-items:flex-end;background:#fff;border:1px solid #cad9ed;
+  border-radius:18px;padding:10px;box-shadow:0 12px 26px rgba(15,23,42,.06);
+}
+textarea{
+  flex:1;border:none;outline:none;resize:none;min-height:42px;max-height:128px;
+  padding:9px 8px;font-size:14px;line-height:1.5;
+}
+.toolbtn,.sendbtn{border:none;border-radius:13px;height:42px;cursor:pointer;font-weight:750}
+.toolbtn{width:42px;background:#eef5ff;color:#1d4ed8;font-size:20px}
+.sendbtn{width:82px;background:#1d4ed8;color:white;font-size:14px}
+.hint{margin-top:8px;color:var(--sub);font-size:12px;display:flex;justify-content:space-between}
+.parse-box{margin-top:10px;border:1px solid #d9e7f8;border-radius:14px;overflow:hidden;background:#fbfdff}
+.parse-row{display:grid;grid-template-columns:118px 1fr;border-bottom:1px solid #e6eef8;font-size:13px}
+.parse-row:last-child{border-bottom:none}
+.parse-row label{background:#f1f6fd;color:#5c6d83;padding:8px 10px}
+.parse-row div{padding:8px 10px}
+.warn-box,.success-box,.info-box{
+  border-radius:14px;padding:12px 14px;margin-top:10px;font-size:13px;line-height:1.65;
+}
+.warn-box{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412}
+.success-box{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534}
+.info-box{border:1px solid #bfdbfe;background:#eff6ff;color:#1e40af}
+.card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.card-grid.five{grid-template-columns:repeat(5,minmax(145px,1fr));overflow-x:auto;padding-bottom:4px}
+.route-card{
+  border:1px solid #d9e7f8;border-radius:16px;background:linear-gradient(180deg,#fff,#f8fbff);
+  padding:13px;position:relative;overflow:hidden;
+}
+.route-card.recommend{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.10)}
+.tag{
+  display:inline-flex;align-items:center;gap:5px;font-size:11px;border-radius:999px;
+  padding:4px 8px;background:#eef5ff;color:#1d4ed8;margin-bottom:8px;
+}
+.route-card h4{margin:0 0 8px;font-size:14px}
+.route-line{margin-top:10px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:12px;color:#41516b}
+.node{padding:4px 7px;border-radius:8px;background:#edf4ff;color:#1d4ed8}
+.arrow{color:#9aa8bd}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.metric{background:#f2f6fb;border-radius:10px;padding:8px}
+.metric b{display:block;font-size:13px}
+.metric span{font-size:11px;color:var(--sub)}
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.small-btn{
+  border:1px solid #cbdcf2;background:#fff;color:#1d4ed8;border-radius:10px;
+  padding:7px 10px;font-size:12px;cursor:pointer;font-weight:700;
+}
+.small-btn:hover{background:#f3f7ff}
+.small-btn.primary{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+.small-btn.warn{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+.small-btn.danger{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.small-btn:disabled{opacity:.52;cursor:not-allowed}
+.data-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
+.data-card{border:1px solid #d9e7f8;background:#fbfdff;border-radius:14px;padding:10px;font-size:12px;line-height:1.55}
+.data-card b{display:block;font-size:13px;margin-bottom:4px;color:#1d4ed8}
+.term-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.term-tag{border:1px solid #cbdcf2;background:#f8fbff;border-radius:999px;padding:5px 8px;font-size:12px;color:#41516b}
+.term-tag b{color:#1d4ed8}
+.weight-control{margin:10px 0}
+.weight-control label{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:6px}
+.weight-control input{width:100%;accent-color:#1d4ed8}
+.weight-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.audit-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.audit-item{border:1px solid #e2eaf5;border-radius:12px;background:#fbfdff;padding:9px;font-size:12px;line-height:1.55}
+.audit-item b{display:block;color:#172033}
+.code-box{background:#0f172a;color:#dbeafe;border-radius:14px;padding:12px;overflow:auto;font-size:12px;line-height:1.55;margin-top:10px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.form-grid label{font-size:12px;color:#52657e}
+.form-grid input,.form-grid select{width:100%;height:36px;border:1px solid #cbdcf2;border-radius:10px;padding:0 10px;margin-top:4px}
+.impact-delta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.delta-card{border:1px solid #bbf7d0;background:#f0fdf4;border-radius:12px;padding:10px;font-size:12px;color:#166534}
+.delta-card.warn{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
+.delta-card b{display:block;font-size:15px}
+.right{display:flex;flex-direction:column}
+.right-head{padding:18px 18px 12px;border-bottom:1px solid var(--line)}
+.right-head h3{margin:0;font-size:16px}
+.right-head p{margin:6px 0 0;color:var(--sub);font-size:12px;line-height:1.5}
+.right-content{overflow:auto;padding:16px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}
+.panel-title{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:800;margin-bottom:10px}
+.status-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed #e2eaf5;font-size:13px;gap:12px}
+.status-row:last-child{border-bottom:none}
+.status-row.clickable{cursor:pointer;border-radius:10px;padding-left:8px;padding-right:8px}
+.status-row.clickable:hover{background:#f3f7ff}
+.ok{color:var(--green);font-weight:750}.slow{color:var(--orange);font-weight:750}.bad{color:var(--red);font-weight:750}
+.mini-map{
+  height:220px;border-radius:16px;background:
+  radial-gradient(circle at 19% 39%, #1d4ed8 0 4px, transparent 5px),
+  radial-gradient(circle at 43% 30%, #2563eb 0 4px, transparent 5px),
+  radial-gradient(circle at 63% 52%, #60a5fa 0 4px, transparent 5px),
+  radial-gradient(circle at 82% 37%, #3b82f6 0 4px, transparent 5px),
+  linear-gradient(135deg,#f8fbff,#e7f0ff);
+  border:1px solid #d9e7f8;position:relative;overflow:hidden;
+}
+.river{
+  position:absolute;left:-30px;right:-30px;top:94px;height:42px;background:rgba(96,165,250,.22);
+  transform:rotate(-8deg);border-top:1px dashed rgba(37,99,235,.35);border-bottom:1px dashed rgba(37,99,235,.35);
+}
+.map-path{position:absolute;left:35px;top:86px;width:285px;height:76px;border-top:3px solid #2563eb;border-radius:50%;transform:rotate(-7deg)}
+.map-label{
+  position:absolute;background:#fff;border:1px solid #d8e6f7;border-radius:10px;padding:5px 7px;
+  font-size:11px;box-shadow:0 6px 16px rgba(15,23,42,.08);
+}
+.l1{left:18px;top:70px}.l2{left:110px;top:44px}.l3{left:205px;top:102px}.l4{right:18px;top:58px}
+.node-editor{margin-top:12px;border:1px solid #d9e7f8;border-radius:16px;overflow:hidden;background:#fbfdff}
+.editor-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f1f6fd;border-bottom:1px solid #d9e7f8;font-size:13px;font-weight:800}
+.node-list{padding:10px}
+.node-item{
+  display:grid;grid-template-columns:28px 1fr 94px 74px 52px;gap:8px;align-items:center;
+  padding:9px;border:1px solid #e3ecf8;border-radius:12px;margin-bottom:8px;background:#fff;
+}
+.node-index{width:24px;height:24px;border-radius:8px;background:#eef5ff;color:#1d4ed8;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.node-item input,.node-item select{
+  height:34px;border:1px solid #cbdcf2;border-radius:9px;padding:0 8px;font-size:12px;background:#fff;
+}
+.node-item button{height:32px}
+.add-node-form{display:grid;grid-template-columns:1fr 100px 80px 60px;gap:8px;padding:0 10px 12px}
+.add-node-form input,.add-node-form select{height:36px;border:1px solid #cbdcf2;border-radius:10px;padding:0 10px;font-size:12px}
+.impact-panel{margin-top:10px;border:1px solid #bbf7d0;background:#f0fdf4;border-radius:14px;padding:11px 12px;color:#166534;font-size:13px}
+.impact-panel b{font-size:14px}
+.modal-mask{
+  position:fixed;inset:0;background:rgba(15,23,42,.38);display:none;align-items:center;justify-content:center;z-index:30;
+}
+.modal{
+  width:min(920px,94vw);background:#fff;border-radius:22px;box-shadow:0 30px 80px rgba(15,23,42,.25);
+  border:1px solid #dbe6f2;overflow:hidden;
+}
+.modal-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.modal-head h3{margin:0;font-size:16px}
+.modal-body{padding:16px 18px;max-height:70vh;overflow:auto}
+.close{border:none;background:#f3f7fb;border-radius:10px;width:34px;height:34px;cursor:pointer}
+.compare-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.compare-table th,.compare-table td{border:1px solid #e2eaf5;padding:9px;text-align:left}
+.compare-table th{background:#f3f7fb;color:#52657e}
+.typing span{display:inline-block;width:6px;height:6px;border-radius:50%;background:#9db1ca;margin:0 2px;animation:bounce 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.45}40%{transform:translateY(-5px);opacity:1}}
+.toast{
+  position:fixed;left:50%;top:20px;transform:translateX(-50%);
+  background:#111827;color:#fff;border-radius:999px;padding:10px 16px;font-size:13px;
+  opacity:0;pointer-events:none;transition:.25s;box-shadow:0 12px 28px rgba(0,0,0,.18);z-index:40;
+}
+.toast.show{opacity:1;top:28px}
+@media(max-width:1200px){
+  .app{grid-template-columns:250px 1fr}
+  .right{display:none}
+  .bubble{max-width:88%}
+}
+@media(max-width:860px){
+  .app{grid-template-columns:1fr;padding:8px}
+  .sidebar{display:none}
+  .card-grid{grid-template-columns:1fr}
+  .card-grid.five,.data-grid,.form-grid,.impact-delta{grid-template-columns:1fr}
+  .node-item{grid-template-columns:24px 1fr;gap:6px}
+  .node-item input,.node-item select,.node-item button{grid-column:2}
+}
+</style>
+</head>
+<body>
+<div class="toast" id="toast">已完成</div>
+<div class="modal-mask" id="modalMask">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">方案详情</h3>
+      <button class="close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo-row">
+        <div class="logo">港</div>
+        <div>
+          <h1>多式联运路径规划智能体</h1>
+          <span class="badge">完整交互原型</span>
+        </div>
+      </div>
+      <p>面向多式联运路径优化，覆盖数据集成、模型构建、权重调整、术语识别、人工干预、拆单 API 与动态重规划。</p>
+    </div>
+    <button class="newchat" onclick="newChat()">＋ 新建规划会话</button>
+    <div class="side-section">
+      <div class="side-title">典型场景</div>
+      <div class="history-item active" onclick="quickAsk('500吨钢材，从岳阳城陵矶港运到上海宝山，6月20日前到，成本优先，可以中转。')"><span class="dot"></span><span>钢材：城陵矶 → 上海</span></div>
+      <div class="history-item" onclick="quickAsk('300吨煤炭，从城陵矶港到长沙电厂，要求2天内到，优先时效。')"><span class="dot"></span><span>煤炭：港口 → 电厂</span></div>
+      <div class="history-item" onclick="quickAsk('有一票集装箱货，从武汉港到宁波舟山港，要求风险低，尽量少中转。')"><span class="dot"></span><span>集装箱：武汉 → 宁波</span></div>
+    </div>
+    <div class="side-section">
+      <div class="side-title">智能体能力</div>
+      <div class="history-item" onclick="openDataIntegration()"><span class="dot"></span><span>模型数据集成</span></div>
+      <div class="history-item"><span class="dot"></span><span>自然语言需求解析</span></div>
+      <div class="history-item"><span class="dot"></span><span>五类方案路径推荐</span></div>
+      <div class="history-item" onclick="openTermDemo()"><span class="dot"></span><span>行业术语识别</span></div>
+      <div class="history-item"><span class="dot"></span><span>中间节点编辑与重算</span></div>
+      <div class="history-item"><span class="dot"></span><span>异常预警与重规划</span></div>
+      <div class="history-item" onclick="openAuditLog()"><span class="dot"></span><span>改单 / 拆单 / 审计追溯</span></div>
+    </div>
+    <div class="side-bottom">
+      <b>注意</b><br/>
+      当前为前端交互原型，数据和算法为模拟。正式系统需要接入订单、港口、船闸、班列、车辆、天气水文、运价等真实接口。
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h2>多式联运路径规划对话</h2>
+        <div class="status"><span class="pulse"></span> 智能体在线 · 路径规划模型 / 算法平台 / 业务规则模拟接入</div>
+      </div>
+      <div class="top-actions"></div>
+    </div>
+
+    <div class="chat" id="chat">
+      <div class="msg bot">
+        <div class="avatar">AI</div>
+        <div class="bubble">
+          <h3>你好，我是多式联运路径规划智能体。</h3>
+          你可以通过结构化表单、自然语言描述、短句快捷录入等方式输入运输需求，我会完成：需求解析 → 策略权重计算 → 五类方案生成 → 节点编辑 → 影响重算。
+        </div>
+      </div>
+    </div>
+
+    <div class="composer-wrap">
+      <div class="composer-shortcuts">
+        <span class="chip" onclick="openStructuredForm()">结构化表单填写</span>
+        <span class="chip" onclick="openQuickPhrases()">短句快捷录入</span>
+      </div>
+      <div class="composer">
+        <button class="toolbtn" title="上传订单/Excel" onclick="showToast('这里可扩展为上传订单、Excel、合同或历史方案')">＋</button>
+        <textarea id="input" placeholder="请输入运输需求，例如：500吨钢材，从岳阳城陵矶港到上海宝山，6月20日前到，成本优先，可以中转……"></textarea>
+        <button class="sendbtn" onclick="sendMessage()">发送</button>
+      </div>
+      <div class="hint">
+        <span>支持：结构化表单 / 短句快捷录入 / 自然语言描述</span>
+        <span>Enter 发送 / Shift+Enter 换行</span>
+      </div>
+    </div>
+  </main>
+
+  <aside class="right">
+    <div class="right-head">
+      <h3>智能体运行面板</h3>
+      <p>展示数据接入、路线示意、策略权重和当前方案节点。节点修改后会同步更新这里。</p>
+    </div>
+    <div class="right-content">
+      <div class="panel">
+        <div class="panel-title">路线示意图</div>
+        <div class="mini-map">
+          <div class="river"></div>
+          <div class="map-path"></div>
+          <div class="map-label l1" id="map1">城陵矶港</div>
+          <div class="map-label l2" id="map2">九江中转</div>
+          <div class="map-label l3" id="map3">铁路节点</div>
+          <div class="map-label l4" id="map4">上海宝山</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">策略权重调整 <span id="weightTotal" class="ok">100%</span></div>
+        <div class="weight-control"><label>成本 <span id="wCost">45%</span></label><input id="rCost" type="range" min="0" max="100" value="45" oninput="adjustWeight('cost',this.value)"></div>
+        <div class="weight-control"><label>时效 <span id="wTime">30%</span></label><input id="rTime" type="range" min="0" max="100" value="30" oninput="adjustWeight('time',this.value)"></div>
+        <div class="weight-control"><label>可靠性 <span id="wRisk">15%</span></label><input id="rRisk" type="range" min="0" max="100" value="15" oninput="adjustWeight('risk',this.value)"></div>
+        <div class="weight-control"><label>中转次数 <span id="wTransfer">10%</span></label><input id="rTransfer" type="range" min="0" max="100" value="10" oninput="adjustWeight('transfer',this.value)"></div>
+        <div class="weight-actions">
+          <button class="small-btn primary" onclick="applyWeightReplan()">按权重重算</button>
+          <button class="small-btn" onclick="resetWeights()">恢复推荐</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">当前方案节点</div>
+        <div id="sideNodes" style="font-size:13px;color:#41516b;line-height:1.7;">暂无方案，请先输入运输需求。</div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const input = document.getElementById('input');
+const toast = document.getElementById('toast');
+const modalMask = document.getElementById('modalMask');
+const modalBody = document.getElementById('modalBody');
+const modalTitle = document.getElementById('modalTitle');
+
+let currentPlan = null;
+let planCounter = 1;
+let currentWeights = {cost:45,time:30,risk:15,transfer:10};
+let auditLogs = [
+  {type:'系统初始化', operator:'系统', time:'2026-06-22 16:00', before:'无', after:'加载模型数据集成清单', impact:'形成可追溯运行环境'}
+];
+
+const modeOptions = ['水运','铁路','公路','水运+铁路','铁路+公路','水运+公路'];
+const mockNodes = [
+  {name:'岳阳城陵矶港', mode:'水运', hours:10, cost:1.8, risk:'低'},
+  {name:'九江港中转', mode:'水运', hours:22, cost:3.1, risk:'中'},
+  {name:'南京铁路节点', mode:'铁路', hours:26, cost:3.4, risk:'低'},
+  {name:'上海宝山到达', mode:'公路', hours:14, cost:2.5, risk:'中'}
+];
+const dataCatalog = [
+  {title:'船舶数据', items:'船舶名称、载重、船长、船宽、舱容、吃水深度、适航等级、可用船期'},
+  {title:'货物数据', items:'货物品类、货物特性、数量、重量、体积、包装方式、起运港、目的港、最晚出发/到达时间'},
+  {title:'港口/航道/船闸数据', items:'港口位置、泊位数量、吨位限制、吃水限制、吞吐量、泊位占用、装卸效率、水位、闸口排队、拥堵、收费、限航、航道水深/限高'},
+  {title:'政策与辅助数据', items:'政策法规、行业标准、环保要求、通行权限、台风、暴雨、水文、水情、浅滩、临时管制'}
+];
+const termDict = [
+  {term:'TEU', meaning:'标准箱单位', field:'cargo.containerUnit'},
+  {term:'吃水', meaning:'船舶/航道水深约束', field:'constraint.draft'},
+  {term:'船闸', meaning:'过闸排队与通航节点', field:'network.lockNode'},
+  {term:'靠泊费', meaning:'港口作业成本', field:'cost.berthingFee'},
+  {term:'限高', meaning:'航道桥梁通行约束', field:'constraint.heightLimit'},
+  {term:'浅滩', meaning:'水文通航风险', field:'risk.shoal'},
+  {term:'中转', meaning:'换装或换线节点', field:'route.transferNode'},
+  {term:'泊位', meaning:'港口可用作业资源', field:'port.berth'}
+];
+
+input.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && !e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+input.addEventListener('input', updateInputAssist);
+
+function scrollBottom(){chat.scrollTop = chat.scrollHeight;}
+function escapeHtml(str){return str.replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));}
+function showToast(text){toast.textContent=text;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800);}
+function addMessage(role, html){
+  const msg=document.createElement('div');
+  msg.className='msg '+(role==='user'?'user':'bot');
+  msg.innerHTML=`<div class="avatar">${role==='user'?'我':'AI'}</div><div class="bubble">${html}</div>`;
+  chat.appendChild(msg);scrollBottom();return msg;
+}
+function addTyping(){return addMessage('bot',`<div class="typing"><span></span><span></span><span></span></div>`);}
+function row(k,v){return `<div class="parse-row"><label>${k}</label><div>${v}</div></div>`;}
+function insertExample(){input.value='500吨钢材，从岳阳城陵矶港运到上海宝山，6月20日前到，成本优先，可以中转。';input.focus();}
+function quickAsk(text){input.value=text;sendMessage();}
+function fillInput(text){input.value=text;input.focus();updateInputAssist();}
+function updateInputAssist(){
+  const el=document.getElementById('inputAssist');
+  if(!el) return;
+  const text=input.value.trim();
+  const tips=[];
+  if(!text){el.classList.remove('show');el.innerHTML='';return;}
+  if(/\d+\s*(kg|KG|公斤)/.test(text)) tips.push({label:'检测到公斤单位，可自动换算为吨', action:'单位换算', value:text.replace(/(\d+)\s*(kg|KG|公斤)/g,(m,n)=>(Number(n)/1000)+'吨')});
+  if(text.includes('城陵矶') && !text.includes('岳阳城陵矶港')) tips.push({label:'地址补全：城陵矶 → 岳阳城陵矶港', action:'补全', value:text.replace(/城陵矶港?|城陵矶/g,'岳阳城陵矶港')});
+  if(text.includes('上海港') && !text.includes('上海宝山')) tips.push({label:'目的地可细化为上海宝山/上海外高桥等港区', action:'细化', value:text.replace('上海港','上海宝山')});
+  if(text.includes('不存在港口')) tips.push({label:'疑似地址不存在，请改为系统路网节点', action:'纠错', value:text.replace('不存在港口','岳阳城陵矶港')});
+  if(text.length>8 && !/(\d+)\s*(吨|箱|TEU|kg|KG|公斤)/.test(text)) tips.push({label:'缺少货物数量/重量，建议补充吨数、箱量或TEU', action:'补充示例', value:text+'，500吨'});
+  if(text.length>8 && !/(日前|天内|最晚|时效|到达)/.test(text)) tips.push({label:'缺少时效要求，建议补充最晚到达时间', action:'补充示例', value:text+'，6月20日前到'});
+  if(!tips.length){el.classList.remove('show');el.innerHTML='';return;}
+  el.innerHTML=tips.slice(0,3).map(t=>`<div class="assist-item"><span>${t.label}</span><button onclick="fillInput('${escapeAttr(t.value)}')">${t.action}</button></div>`).join('');
+  el.classList.add('show');
+}
+function escapeAttr(str){return String(str).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ');}
+function nowText(){return new Date().toLocaleString('zh-CN',{hour12:false});}
+function addAudit(type,before,after,impact,operator='调度员A'){
+  auditLogs.unshift({type,operator,time:nowText(),before,after,impact});
+  auditLogs = auditLogs.slice(0,24);
+}
+function recognizeTerms(text){
+  return termDict.filter(t=>text.toLowerCase().includes(t.term.toLowerCase()) || text.includes(t.term));
+}
+function renderTermTags(terms){
+  if(!terms.length) return '<span class="term-tag"><b>未命中特殊术语</b> → 按通用运输规则解析</span>';
+  return terms.map(t=>`<span class="term-tag"><b>${t.term}</b> → ${t.meaning} / ${t.field}</span>`).join('');
+}
+function renderDataCards(){
+  return `<div class="data-grid">${dataCatalog.map(d=>`<div class="data-card"><b>${d.title}</b>${d.items}</div>`).join('')}</div>`;
+}
+function newChat(){
+  currentPlan = null;
+  chat.innerHTML='';
+  updateSideNodes();
+  addMessage('bot',`
+    <h3>已开启新的规划会话。</h3>
+    请直接输入运输需求。方案生成后，你可以点击“修改中间节点”，对港口、船闸、铁路节点、公路短驳节点进行编辑，并重新计算影响。
+    <div class="chips">
+      <span class="chip" onclick="quickAsk('500吨钢材，从岳阳城陵矶港运到上海宝山，6月20日前到，成本优先，可以中转。')">钢材成本优先</span>
+      <span class="chip" onclick="quickAsk('船闸临时关闭了，帮我重新规划当前方案。')">异常重规划</span>
+      <span class="chip" onclick="openDataIntegration()">模型数据集成</span>
+    </div>
+  `);
+}
+function parseDemand(text){
+  const cargo = text.includes('煤') ? '煤炭' : text.includes('箱') ? '集装箱货物' : text.includes('矿') ? '矿石' : '钢材';
+  const weightMatch = text.match(/(\d+)\s*(吨|箱|TEU)/);
+  const weight = weightMatch ? weightMatch[1] + weightMatch[2] : '未填写';
+
+  let origin = '岳阳城陵矶港';
+  if(text.includes('武汉')) origin='武汉港';
+  if(text.includes('长沙') && !text.includes('城陵矶')) origin='长沙';
+  if(text.includes('城陵矶')) origin='岳阳城陵矶港';
+
+  let dest = '上海宝山';
+  if(text.includes('宁波')) dest='宁波舟山港';
+  if(text.includes('长沙电厂')) dest='长沙电厂';
+  if(text.includes('上海')) dest=text.includes('宝山')?'上海宝山':'上海';
+
+  let target = '综合推荐';
+  let weights = {cost:35,time:35,risk:20,transfer:10};
+  if(text.includes('成本') || text.includes('便宜')){
+    target='成本优先'; weights={cost:50,time:25,risk:15,transfer:10};
+  }
+  if(text.includes('时效') || text.includes('尽快') || text.includes('2天')){
+    target='时效优先'; weights={cost:20,time:55,risk:15,transfer:10};
+  }
+  if(text.includes('风险')){
+    target='低风险优先'; weights={cost:25,time:25,risk:40,transfer:10};
+  }
+  const dateMatch = text.match(/(\d{1,2}月\d{1,2}日|\d{1,2}号|\d+天内|\d{1,2}日前)/);
+  const due = dateMatch ? dateMatch[1] : '未填写';
+  const transfer = text.includes('不允许中转') ? '不允许中转' : text.includes('中转') ? '允许中转' : '未明确';
+  const terms = recognizeTerms(text);
+  const constraints = [];
+  if(text.includes('指定') || text.includes('必须')) constraints.push('指定节点/强约束');
+  if(text.includes('避开') || text.includes('不走')) constraints.push('规避节点/方式');
+  if(text.includes('TEU') || text.includes('箱')) constraints.push('箱量单位校验');
+  if(text.includes('吃水') || text.includes('水深')) constraints.push('吃水/水深适航校验');
+  return {cargo,weight,origin,dest,target,due,transfer,weights,terms,constraints,text};
+}
+function missingFields(p){
+  const miss=[];
+  if(p.weight==='未填写') miss.push('货物重量/数量');
+  if(p.due==='未填写') miss.push('最晚到达时间');
+  if(p.transfer==='未明确') miss.push('是否允许中转');
+  return miss;
+}
+function sendMessage(){
+  const text=input.value.trim();
+  if(!text) return;
+  addMessage('user',escapeHtml(text));
+  input.value='';
+  const typing=addTyping();
+  setTimeout(()=>{
+    typing.remove();
+    if(text.includes('船闸') || text.includes('关闭') || text.includes('异常') || text.includes('重新规划')){
+      if(!currentPlan) currentPlan = createPlan(parseDemand('500吨钢材，从岳阳城陵矶港运到上海宝山，6月20日前到，成本优先，可以中转。'));
+      addMessage('bot',renderReplan());
+      return;
+    }
+    const p=parseDemand(text);
+    const miss=missingFields(p);
+    if(miss.length){addMessage('bot',renderNeedMore(p,miss));}
+    else{
+      currentPlan = createPlan(p);
+      addAudit('新建路径规划','自然语言需求',`${p.origin} → ${p.dest} / ${p.target}`,'生成五类候选方案并写入当前会话','智能体');
+      updateSideNodes();
+      updateWeights(p.weights);
+      addMessage('bot',renderPlan(p));
+    }
+  },850);
+}
+function createPlan(p){
+  let nodes = JSON.parse(JSON.stringify(mockNodes));
+  nodes[0].name = p.origin;
+  nodes[nodes.length-1].name = p.dest;
+  if(p.dest.includes('宁波')){
+    nodes = [
+      {name:p.origin, mode:'水运', hours:8, cost:1.3, risk:'低'},
+      {name:'武汉阳逻港', mode:'水运', hours:16, cost:2.2, risk:'中'},
+      {name:'宁波舟山港', mode:'水运', hours:36, cost:4.6, risk:'中'}
+    ];
+  }
+  if(p.dest.includes('长沙')){
+    nodes = [
+      {name:p.origin, mode:'水运', hours:4, cost:.6, risk:'低'},
+      {name:'长沙铁路/公路换装点', mode:'铁路+公路', hours:18, cost:2.8, risk:'低'},
+      {name:p.dest, mode:'公路', hours:6, cost:1.1, risk:'低'}
+    ];
+  }
+  return {id: planCounter++, demand:p, nodes:nodes, baseline:calcPlan(nodes), status:'待确认', changed:false};
+}
+function calcPlan(nodes){
+  const totalHours = nodes.reduce((sum,n)=>sum+Number(n.hours||0),0);
+  const totalCost = nodes.reduce((sum,n)=>sum+Number(n.cost||0),0);
+  const riskScore = nodes.reduce((sum,n)=>sum+(n.risk==='高'?3:n.risk==='中'?2:1),0)/Math.max(nodes.length,1);
+  const risk = riskScore>2.35?'较高':riskScore>1.55?'中等':'较低';
+  const transfers = Math.max(nodes.length-2,0);
+  return {hours:totalHours, days:(totalHours/24).toFixed(1), cost:totalCost.toFixed(1), risk, transfers};
+}
+function renderNeedMore(p,miss){
+  return `
+    <h3>我已解析到部分需求，但还缺少关键信息。</h3>
+    <div class="parse-box">
+      ${row('货物类型',p.cargo)}
+      ${row('货物数量',p.weight)}
+      ${row('起运地',p.origin)}
+      ${row('目的地',p.dest)}
+      ${row('时效要求',p.due)}
+      ${row('是否中转',p.transfer)}
+      ${row('优化目标',p.target)}
+    </div>
+    <div class="warn-box">还需要补充：${miss.join('、')}。补充后我才能进行路径规划。</div>
+    <div class="chips">
+      <span class="chip" onclick="quickAsk('补充：货物500吨，6月20日前到，允许中转，成本优先。')">补充示例</span>
+      <span class="chip" onclick="quickAsk('500吨钢材，从岳阳城陵矶港运到上海宝山，6月20日前到，成本优先，可以中转。')">完整示例</span>
+    </div>
+  `;
+}
+function renderPlan(p){
+  const main = calcPlan(currentPlan.nodes);
+  return `
+    <h3>已完成模型数据集成、术语解析和五类路径方案生成。</h3>
+    <div class="parse-box">
+      ${row('货物类型',p.cargo)}
+      ${row('货物数量',p.weight)}
+      ${row('起运地',p.origin)}
+      ${row('目的地',p.dest)}
+      ${row('时效要求',p.due)}
+      ${row('是否中转',p.transfer)}
+      ${row('优化目标',p.target)}
+      ${row('特殊约束',p.constraints.length?p.constraints.join('、'):'未识别到强制约束')}
+    </div>
+
+    <div class="term-tags">${renderTermTags(p.terms)}</div>
+    ${renderDataCards()}
+
+    <div class="info-box">
+      模型已按客户可配置权重计算：成本 ${p.weights.cost}%、时效 ${p.weights.time}%、可靠性 ${p.weights.risk}%、中转次数 ${p.weights.transfer}%。右侧滑块可直接调整并重算。
+    </div>
+
+    <div class="card-grid five">
+      ${routeCard('时间最优','TIME_MIN','铁路 + 公路联运','约 3.8 天','约 13.2 万','较低',false)}
+      ${routeCard('成本最优','COST_MIN','水运直达 + 公路短驳','约 7.0 天','约 9.6 万','较高',false)}
+      ${routeCard('综合推荐','BALANCED','水运 + 铁路 + 公路',`约 ${main.days} 天`,`约 ${main.cost} 万`,main.risk,true)}
+      ${routeCard('可靠性最优','RELIABILITY_MAX','避开拥堵船闸 + 铁路中转','约 5.6 天','约 12.1 万','较低',false)}
+      ${routeCard('最少中转','MIN_TRANSFER','水运直达 + 末端短驳','约 6.4 天','约 10.8 万','中等',false)}
+    </div>
+
+    ${renderNodeEditor()}
+
+    <div class="warn-box">
+      注意：船闸排队数据存在轻微延迟，费用结算系统未接入，所以成本为模拟预估值。正式系统需要接入真实接口后才能用于生产决策。
+    </div>
+    <div class="actions">
+      <button class="small-btn primary" onclick="confirmPlan()">确认当前方案</button>
+      <button class="small-btn" onclick="openDetail()">查看方案明细</button>
+      <button class="small-btn" onclick="openChangeOrder()">人工改单</button>
+      <button class="small-btn" onclick="copySummary()">复制摘要</button>
+    </div>
+  `;
+}
+function routeCard(title,tag,mode,time,cost,risk,recommend){
+  return `
+  <div class="route-card ${recommend?'recommend':''}">
+    <span class="tag">${tag}</span>
+    <h4>${title}</h4>
+    <div class="route-line">
+      <span class="node">起点</span><span class="arrow">→</span><span class="node">中转</span><span class="arrow">→</span><span class="node">终点</span>
+    </div>
+    <div class="metrics">
+      <div class="metric"><b>${time}</b><span>预计时效</span></div>
+      <div class="metric"><b>${cost}</b><span>预计成本</span></div>
+      <div class="metric"><b>${mode}</b><span>运输方式</span></div>
+      <div class="metric"><b>${risk}</b><span>执行风险</span></div>
+    </div>
+  </div>`;
+}
+function renderNodeEditor(){
+  if(!currentPlan) return '';
+  const rows = currentPlan.nodes.map((n,i)=>`
+    <div class="node-item" data-index="${i}">
+      <div class="node-index">${i+1}</div>
+      <input value="${escapeHtml(n.name)}" onchange="editNode(${i},'name',this.value)" />
+      <select onchange="editNode(${i},'mode',this.value)">
+        ${modeOptions.map(m=>`<option ${m===n.mode?'selected':''}>${m}</option>`).join('')}
+      </select>
+      <select onchange="editNode(${i},'risk',this.value)">
+        ${['低','中','高'].map(r=>`<option ${r===n.risk?'selected':''}>${r}</option>`).join('')}
+      </select>
+      <button class="small-btn danger" onclick="deleteNode(${i})" ${i===0||i===currentPlan.nodes.length-1?'disabled title="起点和终点不能删除"':''}>删除</button>
+    </div>
+  `).join('');
+  const c = calcPlan(currentPlan.nodes);
+  return `
+    <div class="node-editor" id="nodeEditor">
+      <div class="editor-head">
+        <span>当前方案节点，可直接修改中间节点</span>
+        <span>总时效 ${c.days} 天 / 成本 ${c.cost} 万 / 风险 ${c.risk}</span>
+      </div>
+      <div class="node-list">${rows}</div>
+      <div class="add-node-form">
+        <input id="newNodeName" placeholder="新增节点，例如：南京港 / 某船闸 / 铁路站点" />
+        <select id="newNodeMode">${modeOptions.map(m=>`<option>${m}</option>`).join('')}</select>
+        <select id="newNodeRisk"><option>低</option><option selected>中</option><option>高</option></select>
+        <button class="small-btn primary" onclick="addNode()">新增</button>
+      </div>
+      <div class="actions" style="padding:0 10px 12px;margin-top:0">
+        <button class="small-btn primary" onclick="recalculateByEditor()">重新计算影响</button>
+      </div>
+    </div>
+  `;
+}
+function editNode(i,key,value){
+  if(!currentPlan) return;
+  const old = currentPlan.nodes[i][key];
+  currentPlan.nodes[i][key]=value;
+  currentPlan.changed=true;
+  addAudit('路径节点调整',`${currentPlan.nodes[i].name}.${key}=${old}`,`${currentPlan.nodes[i].name}.${key}=${value}`,'待重新计算影响');
+  updateSideNodes();
+  updateMapLabels();
+}
+function deleteNode(i){
+  if(!currentPlan || i===0 || i===currentPlan.nodes.length-1) return;
+  const old=currentPlan.nodes[i].name;
+  currentPlan.nodes.splice(i,1);
+  currentPlan.changed=true;
+  addAudit('路径节点删除',old,'删除中间节点','将减少中转但需校验可达性');
+  refreshEditor();
+  showToast('已删除节点，请重新计算影响');
+}
+function addNode(){
+  if(!currentPlan) return;
+  const name=document.getElementById('newNodeName').value.trim();
+  const mode=document.getElementById('newNodeMode').value;
+  const risk=document.getElementById('newNodeRisk').value;
+  if(!name){showToast('请先输入新增节点名称');return;}
+  currentPlan.nodes.splice(currentPlan.nodes.length-1,0,{name,mode,risk,hours:18,cost:2.2});
+  currentPlan.changed=true;
+  addAudit('路径节点新增','原方案',`新增 ${name} / ${mode} / ${risk}风险`,'触发受影响子路径重算');
+  refreshEditor();
+  showToast('已新增中间节点');
+}
+function moveMiddleNode(){
+  if(!currentPlan || currentPlan.nodes.length<4){showToast('当前中间节点不足，无法换序');return;}
+  const arr=currentPlan.nodes;
+  const tmp=arr[1]; arr[1]=arr[2]; arr[2]=tmp;
+  currentPlan.changed=true;
+  addAudit('路径节点换序','原中转顺序','交换第1、第2个中间节点','影响装卸等待和中转时长');
+  refreshEditor();
+  showToast('已交换第1、第2个中间节点');
+}
+function forceAvoidNode(){
+  if(!currentPlan) return;
+  const idx=currentPlan.nodes.findIndex(n=>n.risk==='高' && n!==currentPlan.nodes[0] && n!==currentPlan.nodes[currentPlan.nodes.length-1]);
+  if(idx>-1){
+    const old=currentPlan.nodes[idx].name;
+    currentPlan.nodes[idx]={name:'替代低风险中转节点',mode:'铁路+公路',risk:'低',hours:22,cost:3.0};
+    currentPlan.changed=true;
+    addAudit('规避高风险节点',old,'替代低风险中转节点','降低风险，可能增加成本和时效');
+    refreshEditor();
+    showToast('已避开高风险节点：'+old);
+  }else{
+    currentPlan.nodes.splice(currentPlan.nodes.length-1,0,{name:'替代低风险中转节点',mode:'铁路+公路',risk:'低',hours:22,cost:3.0});
+    currentPlan.changed=true;
+    addAudit('新增规避约束','无高风险节点','加入低风险替代节点','为可靠性优先方案增加可选路径');
+    refreshEditor();
+    showToast('已加入低风险替代节点');
+  }
+}
+function refreshEditor(){
+  const editor = document.getElementById('nodeEditor');
+  if(editor) editor.outerHTML = renderNodeEditor();
+  updateSideNodes();
+  updateMapLabels();
+}
+function recalculateByEditor(){
+  if(!currentPlan) return;
+  const c=calcPlan(currentPlan.nodes);
+  const base=currentPlan.baseline || c;
+  const hourDelta = c.hours - base.hours;
+  const costDelta = Number(c.cost) - Number(base.cost);
+  const transferDelta = c.transfers - base.transfers;
+  const hourPct = base.hours ? ((hourDelta/base.hours)*100).toFixed(1) : '0.0';
+  const costPct = base.cost ? ((costDelta/Number(base.cost))*100).toFixed(1) : '0.0';
+  addAudit('自动重算与影响提示',`基线 ${base.days}天/${base.cost}万`,`当前 ${c.days}天/${c.cost}万`,`时效 ${formatDelta(hourDelta,'小时')}(${hourPct}%)，成本 ${formatDelta(costDelta,'万')}(${costPct}%)，中转 ${formatDelta(transferDelta,'次')}`,'智能体');
+  addMessage('bot',`
+    <h3>已根据你修改后的节点重新计算影响。</h3>
+    ${renderCurrentRouteSummary()}
+    <div class="impact-delta">
+      <div class="delta-card ${hourDelta>0?'warn':''}"><b>${formatDelta(hourDelta,'小时')}</b>时效变化 ${hourPct}%</div>
+      <div class="delta-card ${costDelta>0?'warn':''}"><b>${formatDelta(costDelta,'万')}</b>成本变化 ${costPct}%</div>
+      <div class="delta-card ${transferDelta>0?'warn':''}"><b>${formatDelta(transferDelta,'次')}</b>中转次数变化</div>
+    </div>
+    <div class="impact-panel">
+      <b>重算结果：</b><br/>
+      当前方案预计时效约 ${c.days} 天，预计成本约 ${c.cost} 万，风险等级为 ${c.risk}，中转次数 ${c.transfers} 次。系统锁定未变更变量，仅对受影响订单-路径子问题进行重优化。
+    </div>
+    <div class="actions">
+      <button class="small-btn primary" onclick="confirmPlan()">确认修改后方案</button>
+      <button class="small-btn" onclick="openDetail()">查看修改前后对比</button>
+      <button class="small-btn warn" onclick="quickAsk('船闸临时关闭了，帮我重新规划当前方案。')">继续模拟异常</button>
+    </div>
+  `);
+}
+function formatDelta(num,unit){
+  const n=Number(num);
+  const fixed=Math.abs(n)<10 && unit==='万' ? Math.abs(n).toFixed(1) : Math.abs(n).toFixed(0);
+  return (n>=0?'+':'-') + fixed + unit;
+}
+function renderCurrentRouteSummary(){
+  const line=currentPlan.nodes.map(n=>`<span class="node">${escapeHtml(n.name)}</span>`).join(`<span class="arrow">→</span>`);
+  return `<div class="route-line" style="margin-top:6px">${line}</div>`;
+}
+function renderReplan(){
+  if(currentPlan){
+    const before = currentPlan.nodes.map(n=>n.name).join(' → ');
+    const insertAt = Math.max(currentPlan.nodes.length-1,1);
+    currentPlan.nodes.splice(insertAt,0,{name:'临时替代通道',mode:'铁路+公路',risk:'中',hours:20,cost:2.8});
+    currentPlan.nodes = currentPlan.nodes.filter(n=>!n.name.includes('船闸关闭'));
+    const after = currentPlan.nodes.map(n=>n.name).join(' → ');
+    addAudit('动态规划重算',before,after,'天气/船期/船闸/港口拥堵异常触发替代方案推荐','智能体');
+  }
+  updateSideNodes();updateMapLabels();
+  const c = calcPlan(currentPlan.nodes);
+  return `
+    <h3>检测到异常：船闸/通航节点不可用，已启动动态重规划。</h3>
+    <div class="warn-box">
+      系统已识别受影响节点，并加入“临时替代通道”。正式系统中这里会调用船闸、航道、天气、水文、港口拥堵和班列接口重新求解。
+    </div>
+    <div class="card-grid five">
+      ${routeCard('替代方案 A','推荐','水运改线 + 铁路中转',`约 ${c.days} 天`,`约 ${c.cost} 万`,c.risk,true)}
+      ${routeCard('替代方案 B','更快','公路短驳 + 铁路直达','约 4.5 天','约 13.9 万','较低',false)}
+      ${routeCard('等待恢复','低成本','维持原路线等待','约 8.5 天','约 9.9 万','较高',false)}
+      ${routeCard('可靠性方案','低风险','避开拥堵港区 + 班列改签','约 5.9 天','约 12.8 万','较低',false)}
+      ${routeCard('少中转方案','少中转','单一水运替代线','约 7.6 天','约 10.3 万','中等',false)}
+    </div>
+    ${renderNodeEditor()}
+    <div class="parse-box">
+      ${row('异常类型','船闸关闭 / 通航受限')}
+      ${row('处理动作','新增替代通道，重新计算时效、成本和风险')}
+      ${row('业务建议','由调度员确认替代方案，并同步通知客户时效变化')}
+    </div>
+    <div class="actions">
+      <button class="small-btn primary" onclick="confirmPlan()">确认替代方案</button>
+      <button class="small-btn" onclick="showCustomerNotice()">生成客户通知</button>
+      <button class="small-btn" onclick="openDetail()">查看重规划详情</button>
+    </div>
+  `;
+}
+function updateSideNodes(){
+  const el=document.getElementById('sideNodes');
+  if(!el) return;
+  if(!currentPlan){el.innerHTML='暂无方案，请先输入运输需求。';return;}
+  const c=calcPlan(currentPlan.nodes);
+  el.innerHTML = currentPlan.nodes.map((n,i)=>`${i+1}. ${escapeHtml(n.name)} <span style="color:#6b7a90">(${n.mode}/${n.risk}风险)</span>`).join('<br/>')
+    + `<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #e2eaf5;color:#1d4ed8;font-weight:700">约 ${c.days} 天 / ${c.cost} 万 / ${c.risk}</div>`;
+}
+function updateMapLabels(){
+  if(!currentPlan) return;
+  const labels=['map1','map2','map3','map4'];
+  const picks=[currentPlan.nodes[0],currentPlan.nodes[1],currentPlan.nodes[currentPlan.nodes.length-2],currentPlan.nodes[currentPlan.nodes.length-1]];
+  picks.forEach((n,i)=>{const el=document.getElementById(labels[i]); if(el && n) el.textContent=n.name.length>7?n.name.slice(0,7)+'…':n.name;});
+}
+function updateWeights(w){
+  currentWeights = {...w};
+  document.getElementById('wCost').textContent=w.cost+'%';
+  document.getElementById('wTime').textContent=w.time+'%';
+  document.getElementById('wRisk').textContent=w.risk+'%';
+  document.getElementById('wTransfer').textContent=w.transfer+'%';
+  const sliders = {rCost:w.cost,rTime:w.time,rRisk:w.risk,rTransfer:w.transfer};
+  Object.entries(sliders).forEach(([id,val])=>{const el=document.getElementById(id); if(el) el.value=val;});
+  updateWeightTotal();
+}
+function adjustWeight(key,value){
+  currentWeights[key]=Number(value);
+  const labelMap={cost:'wCost',time:'wTime',risk:'wRisk',transfer:'wTransfer'};
+  document.getElementById(labelMap[key]).textContent=value+'%';
+  updateWeightTotal();
+}
+function updateWeightTotal(){
+  const total = Number(currentWeights.cost||0)+Number(currentWeights.time||0)+Number(currentWeights.risk||0)+Number(currentWeights.transfer||0);
+  const el=document.getElementById('weightTotal');
+  if(el){
+    el.textContent=total+'%';
+    el.className = total===100 ? 'ok' : 'slow';
+  }
+}
+function normalizeWeights(){
+  const total = Number(currentWeights.cost||0)+Number(currentWeights.time||0)+Number(currentWeights.risk||0)+Number(currentWeights.transfer||0);
+  if(!total) currentWeights={cost:25,time:25,risk:25,transfer:25};
+  else currentWeights={
+    cost:Math.round(currentWeights.cost/total*100),
+    time:Math.round(currentWeights.time/total*100),
+    risk:Math.round(currentWeights.risk/total*100),
+    transfer:0
+  };
+  currentWeights.transfer = 100-currentWeights.cost-currentWeights.time-currentWeights.risk;
+  updateWeights(currentWeights);
+}
+function applyWeightReplan(){
+  if(!currentPlan){
+    showToast('请先生成路径方案');
+    return;
+  }
+  normalizeWeights();
+  currentPlan.demand.weights = {...currentWeights};
+  const c = calcPlan(currentPlan.nodes);
+  const base = currentPlan.baseline || c;
+  const riskFactor = c.risk === '较低' ? 20 : c.risk === '中等' ? 55 : 85;
+  const costScore = Math.max(0, 100 - Number(c.cost) * 6);
+  const timeScore = Math.max(0, 100 - c.hours * 0.85);
+  const riskScore = Math.max(0, 100 - riskFactor);
+  const transferScore = Math.max(0, 100 - c.transfers * 22);
+  const weightedScore = Math.round(
+    costScore * currentWeights.cost / 100 +
+    timeScore * currentWeights.time / 100 +
+    riskScore * currentWeights.risk / 100 +
+    transferScore * currentWeights.transfer / 100
+  );
+  const focus = Object.entries(currentWeights).sort((a,b)=>b[1]-a[1])[0][0];
+  const focusText = {cost:'成本',time:'时效',risk:'可靠性',transfer:'中转次数'}[focus];
+  const suggestion = {
+    cost:'当前方案将优先保留低成本水运段；如需进一步降本，可减少高费用公路短驳或等待低价船期。',
+    time:'当前方案将优先压缩等待、装卸和中转时间；如需进一步提速，可改用铁路直达或增加公路短驳。',
+    risk:'当前方案将优先避开拥堵船闸、浅滩和恶劣天气影响节点；如需进一步稳妥，可增加低风险替代节点。',
+    transfer:'当前方案将优先减少换装环节；如需进一步少中转，可选择水运直达加末端短驳。'
+  }[focus];
+  addAudit('策略权重调整并重算当前方案','当前方案 '+base.days+'天/'+base.cost+'万','当前方案重新评分 '+weightedScore+'分','根据现有节点、时效、成本、风险和中转次数重新计算推荐结果');
+  addMessage('bot',`
+    <h3>已按最新策略权重对当前方案重新计算。</h3>
+    ${renderCurrentRouteSummary()}
+    <div class="impact-delta">
+      <div class="delta-card"><b>${weightedScore}分</b>当前方案综合评分</div>
+      <div class="delta-card"><b>${focusText}</b>当前最高权重目标</div>
+      <div class="delta-card ${c.risk==='较高'?'warn':''}"><b>${c.risk}</b>当前执行风险</div>
+    </div>
+    <div class="parse-box">
+      ${row('当前权重',`成本 ${currentWeights.cost}% / 时效 ${currentWeights.time}% / 可靠性 ${currentWeights.risk}% / 中转次数 ${currentWeights.transfer}%`)}
+      ${row('当前方案指标',`预计 ${c.days} 天 / 成本 ${c.cost} 万 / 风险 ${c.risk} / 中转 ${c.transfers} 次`)}
+      ${row('重算建议',suggestion)}
+    </div>
+    <div class="actions">
+      <button class="small-btn primary" onclick="confirmPlan()">确认当前权重方案</button>
+      <button class="small-btn" onclick="recalculateByEditor()">重新计算节点影响</button>
+    </div>
+  `);
+}
+function resetWeights(){
+  updateWeights({cost:45,time:30,risk:15,transfer:10});
+  showToast('已恢复推荐权重');
+}
+function confirmPlan(){
+  if(currentPlan) currentPlan.status='待业务确认';
+  addAudit('方案确认','待确认','待业务确认','记录当前节点、运输方式、修改人、修改时间和方案版本');
+  addMessage('bot',`
+    <h3>当前方案已进入“待业务确认”。</h3>
+    下一步流程建议：调度员确认资源 → 商务确认费用 → 客户确认 → 回写多式联运业务系统 → 下发执行单。
+    <div class="success-box">
+      系统已记录当前节点、运输方式、修改时间、修改人和重算结果。正式系统中可形成审计日志和方案版本。
+    </div>
+    <div class="actions">
+      <button class="small-btn primary" onclick="showToast('原型中这里可扩展为下发执行单')">下发执行单</button>
+      <button class="small-btn" onclick="showToast('原型中这里可扩展为导出PDF/Word方案')">导出方案</button>
+    </div>
+  `);
+}
+function openDataIntegration(type){
+  const detailMap = {
+    ship:{
+      title:'船舶数据集成明细',
+      rows:[
+        ['船舶基础档案','船舶名称、MMSI/编号、船型、适航区域、船期状态'],
+        ['船舶尺度参数','载重、船长、船宽、舱容、吃水深度'],
+        ['能力校验','吨位限制、舱容匹配、吃水与航道水深适配'],
+        ['模拟状态','已接入船舶档案库，船期每 15 分钟刷新']
+      ]
+    },
+    cargo:{
+      title:'货物与订单数据集成明细',
+      rows:[
+        ['货物属性','品类、特性、数量、重量、体积、包装方式'],
+        ['运输需求','起运港、目的港、最晚出发时间、最晚到达时间、时效要求'],
+        ['订单约束','是否允许中转、运输方式偏好、特殊业务约束'],
+        ['模拟状态','已接入订单中心，支持自然语言解析后回填结构化字段']
+      ]
+    },
+    port:{
+      title:'港口/航道/船闸数据集成明细',
+      rows:[
+        ['港口资源','港口名称、GIS位置、泊位数量、泊位吨位限制、泊位占用情况'],
+        ['作业能力','港口吞吐量、装卸效率、库容能力、设备作业情况'],
+        ['通航约束','港口水位、航道水深、限高、限宽、浅滩、通航限制'],
+        ['排队与费用','闸口排队、港口拥堵、靠泊费、装卸费、过闸费'],
+        ['模拟状态','船闸排队存在 8 分钟延迟，已在方案风险中提示']
+      ]
+    },
+    policy:{
+      title:'政策/天气/水文辅助数据集成明细',
+      rows:[
+        ['政策法规','行业标准、环保要求、港口限航政策、通行权限'],
+        ['天气数据','台风、暴雨、温度、风向、风速、能见度'],
+        ['水文水情','水位、水深、流量、浅滩、枯水/丰水影响'],
+        ['模拟状态','已接入天气水文模拟源，异常可触发动态重规划']
+      ]
+    }
+  };
+  const selected = type ? [detailMap[type]] : Object.values(detailMap);
+  modalTitle.textContent = type ? selected[0].title : '模型数据集成总览';
+  modalBody.innerHTML = `
+    <div class="info-box">围绕船舶、货物、港口/航道/船闸、政策与辅助数据四类资源建立统一数据底座，并用于因子权重计算、特征选择、路径匹配和风险提示。</div>
+    ${selected.map(group=>`
+      <h3 style="margin:14px 0 8px;font-size:15px">${group.title}</h3>
+      <div class="parse-box">
+        ${group.rows.map(r=>row(r[0],r[1])).join('')}
+      </div>
+    `).join('')}
+    <div class="actions">
+      <button class="small-btn" onclick="openDataIntegration('ship')">船舶数据</button>
+      <button class="small-btn" onclick="openDataIntegration('cargo')">货物与订单</button>
+      <button class="small-btn" onclick="openDataIntegration('port')">港口/航道/船闸</button>
+      <button class="small-btn" onclick="openDataIntegration('policy')">政策/天气/水文</button>
+    </div>
+  `;
+  openModal();
+}
+function openTermDemo(){
+  const demoText = currentPlan?.demand?.text || '500吨钢材，从城陵矶港到上海宝山，指定南京铁路节点，避开排队严重船闸，TEU和吃水深度都要校验。';
+  const terms = recognizeTerms(demoText);
+  modalTitle.textContent='行业术语识别与精准解析';
+  modalBody.innerHTML=`
+    <div class="info-box">输入文本：${escapeHtml(demoText)}</div>
+    <div class="term-tags">${renderTermTags(terms)}</div>
+    <div class="parse-box">
+      ${row('识别能力','支持港口、航道、船闸、箱量、吃水、费用、浅滩、限高等多式联运专业术语解析。')}
+      ${row('解析结果','将专业术语转换为算法可识别字段，用于适航校验、成本计算、风险评估和路径约束。')}
+    </div>
+  `;
+  openModal();
+}
+function openTextInputDemo(){
+  modalTitle.textContent='文本输入功能';
+  modalBody.innerHTML=`
+    <div class="info-box">文本输入功能全面支持结构化表单填写、自然语言描述、短句快捷录入和智能补全纠错，适配日常办公场景下的高效操作需求。</div>
+    <div class="parse-box">
+      ${row('结构化表单填写','提供起运地、目的地、货物品类、重量/体积、期望时效、运输偏好、特殊要求等标准字段，支持下拉选择、日期选择、数值输入和字段扩展。')}
+      ${row('自然语言描述','业务人员可直接描述物流需求，智能体自动解析核心要素与约束条件，无需人工逐项拆分填写。')}
+      ${row('短句快捷录入','提供快捷短语模板与历史需求复用，例如“城陵矶港→上海港，普货集装箱，标准时效”，修改少量参数即可提交。')}
+      ${row('智能补全与纠错','提供输入提示、地址自动补全、单位换算提醒、明显错误纠正，降低录入错误率并提升数据质量。')}
+    </div>
+    <div class="actions">
+      <button class="small-btn primary" onclick="openStructuredForm()">打开结构化表单</button>
+      <button class="small-btn" onclick="openQuickPhrases()">快捷短句模板</button>
+      <button class="small-btn" onclick="openCorrectionDemo()">智能纠错演示</button>
+    </div>
+  `;
+  openModal();
+}
+function openStructuredForm(){
+  modalTitle.textContent='结构化物流需求录入表单';
+  modalBody.innerHTML=`
+    <div class="info-box">表单字段可根据业务特点自定义配置与扩展，适合标准化订单录入。</div>
+    <div class="form-grid">
+      <label>起运地<input id="formOrigin" value="岳阳城陵矶港"></label>
+      <label>目的地<input id="formDest" value="上海宝山"></label>
+      <label>货物品类<select id="formCargo"><option>钢材</option><option>煤炭</option><option>集装箱货物</option><option>矿石</option><option>粮食</option></select></label>
+      <label>重量/体积<input id="formWeight" value="500吨"></label>
+      <label>期望时效<input id="formDue" type="date" value="2026-06-20"></label>
+      <label>运输偏好<select id="formPref"><option>成本优先</option><option>时效优先</option><option>水运优先</option><option>铁运优先</option><option>公路优先</option><option>低风险优先</option></select></label>
+      <label>特殊要求<select id="formSpecial"><option>无特殊要求</option><option>危险品</option><option>超限货物</option><option>防潮</option><option>温控</option></select></label>
+      <label>是否允许中转<select id="formTransfer"><option>允许中转</option><option>不允许中转</option></select></label>
+    </div>
+    <div class="actions">
+      <button class="small-btn primary" onclick="submitStructuredForm()">生成需求文本</button>
+      <button class="small-btn" onclick="closeModal()">取消</button>
+    </div>
+  `;
+  openModal();
+}
+function submitStructuredForm(){
+  const origin=document.getElementById('formOrigin').value;
+  const dest=document.getElementById('formDest').value;
+  const cargo=document.getElementById('formCargo').value;
+  const weight=document.getElementById('formWeight').value;
+  const due=document.getElementById('formDue').value;
+  const pref=document.getElementById('formPref').value;
+  const special=document.getElementById('formSpecial').value;
+  const transfer=document.getElementById('formTransfer').value;
+  fillInput(`${weight}${cargo}，从${origin}运到${dest}，${due}前到，${pref}，${transfer}，特殊要求：${special}。`);
+  closeModal();
+  showToast('已由结构化表单生成需求文本');
+}
+function openQuickPhrases(){
+  modalTitle.textContent='短句快捷录入';
+  const phrases=[
+    '城陵矶港→上海港，普货集装箱，标准时效，成本优先。',
+    '武汉港→宁波舟山港，集装箱货物，低风险优先，尽量少中转。',
+    '城陵矶港→长沙电厂，300吨煤炭，2天内到，时效优先。',
+    '岳阳城陵矶港→上海宝山，500吨钢材，允许中转，避开排队严重船闸。'
+  ];
+  modalBody.innerHTML=`
+    <div class="info-box">针对高频、标准化需求，可一键复用快捷短语或历史需求，仅修改少量差异化参数即可完成录入。</div>
+    <div class="audit-list">
+      ${phrases.map(p=>`<div class="audit-item"><b>${escapeHtml(p)}</b><div class="actions"><button class="small-btn primary" onclick="closeModal();fillInput('${escapeAttr(p)}')">填入输入框</button><button class="small-btn" onclick="closeModal();quickAsk('${escapeAttr(p)}')">直接发送</button></div></div>`).join('')}
+    </div>
+  `;
+  openModal();
+}
+function openCorrectionDemo(){
+  modalTitle.textContent='智能补全与纠错演示';
+  modalBody.innerHTML=`
+    <div class="info-box">输入过程中可进行地址自动补全、单位换算提醒和明显错误纠正。点击下方示例后，输入框下方会出现纠错建议。</div>
+    <div class="parse-box">
+      ${row('单位换算','输入“500kg钢材”时提示可换算为“0.5吨钢材”。')}
+      ${row('地址补全','输入“城陵矶”时提示补全为“岳阳城陵矶港”。')}
+      ${row('错误纠正','输入“不存在港口”时提示改为系统路网中的有效节点。')}
+      ${row('缺失提醒','缺少货量或时效时提示补充重量、箱量、最晚到达时间等关键信息。')}
+    </div>
+    <div class="actions">
+      <button class="small-btn primary" onclick="closeModal();fillInput('500kg钢材，从城陵矶到上海港，成本优先')">试用单位换算</button>
+      <button class="small-btn" onclick="closeModal();fillInput('钢材，从不存在港口到上海宝山')">试用地址纠错</button>
+    </div>
+  `;
+  openModal();
+}
+function openDetail(){
+  if(!currentPlan){showToast('请先生成方案');return;}
+  const c=calcPlan(currentPlan.nodes);
+  modalTitle.textContent='方案明细与节点影响';
+  modalBody.innerHTML=`
+    <div class="info-box">
+      这里用于查看每个节点的运输方式、预计耗时、预计成本、风险等级，以及修改节点后的影响。
+    </div>
+    <table class="compare-table">
+      <thead><tr><th>序号</th><th>节点</th><th>运输方式</th><th>预计耗时</th><th>预计成本</th><th>风险</th></tr></thead>
+      <tbody>
+        ${currentPlan.nodes.map((n,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(n.name)}</td><td>${n.mode}</td><td>${n.hours}小时</td><td>${n.cost}万</td><td>${n.risk}</td></tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="impact-panel">
+      当前汇总：预计 ${c.days} 天，预计成本 ${c.cost} 万，风险 ${c.risk}，中转次数 ${c.transfers} 次。
+    </div>
+  `;
+  openModal();
+}
+function openSplitOrder(){
+  modalTitle.textContent='拆单模拟';
+  modalBody.innerHTML=`
+    <div class="info-box">
+      拆单用于当一票货物无法一次性满足运力、船期或时效要求时，将订单拆成多个子订单分别规划。
+    </div>
+    <table class="compare-table">
+      <thead><tr><th>子订单</th><th>货量</th><th>推荐路径</th><th>预计时效</th><th>预计成本</th></tr></thead>
+      <tbody>
+        <tr><td>子订单A</td><td>300吨</td><td>水运 + 铁路</td><td>5.2天</td><td>6.5万</td></tr>
+        <tr><td>子订单B</td><td>200吨</td><td>水运 + 公路短驳</td><td>6.0天</td><td>4.6万</td></tr>
+      </tbody>
+    </table>
+    <div class="parse-box">
+      ${row('拆单 API','POST /api/v1/multimodal/orders/split')}
+      ${row('输出字段','subOrderId、parentOrderId、cargoWeight、routeNodes、transportModes、etaHours、costAmount、riskLevel')}
+      ${row('外部调用','供订单系统、调度系统、费用系统调用并回写子订单执行状态')}
+    </div>
+    <pre class="code-box">${escapeHtml(JSON.stringify({
+  parentOrderId:'ORD-20260622-001',
+  subOrders:[
+    {subOrderId:'ORD-001-A', cargoWeight:'300吨', routeNodes:['岳阳城陵矶港','九江港中转','上海宝山'], etaHours:125, costAmount:65000},
+    {subOrderId:'ORD-001-B', cargoWeight:'200吨', routeNodes:['岳阳城陵矶港','南京铁路节点','上海宝山'], etaHours:144, costAmount:46000}
+  ]
+},null,2))}</pre>
+    <div class="actions"><button class="small-btn primary" onclick="confirmSplitOrder()">确认拆单方案</button></div>
+  `;
+  openModal();
+}
+function confirmSplitOrder(){
+  addAudit('人工拆单','原订单 500吨','子订单A 300吨 / 子订单B 200吨','输出子订单货量、路径、时效、成本字段，供外部系统调用');
+  closeModal();
+  showToast('已生成拆单方案和 API 输出');
+}
+function openChangeOrder(){
+  if(!currentPlan){showToast('请先生成方案');return;}
+  modalTitle.textContent='人工改单';
+  modalBody.innerHTML=`
+    <div class="info-box">支持修改运量、运输时效、约束条件和强制路径节点。提交后系统会自动重算受影响部分，并记录审计日志。</div>
+    <div class="form-grid">
+      <label>货量<input id="changeWeight" value="${escapeHtml(currentPlan.demand.weight)}"></label>
+      <label>最晚到达<input id="changeDue" value="${escapeHtml(currentPlan.demand.due)}"></label>
+      <label>优化目标<select id="changeTarget"><option>成本优先</option><option>时效优先</option><option>低风险优先</option><option>最少中转</option></select></label>
+      <label>强制经过节点<input id="changeVia" placeholder="例如：南京铁路节点"></label>
+    </div>
+    <div class="actions"><button class="small-btn primary" onclick="submitChangeOrder()">提交改单并重算</button></div>
+  `;
+  openModal();
+}
+function submitChangeOrder(){
+  if(!currentPlan) return;
+  const old = `${currentPlan.demand.weight} / ${currentPlan.demand.due} / ${currentPlan.demand.target}`;
+  currentPlan.demand.weight=document.getElementById('changeWeight').value;
+  currentPlan.demand.due=document.getElementById('changeDue').value;
+  currentPlan.demand.target=document.getElementById('changeTarget').value;
+  const via=document.getElementById('changeVia').value.trim();
+  if(via) currentPlan.nodes.splice(currentPlan.nodes.length-1,0,{name:via,mode:'铁路+公路',risk:'低',hours:16,cost:2.6});
+  addAudit('人工改单',old,`${currentPlan.demand.weight} / ${currentPlan.demand.due} / ${currentPlan.demand.target}${via?' / 强制经过 '+via:''}`,'已自动重算受影响路径并生成影响提示');
+  closeModal();
+  recalculateByEditor();
+}
+function openAuditLog(){
+  modalTitle.textContent='干预操作审计日志';
+  modalBody.innerHTML=`
+    <div class="info-box">记录操作人、时间、前后方案对比和影响分析结果，支持查询与导出。以下为原型模拟日志。</div>
+    <div class="audit-list">
+      ${auditLogs.map(log=>`<div class="audit-item"><b>${log.type} · ${log.operator} · ${log.time}</b>变更前：${escapeHtml(log.before)}<br/>变更后：${escapeHtml(log.after)}<br/>影响分析：${escapeHtml(log.impact)}</div>`).join('')}
+    </div>
+    <div class="actions">
+      <button class="small-btn primary" onclick="exportAuditLog()">导出日志</button>
+      <button class="small-btn" onclick="closeModal()">关闭</button>
+    </div>
+  `;
+  openModal();
+}
+function exportAuditLog(){
+  const text=auditLogs.map(log=>`${log.time},${log.operator},${log.type},${log.before},${log.after},${log.impact}`).join('\n');
+  navigator.clipboard && navigator.clipboard.writeText('时间,操作人,类型,变更前,变更后,影响分析\n'+text);
+  showToast('审计日志已复制，可粘贴为CSV');
+}
+function showCustomerNotice(){
+  addMessage('bot',`
+    <h3>客户通知话术已生成。</h3>
+    由于当前通航节点临时受限，原运输方案需要调整。系统已推荐替代路线，预计时效将发生小幅变化，具体到达时间和费用变化待业务确认后同步。我们将持续跟踪船闸、港口和班列状态，并及时更新运输进度。
+    <div class="actions"><button class="small-btn" onclick="copyNotice()">复制通知话术</button></div>
+  `);
+}
+function copyNotice(){
+  navigator.clipboard && navigator.clipboard.writeText('由于当前通航节点临时受限，原运输方案需要调整。系统已推荐替代路线，预计时效将发生小幅变化，具体到达时间和费用变化待业务确认后同步。');
+  showToast('已复制客户通知');
+}
+function copySummary(){
+  let text='多式联运路径规划摘要：';
+  if(currentPlan){
+    const c=calcPlan(currentPlan.nodes);
+    text+=currentPlan.nodes.map(n=>n.name).join(' → ') + `。预计${c.days}天，成本${c.cost}万，风险${c.risk}。`;
+  }else text+='暂无当前方案。';
+  navigator.clipboard && navigator.clipboard.writeText(text);
+  showToast('已复制方案摘要');
+}
+function openExplain(){
+  modalTitle.textContent='多式联运路径规划智能体流程说明';
+  modalBody.innerHTML=`
+    <div class="parse-box">
+      ${row('1. 文本输入','支持结构化表单填写、自然语言描述、短句快捷录入、智能补全与纠错，覆盖起运地、目的地、货物品类、重量/体积、期望时效、运输偏好和特殊要求。')}
+      ${row('2. 需求解析','智能体把表单或自然语言内容转成算法字段，如货物、重量、起终点、是否中转、运输偏好和特殊约束。')}
+      ${row('3. 数据调用','调用订单、船舶、车辆、铁路、港口、船闸、天气水文、运价等数据。')}
+      ${row('4. 约束判断','判断船闸、航道、泊位、班列、时效、成本等硬约束和软约束。')}
+      ${row('5. 算法计算','生成成本最低、时效最快、综合推荐、低风险等多套方案。')}
+      ${row('6. 节点修改','业务人员可以修改中转港、铁路节点、公路短驳点等中间节点。')}
+      ${row('7. 影响重算','系统重新计算修改后的成本、时效、风险和中转次数。')}
+      ${row('8. 异常重规划','遇到船闸关闭、天气恶化、港口拥堵、班列取消时重新规划。')}
+      ${row('9. 方案确认','调度、商务、客户确认后回写业务系统并下发执行。')}
+      ${row('10. 执行反馈','实际成本、时效、异常记录回流，后续优化模型。')}
+    </div>
+    <div class="actions"><button class="small-btn primary" onclick="openTextInputDemo()">查看文本输入功能</button></div>
+  `;
+  openModal();
+}
+function openModal(){modalMask.style.display='flex';}
+function closeModal(){modalMask.style.display='none';}
+modalMask.addEventListener('click',e=>{if(e.target===modalMask)closeModal();});
+</script>
+</body>
+</html>

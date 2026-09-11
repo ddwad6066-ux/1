@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>门爱才服务后台</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --blue: #4169f5;
+      --text: #172033;
+      --line: #e7ecf5;
+      --card: #ffffff;
+      --green: #25b35d;
+      --red: #f05252;
+      --orange: #f39b24;
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    }
+    body { margin: 0; color: var(--text); background: #f3f6fc; font-size: 18px; overflow: hidden; }
+    .app { width: 100vw; height: 100vh; display: grid; grid-template-columns: 300px 1fr; background: linear-gradient(90deg, #fff 0 300px, #f2f5fb 300px); }
+    .sidebar { background: #fff; border-right: 1px solid #e3e8f2; box-shadow: inset 0 1px 0 #edf1f7; z-index: 2; }
+    .brand { height: 106px; display: flex; align-items: center; gap: 16px; padding: 0 28px; border-bottom: 1px solid #e5eaf3; }
+    .logo { width: 55px; height: 55px; border-radius: 16px; display: grid; place-items: center; background: linear-gradient(135deg, #4771ff, #7189f6); color: #fff; font-size: 25px; font-weight: 800; }
+    .brand strong { display: block; font-size: 24px; line-height: 1.25; color: #0d1628; }
+    .brand span { display: block; margin-top: 6px; color: #5f6f86; font-size: 16px; }
+    .nav { padding-top: 18px; }
+    .nav-item { height: 56px; margin: 0 15px 10px; padding: 0 20px; display: flex; align-items: center; gap: 14px; border-radius: 12px; color: #5c6b82; background: #fff; font-size: 20px; font-weight: 700; position: relative; cursor: pointer; user-select: none; }
+    .nav-item.active { color: var(--blue); background: #f2f5fd; }
+    .nav-item.active::before { content: ""; width: 4px; height: 33px; border-radius: 4px; background: var(--blue); position: absolute; left: 0; }
+    .nav-icon { width: 18px; height: 18px; color: currentColor; flex: 0 0 auto; }
+    .main { min-width: 0; height: 100vh; overflow-y: auto; overflow-x: hidden; scrollbar-color: #8a8a8a #f5f5f5; }
+    .main::-webkit-scrollbar, .modal-body::-webkit-scrollbar { width: 16px; }
+    .main::-webkit-scrollbar-track, .modal-body::-webkit-scrollbar-track { background: #f5f5f5; }
+    .main::-webkit-scrollbar-thumb, .modal-body::-webkit-scrollbar-thumb { background: #8b8b8b; border-radius: 10px; border: 4px solid #f5f5f5; }
+    .topbar { height: 86px; background: rgba(255,255,255,.96); border-bottom: 1px solid #e4e9f2; display: flex; align-items: center; justify-content: space-between; padding: 0 58px 0 34px; position: sticky; top: 0; z-index: 5; }
+    h1 { margin: 0; font-size: 31px; letter-spacing: 0; line-height: 1.15; }
+    .crumb { margin-top: 8px; color: #8793a6; font-size: 16px; }
+    .account { display: flex; align-items: center; gap: 38px; font-size: 17px; }
+    .user-pill { height: 72px; display: flex; align-items: center; gap: 16px; padding: 10px 18px; border: 1px solid #e4e9f2; border-radius: 17px; box-shadow: 0 10px 28px rgba(34,57,102,.06); background: #fff; }
+    .online { padding: 7px 15px; border-radius: 18px; color: var(--green); background: #eaf9f1; font-weight: 700; }
+    .avatar { width: 50px; height: 50px; border-radius: 13px; display: grid; place-items: center; color: #fff; background: #5b78f6; font-size: 20px; font-weight: 800; }
+    .role strong { display: block; color: #121a2a; font-size: 18px; }
+    .role span { display: block; margin-top: 5px; color: #69778d; font-size: 15px; }
+    .logout { color: #2f61ff; text-decoration: none; white-space: nowrap; }
+    .content { min-height: calc(100vh - 86px); padding: 30px 48px 80px 30px; background: linear-gradient(90deg, #edf2fb 0, #f7f9fe 14%, #f7f9fe 100%); }
+    .panel { background: var(--card); border: 1px solid #e8edf5; border-radius: 24px; box-shadow: 0 18px 36px rgba(50,72,112,.07); }
+    .filter { min-height: 152px; padding: 26px 27px 25px; margin-bottom: 22px; }
+    .filter h2, .table-card h2 { margin: 0 0 24px; font-size: 29px; line-height: 1.1; color: #0d1628; }
+    .form-row { display: grid; grid-template-columns: auto minmax(360px, 1fr) auto minmax(360px, 1fr) auto auto; align-items: center; gap: 20px; }
+    label { font-weight: 700; color: #222b3d; white-space: nowrap; }
+    input { height: 42px; padding: 0 16px; border: 1px solid #cbd8f5; border-radius: 12px; font-size: 17px; color: #334158; outline: none; background: #fff; min-width: 0; }
+    input::placeholder { color: #9aa6b8; }
+    .filter-select { height: 42px; min-width: 0; width: 100%; padding: 0 44px 0 16px; border: 1px solid #cbd8f5; border-radius: 12px; font-size: 17px; color: #334158; outline: none; background: #fff; box-sizing: border-box; }
+    button { border: 0; font-family: inherit; cursor: pointer; font-size: 18px; white-space: nowrap; }
+    .btn { height: 40px; padding: 0 22px; border-radius: 12px; }
+    .btn-primary { background: var(--blue); color: #fff; box-shadow: 0 6px 14px rgba(65,105,245,.18); }
+    .btn-ghost { border: 1px solid #d5dce8; background: #fff; color: #333b4d; }
+    .table-card { min-height: 648px; padding: 26px 27px 35px; overflow: hidden; }
+    .tabs { display: flex; gap: 47px; border-bottom: 3px solid #e8edf5; margin-bottom: 40px; }
+    .tab { padding: 2px 0 12px; color: #1e2737; background: transparent; border-radius: 0; font-weight: 800; position: relative; }
+    .tab.active { color: var(--blue); }
+    .tab.active::after { content: ""; height: 3px; left: 0; right: 0; bottom: -3px; position: absolute; background: var(--blue); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; min-width: 1240px; border-collapse: collapse; table-layout: fixed; color: #334158; }
+    thead th { height: 50px; background: #f6f8fc; color: #253449; font-weight: 800; text-align: left; border-bottom: 1px solid var(--line); }
+    th:first-child { border-radius: 12px 0 0 0; }
+    th:last-child { border-radius: 0 12px 0 0; }
+    th, td { padding: 0 16px; }
+    tbody td { height: 50px; border-bottom: 1px solid var(--line); line-height: 1.35; vertical-align: middle; word-break: break-all; }
+    .num { width: 82px; text-align: center; }
+    .name { width: 160px; }
+    .phone { width: 175px; }
+    .unit { width: 360px; }
+    .type { width: 180px; }
+    .time { width: 230px; }
+    .result { width: 150px; }
+    .review-time { width: 190px; }
+    .action { width: 150px; }
+    .desc { width: 430px; }
+    .link { color: #1e5cff; background: transparent; padding: 0; height: auto; }
+    .tag { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 6px; font-size: 15px; }
+    .tag.green { color: #20a53a; background: #f0ffeb; border: 1px solid #bfe9b8; }
+    .tag.red { color: #f04d4d; background: #fff0f0; border: 1px solid #ffd8d8; }
+    .tag.orange { color: #f08a18; background: #fff7ec; border: 1px solid #ffe2bf; }
+    .float-ai { position: fixed; right: 8px; top: 90px; width: 40px; height: 40px; border-radius: 50%; background: #f69abd; color: #fff; z-index: 7; display: grid; place-items: center; font-weight: 900; font-size: 18px; box-shadow: 0 3px 10px rgba(210,80,130,.28); }
+    .float-ai::before { content: ""; width: 26px; height: 26px; border: 2px solid #fff; border-radius: 50%; position: absolute; opacity: .9; }
+    .modal-mask { position: fixed; inset: 0; z-index: 20; background: rgba(8,16,32,.18); display: none; align-items: center; justify-content: center; }
+    .modal-mask.show { display: flex; }
+    .modal { width: min(1098px, calc(100vw - 44px)); height: min(762px, calc(100vh - 28px)); background: #fff; border-radius: 7px 7px 14px 14px; display: flex; flex-direction: column; box-shadow: 0 18px 46px rgba(16,28,55,.18); overflow: hidden; }
+    .modal-head { height: 59px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 24px; border-bottom: 1px solid #edf1f7; }
+    .close { color: #9199a8; font-size: 30px; line-height: 1; background: transparent; }
+    .modal-body { flex: 1; overflow-y: auto; padding: 30px 18px 20px 20px; background: #fff; }
+    .section-title { margin: 0 0 22px; padding-left: 16px; border-left: 5px solid var(--blue); font-size: 21px; line-height: 1.25; font-weight: 900; color: #121a2b; }
+    .info-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px 20px; margin-bottom: 28px; }
+    .info-card { min-height: 98px; padding: 18px 17px; border: 1px solid #e6ebf5; border-radius: 15px; background: #f9fbff; color: #111a2b; }
+    .info-card .label { margin-bottom: 16px; color: #748197; font-size: 15px; }
+    .info-card .value { font-size: 20px; line-height: 1.35; word-break: break-all; }
+    .id-link { display: inline-block; margin-top: 14px; color: #1e5cff; text-decoration: none; font-size: 17px; }
+    .attachment-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px 20px; margin-bottom: 28px; }
+    .attachment { min-height: 76px; border: 1px solid #e6ebf5; border-radius: 15px; background: #f9fbff; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 16px 18px; }
+    .file-name { color: #182338; font-weight: 700; }
+    .file-meta { margin-top: 6px; color: #7b8798; font-size: 15px; }
+    .reply-textarea { width: 100%; min-height: 118px; padding: 14px 16px; border: 1px solid #d7e0ef; border-radius: 14px; resize: vertical; font: inherit; color: #182338; outline: none; background: #f9fbff; }
+    .qa-toolbar { display: flex; justify-content: flex-end; margin: -6px 0 18px; }
+    .qa-reply { max-width: 520px; line-height: 1.55; color: #344052; }
+    .qa-input { width: 100%; box-sizing: border-box; border: 1px solid #d7e0ef; border-radius: 10px; padding: 10px 12px; font: inherit; color: #182338; background: #fff; outline: none; }
+    .status-select { height: 30px; padding: 0 10px; border-radius: 6px; border: 1px solid #bfe9b8; color: #20a53a; background: #f0ffeb; font: inherit; font-size: 15px; outline: none; }
+    .link.danger { color: #e3272f; margin-left: 14px; }
+    .modal-foot { height: 88px; display: flex; justify-content: flex-end; align-items: center; gap: 30px; padding: 0 18px; border-top: 1px solid #edf1f7; background: #fff; }
+    .modal-btn { min-width: 140px; height: 50px; border-radius: 14px; font-size: 20px; font-weight: 800; }
+    .modal-btn.back { color: #4e5b70; border: 1px solid #d2ddf2; background: #fff; }
+    .modal-btn.reject { color: #e3272f; border: 1px solid #ffc9c9; background: #fff5f5; }
+    .modal-btn.pass { color: #fff; background: var(--blue); }
+    .modal-btn.close-only { min-width: 75px; height: 40px; color: #2f3b4f; border: 1px solid #d5dce8; background: #fff; font-weight: 500; }
+    .modal-btn.reply { color: #fff; background: var(--blue); }
+    .hidden { display: none; }
+    @media (max-width: 1200px) {
+      .app { grid-template-columns: 260px 1fr; }
+      .form-row { grid-template-columns: auto 1fr; }
+      .account { gap: 18px; }
+      .user-pill { padding: 8px 12px; }
+      .info-grid, .attachment-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">MA</div>
+        <div>
+          <strong>门爱才服务后台</strong>
+          <span>管理端</span>
+        </div>
+      </div>
+      <nav class="nav">
+        <div class="nav-item active" data-page="station">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 4h8v2h3a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h3V4Zm2 2h4V5h-4v1Zm6.8 5.4-1.4-1.4-4.5 4.5-2.1-2.1-1.4 1.4 3.5 3.5 5.9-5.9Z"/></svg>
+          人才驿站申请审批
+        </div>
+        <div class="nav-item" data-page="identify">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 4 5.6v5.5c0 5 3.4 9.7 8 10.9 4.6-1.2 8-5.9 8-10.9V5.6L12 2Zm0 2.2 6 2.7v4.2c0 4-2.5 7.8-6 8.8-3.5-1-6-4.8-6-8.8V6.9l6-2.7Zm-1 11.2 5.1-5.1-1.4-1.4-3.7 3.7-1.7-1.7-1.4 1.4 3.1 3.1Z"/></svg>
+          人才认定申请审批
+        </div>
+        <div class="nav-item" data-page="feedback">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 4h14a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9l-5 4v-4H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm3 5v2h8V9H8Zm0 4v2h5v-2H8Z"/></svg>
+          反馈意见审批
+        </div>
+        <div class="nav-item" data-page="consultation">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3a9 9 0 0 0-9 9c0 1.7.5 3.3 1.3 4.7L3 21l4.4-1.2A9 9 0 1 0 12 3Zm-4 8h8v2H8v-2Zm0-3h8v2H8V8Zm0 6h5v2H8v-2Z"/></svg>
+          服务咨询配置
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">人才驿站审批</h1>
+          <div class="crumb" id="breadcrumb">门爱才服务后台 / 人才驿站审批</div>
+        </div>
+        <div class="account">
+          <div class="user-pill">
+            <span class="online">在线</span>
+            <span class="avatar">组</span>
+            <span class="role"><strong>组织部审批人</strong><span>组织部审批人</span></span>
+          </div>
+          <a class="logout" href="#">退出登录</a>
+        </div>
+      </header>
+
+      <div class="content page-content" id="stationPage">
+        <section class="panel filter">
+          <h2>筛选</h2>
+          <div class="form-row">
+            <label>申请人</label><input type="text" placeholder="请输入申请人姓名">
+            <label>手机号</label><input type="text" placeholder="请输入手机号">
+            <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
+          </div>
+        </section>
+        <section class="panel table-card">
+          <h2>人才驿站审批</h2>
+          <div class="tabs" data-tabs="station">
+            <button class="tab active" data-target="stationPending">待处理</button>
+            <button class="tab" data-target="stationDone">已处理</button>
+            <button class="tab" data-target="stationClosed">终止处理</button>
+          </div>
+          <div class="table-wrap" id="stationPending">
+            <table>
+              <thead><tr><th class="num">序号</th><th class="name">申请人</th><th class="phone">手机号</th><th class="unit">单位</th><th class="type">分类</th><th class="time">提交时间</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td class="num">1</td><td>西秀</td><td>13148283200</td><td>嘻嘻；憨憨</td><td>人才驿站申请</td><td>2026-06-17 16:35:22</td><td><button class="link open-detail" data-detail="station">处理</button></td></tr>
+                <tr><td class="num">2</td><td>111</td><td>11111111111</td><td>111111</td><td>人才驿站申请</td><td>2026-06-17 16:13:10</td><td><button class="link open-detail" data-detail="station">处理</button></td></tr>
+                <tr><td class="num">3</td><td>测试哈哈哈哈</td><td>13148283200</td><td>憨憨；憨憨企业</td><td>人才驿站申请</td><td>2026-06-17 15:24:16</td><td><button class="link open-detail" data-detail="station">处理</button></td></tr>
+                <tr><td class="num">4</td><td>都不是</td><td>13148283200</td><td>嘻嘻；哈哈哈哈哈哈哈</td><td>人才驿站申请</td><td>2026-06-09 18:10:53</td><td><button class="link open-detail" data-detail="station">处理</button></td></tr>
+                <tr><td class="num">5</td><td>嘻嘻</td><td>13148283200</td><td>憨憨企业；急急急</td><td>人才驿站申请</td><td>2026-06-09 18:09:29</td><td><button class="link open-detail" data-detail="station">处理</button></td></tr>
+                <tr><td class="num">6</td><td>嘻嘻嘻</td><td>13148283200</td><td>憨憨企业</td><td>人才驿站申请</td><td>2026-06-09 17:58:11</td><td><button class="link open-detail" data-detail="station">处理</button></td></tr>
+                <tr><td class="num">7</td><td>123</td><td>13721212121</td><td>123</td><td>人才驿站申请</td><td>2026-06-09 17:25:48</td><td><button class="link open-detail" data-detail="station">处理</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap hidden" id="stationDone">
+            <table>
+              <thead><tr><th class="num">序号</th><th class="name">申请人</th><th class="phone">手机号</th><th class="unit">单位</th><th class="type">分类</th><th class="time">提交时间</th><th class="result">审批结果</th><th class="review-time">审批时间</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td class="num">1</td><td>面试......改实习</td><td>13148283200</td><td>嘻嘻嘻</td><td>人才驿站申请</td><td>2026-06-17 16:39:15</td><td><span class="tag orange">退回个人</span></td><td>2026-06-17</td><td><button class="link open-detail" data-detail="station">查看详情</button></td></tr>
+                <tr><td class="num">2</td><td>实习......求职</td><td>13148283200</td><td>测试1；憨憨企业</td><td>人才驿站申请</td><td>2026-06-17 16:42:02</td><td><span class="tag red">审核不通过</span></td><td>2026-06-17</td><td><button class="link open-detail" data-detail="station">查看详情</button></td></tr>
+                <tr><td class="num">3</td><td>实习生</td><td>13148283200</td><td>嘻嘻</td><td>人才驿站申请</td><td>2026-06-17 16:27:41</td><td><span class="tag green">审核通过</span></td><td>2026-06-17</td><td><button class="link open-detail" data-detail="station">查看详情</button></td></tr>
+                <tr><td class="num">4</td><td>测试</td><td>13148283200</td><td>嘻嘻</td><td>人才驿站申请</td><td>2026-06-17 16:12:04</td><td><span class="tag red">审核不通过</span></td><td>2026-06-17</td><td><button class="link open-detail" data-detail="station">查看详情</button></td></tr>
+                <tr><td class="num">5</td><td>实习生</td><td>13148283200</td><td>憨憨企业</td><td>人才驿站申请</td><td>2026-06-17 16:07:58</td><td><span class="tag orange">退回个人</span></td><td>2026-06-17</td><td><button class="link open-detail" data-detail="station">查看详情</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap hidden" id="stationClosed">
+            <table>
+              <thead><tr><th class="num">序号</th><th class="name">申请人</th><th class="phone">手机号</th><th class="unit">单位</th><th class="type">分类</th><th class="time">提交时间</th><th class="result">终止原因</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td class="num">1</td><td>策划类型数据</td><td>13148283200</td><td>彻底123</td><td>人才驿站申请</td><td>2026-06-17 16:32:42</td><td>其他审批人终止</td><td><button class="link open-detail" data-detail="station">查看详情</button></td></tr>
+                <tr><td class="num">2</td><td>草稿</td><td>13148283200</td><td>憨憨企业；憨憨</td><td>人才驿站申请</td><td>2026-06-17 15:18:14</td><td>其他审批人终止</td><td><button class="link open-detail" data-detail="station">查看详情</button></td></tr>
+                <tr><td class="num">3</td><td>面试人员</td><td>13148283200</td><td>面试企业1；憨憨</td><td>人才驿站申请</td><td>2026-06-17 14:59:13</td><td>其他审批人终止</td><td><button class="link open-detail" data-detail="station">查看详情</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <div class="content page-content hidden" id="identifyPage">
+        <section class="panel filter">
+          <h2>筛选</h2>
+          <div class="form-row">
+            <label>申请人</label><input type="text" placeholder="请输入申请人姓名">
+            <label>手机号</label><input type="text" placeholder="请输入手机号">
+            <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
+          </div>
+        </section>
+        <section class="panel table-card">
+          <h2>人才认定审批</h2>
+          <div class="tabs" data-tabs="identify">
+            <button class="tab active" data-target="identifyPending">待处理</button>
+            <button class="tab" data-target="identifyDone">已处理</button>
+            <button class="tab" data-target="identifyClosed">终止处理</button>
+          </div>
+          <div class="table-wrap" id="identifyPending">
+            <table>
+              <thead><tr><th class="num">序号</th><th class="name">申请人</th><th class="phone">手机号</th><th class="unit">单位</th><th class="type">分类</th><th class="time">提交时间</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td class="num">1</td><td>西秀</td><td>13148283200</td><td>门爱才科技有限公司</td><td>人才认定申请</td><td>2026-06-17 16:35:22</td><td><button class="link open-detail" data-detail="identify">处理</button></td></tr>
+                <tr><td class="num">2</td><td>测试人员</td><td>13148283200</td><td>憨憨企业</td><td>人才认定申请</td><td>2026-06-17 16:13:10</td><td><button class="link open-detail" data-detail="identify">处理</button></td></tr>
+                <tr><td class="num">3</td><td>李想</td><td>13721212121</td><td>北京中科胜琦科技有限公司</td><td>人才认定申请</td><td>2026-06-17 15:24:16</td><td><button class="link open-detail" data-detail="identify">处理</button></td></tr>
+                <tr><td class="num">4</td><td>王一</td><td>13148283200</td><td>测试单位</td><td>人才认定申请</td><td>2026-06-09 18:10:53</td><td><button class="link open-detail" data-detail="identify">处理</button></td></tr>
+                <tr><td class="num">5</td><td>赵六</td><td>13148283200</td><td>急急急人才服务有限公司</td><td>人才认定申请</td><td>2026-06-09 18:09:29</td><td><button class="link open-detail" data-detail="identify">处理</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap hidden" id="identifyDone">
+            <table>
+              <thead><tr><th class="num">序号</th><th class="name">申请人</th><th class="phone">手机号</th><th class="unit">单位</th><th class="type">分类</th><th class="time">提交时间</th><th class="result">审批结果</th><th class="review-time">审批时间</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td class="num">1</td><td>周周</td><td>13148283200</td><td>门爱才科技有限公司</td><td>人才认定申请</td><td>2026-06-17 16:39:15</td><td><span class="tag green">审核通过</span></td><td>2026-06-17</td><td><button class="link open-detail" data-detail="identify">查看详情</button></td></tr>
+                <tr><td class="num">2</td><td>实习......求职</td><td>13148283200</td><td>测试1；憨憨企业</td><td>人才认定申请</td><td>2026-06-17 16:42:02</td><td><span class="tag red">审核不通过</span></td><td>2026-06-17</td><td><button class="link open-detail" data-detail="identify">查看详情</button></td></tr>
+                <tr><td class="num">3</td><td>人才申请</td><td>13148283200</td><td>嘻嘻</td><td>人才认定申请</td><td>2026-06-17 16:27:41</td><td><span class="tag orange">退回个人</span></td><td>2026-06-17</td><td><button class="link open-detail" data-detail="identify">查看详情</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap hidden" id="identifyClosed">
+            <table>
+              <thead><tr><th class="num">序号</th><th class="name">申请人</th><th class="phone">手机号</th><th class="unit">单位</th><th class="type">分类</th><th class="time">提交时间</th><th class="result">终止原因</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td class="num">1</td><td>认定草稿</td><td>13148283200</td><td>彻底123</td><td>人才认定申请</td><td>2026-06-17 16:32:42</td><td>其他审批人终止</td><td><button class="link open-detail" data-detail="identify">查看详情</button></td></tr>
+                <tr><td class="num">2</td><td>材料缺失</td><td>13148283200</td><td>憨憨企业；憨憨</td><td>人才认定申请</td><td>2026-06-17 15:18:14</td><td>其他审批人终止</td><td><button class="link open-detail" data-detail="identify">查看详情</button></td></tr>
+                <tr><td class="num">3</td><td>认证人员</td><td>13148283200</td><td>面试企业1；憨憨</td><td>人才认定申请</td><td>2026-06-17 14:59:13</td><td>其他审批人终止</td><td><button class="link open-detail" data-detail="identify">查看详情</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <div class="content page-content hidden" id="feedbackPage">
+        <section class="panel filter">
+          <h2>筛选</h2>
+          <div class="form-row">
+            <label>联系人</label><input type="text" placeholder="请输入联系人姓名">
+            <label>联系方式</label><input type="text" placeholder="请输入联系方式">
+            <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
+          </div>
+        </section>
+        <section class="panel table-card">
+          <h2>反馈意见审批</h2>
+          <div class="tabs" data-tabs="feedback">
+            <button class="tab active" data-target="feedbackPending">待处理</button>
+            <button class="tab" data-target="feedbackDone">已处理</button>
+            <button class="tab" data-target="feedbackClosed">终止处理</button>
+          </div>
+          <div class="table-wrap" id="feedbackPending">
+            <table>
+              <thead><tr><th class="num">序号</th><th class="name">联系人</th><th class="phone">联系方式</th><th class="desc">问题描述</th><th class="time">提交时间</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td class="num">1</td><td>王女士</td><td>13148283200</td><td>人才驿站申请提交后状态一直没有更新，希望尽快处理。</td><td>2026-06-17 17:02:31</td><td><button class="link open-detail" data-detail="feedback">回复</button></td></tr>
+                <tr><td class="num">2</td><td>李先生</td><td>13721212121</td><td>上传附件后页面提示异常，重新登录后仍然无法查看。</td><td>2026-06-17 16:48:22</td><td><button class="link open-detail" data-detail="feedback">回复</button></td></tr>
+                <tr><td class="num">3</td><td>测试用户</td><td>11111111111</td><td>人才认定材料页面显示不完整，想确认是否已经提交成功。</td><td>2026-06-17 16:16:09</td><td><button class="link open-detail" data-detail="feedback">回复</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap hidden" id="feedbackDone">
+            <table>
+              <thead><tr><th class="num">序号</th><th class="name">联系人</th><th class="phone">联系方式</th><th class="desc">问题描述</th><th class="result">回复内容</th><th class="review-time">回复时间</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td class="num">1</td><td>赵六</td><td>13100000000</td><td>短信验证码接收较慢，影响登录后台查看审核结果。</td><td>已优化验证码通道，请重新尝试登录。</td><td>2026-06-09</td><td><button class="link open-detail" data-detail="feedback">查看详情</button></td></tr>
+                <tr><td class="num">2</td><td>周周</td><td>13148283200</td><td>附件预览时偶发空白，已重新上传材料。</td><td>已收到材料，附件预览问题已反馈技术处理。</td><td>2026-06-09</td><td><button class="link open-detail" data-detail="feedback">查看详情</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap hidden" id="feedbackClosed">
+            <table>
+              <thead><tr><th class="num">序号</th><th class="name">联系人</th><th class="phone">联系方式</th><th class="desc">问题描述</th><th class="result">终止原因</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td class="num">1</td><td>陈先生</td><td>13000000000</td><td>重复提交的反馈意见，希望撤回其中一条。</td><td>其他审批人终止</td><td><button class="link open-detail" data-detail="feedback">查看详情</button></td></tr>
+                <tr><td class="num">2</td><td>刘女士</td><td>13600000000</td><td>联系方式填写错误，已通过电话确认无需继续处理。</td><td>其他审批人终止</td><td><button class="link open-detail" data-detail="feedback">查看详情</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <div class="content page-content hidden" id="consultationPage">
+        <section class="panel filter">
+          <h2>筛选</h2>
+          <div class="form-row">
+            <label>问题</label><input type="text" placeholder="请输入问题">
+            <label>启用状态</label><select class="filter-select"><option>请选择启用状态</option><option>启用</option><option>停用</option></select>
+            <button class="btn btn-primary">查询</button><button class="btn btn-ghost">重置</button>
+          </div>
+        </section>
+        <section class="panel table-card">
+          <h2>服务咨询自动回复配置</h2>
+          <div class="qa-toolbar"><button class="btn btn-primary open-detail" data-detail="consultation">新增问题</button></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th class="num">序号</th><th class="name">问题</th><th class="desc">自动回复内容</th><th class="result">状态</th><th class="time">更新时间</th><th class="action">操作</th></tr></thead>
+              <tbody id="consultationTableBody">
+                <tr><td class="num">1</td><td>如何申请人才引进？</td><td><div class="qa-reply">进入“服务-人才引进”，选择对应业务后填写个人信息、单位信息并提交材料，后台审核后可在申请查询中查看进度。</div></td><td><select class="status-select"><option selected>启用</option><option>停用</option></select></td><td>2026-06-24</td><td><button class="link open-detail" data-detail="consultation">配置</button><button class="link danger delete-question">删除</button></td></tr>
+                <tr><td class="num">2</td><td>工作居住证申请需要哪些材料？</td><td><div class="qa-reply">通常需要身份证明、劳动合同、单位证明、学历或职称材料等，具体以页面表单提示为准。</div></td><td><select class="status-select"><option selected>启用</option><option>停用</option></select></td><td>2026-06-24</td><td><button class="link open-detail" data-detail="consultation">配置</button><button class="link danger delete-question">删除</button></td></tr>
+                <tr><td class="num">3</td><td>人才认定有哪些类别？</td><td><div class="qa-reply">人才认定包含战略科学家、领军人才、骨干人才、青年英才、实用人才、柔性引进人才等类别。</div></td><td><select class="status-select"><option selected>启用</option><option>停用</option></select></td><td>2026-06-24</td><td><button class="link open-detail" data-detail="consultation">配置</button><button class="link danger delete-question">删除</button></td></tr>
+                <tr><td class="num">4</td><td>子女教育有哪些保障？</td><td><div class="qa-reply">经认定的人才可按政策享受入学协调、绿色通道等服务，具体保障以人才类别和当年政策为准。</div></td><td><select class="status-select"><option>启用</option><option selected>停用</option></select></td><td>2026-06-20</td><td><button class="link open-detail" data-detail="consultation">配置</button><button class="link danger delete-question">删除</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="float-ai">AI</div>
+
+  <div class="modal-mask" id="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <div id="modal-title">申请详情</div>
+        <button class="close" id="closeModal" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot">
+        <button class="modal-btn back">退回个人</button>
+        <button class="modal-btn reject">审核不通过</button>
+        <button class="modal-btn pass">审核通过</button>
+      </div>
+    </div>
+  </div>
+
+  <template id="stationDetail">
+    <h3 class="section-title">一、基础信息</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="label">姓名</div><div class="value">西秀</div></div>
+      <div class="info-card"><div class="label">性别</div><div class="value">女</div></div>
+      <div class="info-card"><div class="label">出生日期</div><div class="value">2001-04-01</div></div>
+      <div class="info-card"><div class="label">证件类型</div><div class="value">身份证</div></div>
+      <div class="info-card"><div class="label">证件号码</div><div class="value">4116**********1227</div><a class="id-link" href="#">查看完整身份证号</a></div>
+      <div class="info-card"><div class="label">联系电话</div><div class="value">13148283200</div></div>
+      <div class="info-card"><div class="label">现居住地</div><div class="value">急急急急急急急急急急急急急急急</div></div>
+      <div class="info-card"><div class="label">申请类别</div><div class="value">求职面试类</div></div>
+    </div>
+    <h3 class="section-title">二、学历学籍信息</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="label">学历</div><div class="value">其他</div></div>
+      <div class="info-card"><div class="label">是否国内院校</div><div class="value">否</div></div>
+      <div class="info-card"><div class="label">学校所属省份</div><div class="value">江苏省</div></div>
+      <div class="info-card"><div class="label">毕业院校</div><div class="value">南京某某大学</div></div>
+      <div class="info-card"><div class="label">专业</div><div class="value">软件技术</div></div>
+      <div class="info-card"><div class="label">毕业时间</div><div class="value">2026-06</div></div>
+    </div>
+    <h3 class="section-title">三、入住申请信息</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="label">入住日期</div><div class="value">2026-06-20</div></div>
+      <div class="info-card"><div class="label">离店日期</div><div class="value">2026-06-23</div></div>
+      <div class="info-card"><div class="label">申请天数</div><div class="value">3 天</div></div>
+    </div>
+  </template>
+
+  <template id="identifyDetail">
+    <h3 class="section-title">一、个人信息</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="label">姓名</div><div class="value">西秀</div></div>
+      <div class="info-card"><div class="label">性别</div><div class="value">女</div></div>
+      <div class="info-card"><div class="label">出生日期</div><div class="value">2001-04-01</div></div>
+      <div class="info-card"><div class="label">证件类型</div><div class="value">身份证</div></div>
+      <div class="info-card"><div class="label">证件号码</div><div class="value">4116**********1227</div><a class="id-link" href="#">查看完整身份证号</a></div>
+      <div class="info-card"><div class="label">联系电话</div><div class="value">13148283200</div></div>
+      <div class="info-card"><div class="label">工作单位</div><div class="value">门爱才科技有限公司</div></div>
+      <div class="info-card"><div class="label">人才类别</div><div class="value">青年储备人才</div></div>
+      <div class="info-card"><div class="label">申请类型</div><div class="value">人才认定申请</div></div>
+    </div>
+    <h3 class="section-title">二、申报信息</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="label">最高学历</div><div class="value">本科</div></div>
+      <div class="info-card"><div class="label">毕业院校</div><div class="value">南京某某大学</div></div>
+      <div class="info-card"><div class="label">专业</div><div class="value">软件技术</div></div>
+      <div class="info-card"><div class="label">申报层级</div><div class="value">区级人才认定</div></div>
+      <div class="info-card"><div class="label">现居住地</div><div class="value">江苏省南京市</div></div>
+      <div class="info-card"><div class="label">提交时间</div><div class="value">2026-06-17 16:35:22</div></div>
+    </div>
+    <h3 class="section-title">三、附件材料</h3>
+    <div class="attachment-list">
+      <div class="attachment"><div><div class="file-name">身份证正反面.pdf</div><div class="file-meta">PDF · 1.2MB</div></div><button class="link">查看</button></div>
+      <div class="attachment"><div><div class="file-name">学历学位证明.pdf</div><div class="file-meta">PDF · 860KB</div></div><button class="link">查看</button></div>
+      <div class="attachment"><div><div class="file-name">劳动合同或任职证明.pdf</div><div class="file-meta">PDF · 940KB</div></div><button class="link">查看</button></div>
+      <div class="attachment"><div><div class="file-name">人才认定申请承诺书.pdf</div><div class="file-meta">PDF · 520KB</div></div><button class="link">查看</button></div>
+    </div>
+  </template>
+
+  <template id="feedbackDetail">
+    <h3 class="section-title">一、反馈人信息</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="label">联系人</div><div class="value">王女士</div></div>
+      <div class="info-card"><div class="label">联系方式</div><div class="value">13148283200</div></div>
+      <div class="info-card"><div class="label">提交时间</div><div class="value">2026-06-17 17:02:31</div></div>
+      <div class="info-card"><div class="label">反馈来源</div><div class="value">小程序用户</div></div>
+      <div class="info-card"><div class="label">关联模块</div><div class="value">人才驿站申请审批</div></div>
+      <div class="info-card"><div class="label">处理状态</div><div class="value">待处理</div></div>
+    </div>
+    <h3 class="section-title">二、问题描述</h3>
+    <div class="info-grid">
+      <div class="info-card" style="grid-column: 1 / -1;"><div class="label">问题描述</div><div class="value">人才驿站申请提交后状态一直没有更新，希望后台尽快核实处理；同时上传附件后偶尔无法预览。</div></div>
+    </div>
+    <h3 class="section-title">三、附件文件</h3>
+    <div class="attachment-list">
+      <div class="attachment"><div><div class="file-name">申请状态异常截图.png</div><div class="file-meta">PNG · 418KB</div></div><button class="link">查看</button></div>
+      <div class="attachment"><div><div class="file-name">用户上传失败材料.pdf</div><div class="file-meta">PDF · 1.1MB</div></div><button class="link">查看</button></div>
+      <div class="attachment"><div><div class="file-name">问题补充说明.docx</div><div class="file-meta">DOCX · 236KB</div></div><button class="link">查看</button></div>
+    </div>
+    <div id="feedbackReplyArea"></div>
+  </template>
+
+  <template id="consultationDetail">
+    <h3 class="section-title">一、问题配置</h3>
+    <div class="info-grid">
+      <div class="info-card" style="grid-column: span 2;"><div class="label">问题标题</div><input class="qa-input" id="qaQuestionInput" value="如何申请人才引进？"></div>
+      <div class="info-card"><div class="label">启用状态</div><div class="value"><select class="status-select" id="qaStatusInput"><option selected>启用</option><option>停用</option></select></div></div>
+    </div>
+    <h3 class="section-title">二、自动回复内容</h3>
+    <textarea class="reply-textarea" id="qaReplyInput">进入“服务-人才引进”，选择对应业务后填写个人信息、单位信息并提交材料，后台审核后可在申请查询中查看进度。</textarea>
+  </template>
+
+  <script>
+    const pageMeta = {
+      station: { title: "人才驿站审批", crumb: "门爱才服务后台 / 人才驿站审批" },
+      identify: { title: "人才认定审批", crumb: "门爱才服务后台 / 人才认定审批" },
+      feedback: { title: "反馈意见审批", crumb: "门爱才服务后台 / 反馈意见审批" },
+      consultation: { title: "服务咨询配置", crumb: "门爱才服务后台 / 服务咨询配置" }
+    };
+    const pageTitle = document.getElementById("pageTitle");
+    const breadcrumb = document.getElementById("breadcrumb");
+    const navItems = document.querySelectorAll(".nav-item");
+    const pages = document.querySelectorAll(".page-content");
+
+    navItems.forEach(item => {
+      item.addEventListener("click", () => {
+        const page = item.dataset.page;
+        navItems.forEach(nav => nav.classList.toggle("active", nav === item));
+        pages.forEach(content => content.classList.toggle("hidden", content.id !== page + "Page"));
+        pageTitle.textContent = pageMeta[page].title;
+        breadcrumb.textContent = pageMeta[page].crumb;
+        document.querySelector(".main").scrollTop = 0;
+      });
+    });
+
+    document.querySelectorAll(".tabs").forEach(tabGroup => {
+      tabGroup.addEventListener("click", event => {
+        const tab = event.target.closest(".tab");
+        if (!tab) return;
+        tabGroup.querySelectorAll(".tab").forEach(item => item.classList.toggle("active", item === tab));
+        const section = tabGroup.closest(".table-card");
+        section.querySelectorAll(".table-wrap").forEach(table => table.classList.toggle("hidden", table.id !== tab.dataset.target));
+      });
+    });
+
+    function syncStatusSelect(select) {
+      const disabled = select.value === "停用";
+      select.style.color = disabled ? "#f08a18" : "#20a53a";
+      select.style.background = disabled ? "#fff7ec" : "#f0ffeb";
+      select.style.borderColor = disabled ? "#ffe2bf" : "#bfe9b8";
+    }
+    function bindStatusSelect(select) {
+      select.addEventListener("change", () => syncStatusSelect(select));
+      syncStatusSelect(select);
+    }
+    function renumberConsultationRows() {
+      document.querySelectorAll("#consultationTableBody .num").forEach((cell, index) => {
+        cell.textContent = index + 1;
+      });
+    }
+    function todayText() {
+      const date = new Date();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${date.getFullYear()}-${month}-${day}`;
+    }
+    function addConsultationRow(question, reply, status) {
+      const tbody = document.getElementById("consultationTableBody");
+      const row = document.createElement("tr");
+      row.innerHTML = `<td class="num"></td><td>${question}</td><td><div class="qa-reply">${reply}</div></td><td><select class="status-select"><option ${status === "启用" ? "selected" : ""}>启用</option><option ${status === "停用" ? "selected" : ""}>停用</option></select></td><td>${todayText()}</td><td><button class="link open-detail" data-detail="consultation">配置</button><button class="link danger delete-question">删除</button></td>`;
+      tbody.appendChild(row);
+      bindStatusSelect(row.querySelector(".status-select"));
+      bindDetailButton(row.querySelector(".open-detail"));
+      renumberConsultationRows();
+    }
+    document.querySelectorAll(".status-select").forEach(select => {
+      bindStatusSelect(select);
+    });
+    document.getElementById("consultationTableBody").addEventListener("click", event => {
+      const deleteButton = event.target.closest(".delete-question");
+      if (!deleteButton) return;
+      deleteButton.closest("tr").remove();
+      renumberConsultationRows();
+    });
+    /*
+    document.querySelectorAll(".status-select").forEach(select => {
+      const syncStatusColor = () => {
+        const disabled = select.value === "停用";
+        select.style.color = disabled ? "#f08a18" : "#20a53a";
+        select.style.background = disabled ? "#fff7ec" : "#f0ffeb";
+        select.style.borderColor = disabled ? "#ffe2bf" : "#bfe9b8";
+      };
+      select.addEventListener("change", syncStatusColor);
+      syncStatusColor();
+    });
+    */
+
+    const modal = document.getElementById("modal");
+    const modalBody = document.getElementById("modalBody");
+    const modalTitle = document.getElementById("modal-title");
+    const modalFoot = document.querySelector(".modal-foot");
+    const auditButtons = '<button class="modal-btn back">退回个人</button><button class="modal-btn reject">审核不通过</button><button class="modal-btn pass">审核通过</button>';
+    const viewButton = '<button class="modal-btn close-only" data-close-modal>关闭</button>';
+    const replyButtons = '<button class="modal-btn close-only" data-close-modal>取消</button><button class="modal-btn reply" data-close-modal>提交回复</button>';
+    let isAddingQuestion = false;
+    const saveQaButtons = '<button class="modal-btn close-only" data-close-modal>取消</button><button class="modal-btn reply" data-save-qa>保存配置</button>';
+    function bindDetailButton(btn) {
+      btn.addEventListener("click", () => {
+        const tpl = document.getElementById(btn.dataset.detail + "Detail");
+        modalBody.innerHTML = tpl.innerHTML;
+        const isViewOnly = btn.textContent.trim() === "查看详情";
+        if (btn.dataset.detail === "consultation") {
+          isAddingQuestion = btn.textContent.trim() === "新增问题";
+          modalTitle.textContent = isAddingQuestion ? "新增自动回复问题" : "问题配置";
+          if (isAddingQuestion) {
+            const questionInput = modalBody.querySelector("#qaQuestionInput");
+            const replyInput = modalBody.querySelector("#qaReplyInput");
+            if (questionInput) questionInput.value = "";
+            if (replyInput) replyInput.value = "";
+          }
+          modalBody.querySelectorAll(".status-select").forEach(select => bindStatusSelect(select));
+          modalFoot.innerHTML = saveQaButtons;
+        } else if (btn.dataset.detail === "feedback") {
+          isAddingQuestion = false;
+          modalTitle.textContent = "反馈详情";
+          const area = modalBody.querySelector("#feedbackReplyArea");
+          area.innerHTML = isViewOnly
+            ? '<h3 class="section-title">四、回复意见</h3><div class="info-grid"><div class="info-card" style="grid-column: 1 / -1;"><div class="label">回复内容</div><div class="value">已收到反馈，相关问题已安排专人处理，请稍后重新查看申请状态。</div></div></div>'
+            : '<h3 class="section-title">四、回复意见</h3><textarea class="reply-textarea" placeholder="请输入回复意见"></textarea>';
+          modalFoot.innerHTML = isViewOnly ? viewButton : replyButtons;
+        } else {
+          isAddingQuestion = false;
+          modalTitle.textContent = "申请详情";
+          modalFoot.innerHTML = isViewOnly ? viewButton : auditButtons;
+        }
+        modal.classList.add("show");
+      });
+    }
+    document.querySelectorAll(".open-detail").forEach(btn => bindDetailButton(btn));
+    document.getElementById("closeModal").addEventListener("click", () => modal.classList.remove("show"));
+    modalFoot.addEventListener("click", event => {
+      if (event.target.closest("[data-save-qa]")) {
+        const question = (modalBody.querySelector("#qaQuestionInput")?.value || "").trim();
+        const reply = (modalBody.querySelector("#qaReplyInput")?.value || "").trim();
+        const status = modalBody.querySelector("#qaStatusInput")?.value || "启用";
+        if (isAddingQuestion && question && reply) {
+          addConsultationRow(question, reply, status);
+        }
+        modal.classList.remove("show");
+        return;
+      }
+      if (event.target.closest("[data-close-modal]")) modal.classList.remove("show");
+    });
+    modal.addEventListener("click", event => {
+      if (event.target === modal) modal.classList.remove("show");
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") modal.classList.remove("show");
+    });
+  </script>
+</body>
+</html>

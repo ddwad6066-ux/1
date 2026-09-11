@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智妍办公AI综合提效平台</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei','PingFang SC',sans-serif;background:#f0f2f5;color:#333;display:flex;height:100vh;overflow:hidden}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:#c1c1c1;border-radius:3px}
+::-webkit-scrollbar-track{background:transparent}
+.sidebar{width:220px;min-width:220px;background:#fff;color:#333;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid #e8e8e8}
+.logo{height:50px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid #f0f0f0;flex-shrink:0;gap:8px}
+.logo-icon{font-size:20px;flex-shrink:0}
+.logo-text{font-size:13px;font-weight:600;white-space:nowrap;line-height:1.3;color:#333}
+.menu{flex:1;overflow-y:auto;padding:4px 0}
+.menu-item{display:flex;align-items:center;padding:0 14px;height:42px;cursor:pointer;color:#555;transition:all .15s;white-space:nowrap;font-size:13px;gap:8px}
+.menu-item:hover{color:#1890ff;background:#f0f5ff}
+.menu-item.active{color:#1890ff;background:#e6f7ff;font-weight:500}
+.menu-icon{width:16px;text-align:center;font-size:14px;flex-shrink:0}
+.menu-text{flex:1;overflow:hidden;text-overflow:ellipsis}
+.menu-arrow{font-size:11px;transition:transform .2s;color:#999}
+.menu-arrow.open{transform:rotate(90deg)}
+.sub-menu{overflow:hidden;max-height:0;transition:max-height .3s}
+.sub-menu.open{max-height:1200px}
+.sub-item{display:flex;align-items:center;padding:0 14px 0 36px;height:36px;cursor:pointer;color:#888;font-size:12px;transition:all .15s;white-space:nowrap}
+.sub-item:hover{color:#1890ff;background:#f0f5ff}
+.sub-item.active{color:#1890ff;background:#e6f7ff;font-weight:500}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.header{height:50px;background:#fff;display:flex;align-items:center;padding:0 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);z-index:10;flex-shrink:0;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-title{font-size:15px;font-weight:600;color:#333}
+.header-right{display:flex;align-items:center;gap:12px}
+.header-right .avatar{width:30px;height:30px;border-radius:50%;background:#1890ff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px}
+.header-right .uname{font-size:13px;color:#666}
+.breadcrumb{font-size:12px;color:#999;padding:6px 0 0 2px}
+.breadcrumb span{color:#333}
+.content{flex:1;overflow-y:auto;padding:16px}
+.panel{background:#fff;border-radius:6px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.panel-title{font-size:15px;font-weight:600;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #f0f0f0}
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:flex-end}
+.filter-group{display:flex;flex-direction:column;gap:3px}
+.filter-group label{font-size:11px;color:#999}
+.filter-group input,.filter-group select{height:30px;border:1px solid #d9d9d9;border-radius:4px;padding:0 8px;font-size:12px;outline:none;min-width:130px}
+.filter-group input:focus,.filter-group select:focus{border-color:#1890ff}
+.btn{height:30px;padding:0 14px;border:1px solid #d9d9d9;border-radius:4px;cursor:pointer;font-size:12px;display:inline-flex;align-items:center;gap:4px;transition:all .15s;background:#fff;color:#333}
+.btn:hover{border-color:#1890ff;color:#1890ff}
+.btn-primary{background:#1890ff;color:#fff;border-color:#1890ff}
+.btn-primary:hover{background:#40a9ff;border-color:#40a9ff}
+.btn-danger{color:#ff4d4f;border-color:#ff4d4f;background:#fff}
+.btn-danger:hover{color:#ff7875;border-color:#ff7875}
+.btn-link{border:none;background:none;color:#1890ff;cursor:pointer;font-size:12px;padding:0 4px;height:auto}
+.btn-link:hover{text-decoration:underline}
+.btn-link.danger{color:#ff4d4f}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:#fafafa}
+th,td{padding:9px 8px;border:1px solid #f0f0f0;text-align:left;white-space:nowrap}
+th{font-weight:600;color:#666;font-size:12px}
+td{color:#333}
+tr:hover td{background:#fafafa}
+.pagination{display:flex;align-items:center;justify-content:flex-end;margin-top:14px;font-size:12px;color:#666;gap:6px}
+.tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;line-height:1.6}
+.tag-success{background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f}
+.tag-warning{background:#fffbe6;color:#faad14;border:1px solid #ffe58f}
+.tag-error{background:#fff2f0;color:#ff4d4f;border:1px solid #ffccc7}
+.tag-blue{background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff}
+.tag-default{background:#fafafa;color:#666;border:1px solid #d9d9d9}
+.tag-purple{background:#f9f0ff;color:#722ed1;border:1px solid #d3adf7}
+.tag-cyan{background:#e6fffb;color:#13c2c2;border:1px solid #87e8de}
+.tag-orange{background:#fff7e6;color:#fa8c16;border:1px solid #ffd591}
+.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.stat-card{background:#fff;border-radius:6px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.stat-card .label{font-size:12px;color:#999;margin-bottom:6px}
+.stat-card .value{font-size:24px;font-weight:700;color:#333}
+.stat-card .unit{font-size:12px;color:#999;font-weight:400;margin-left:2px}
+.stat-card:nth-child(1){border-left:3px solid #1890ff}
+.stat-card:nth-child(2){border-left:3px solid #52c41a}
+.stat-card:nth-child(3){border-left:3px solid #faad14}
+.stat-card:nth-child(4){border-left:3px solid #f5222d}
+.tab-filter{display:flex;gap:0;margin-bottom:14px;border-bottom:1px solid #f0f0f0}
+.tab-filter .tab{padding:6px 16px;cursor:pointer;font-size:13px;color:#666;border-bottom:2px solid transparent;transition:all .15s}
+.tab-filter .tab:hover{color:#1890ff}
+.tab-filter .tab.active{color:#1890ff;border-bottom-color:#1890ff;font-weight:500}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.chart-container{height:280px}
+.rank-list{list-style:none}
+.rank-list li{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid #fafafa;font-size:12px}
+.rank-list .rank{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;margin-right:8px;flex-shrink:0;background:#f0f0f0;color:#999}
+.rank-list li:nth-child(1) .rank{background:#f5222d;color:#fff}
+.rank-list li:nth-child(2) .rank{background:#fa8c16;color:#fff}
+.rank-list li:nth-child(3) .rank{background:#fadb14;color:#333}
+.rank-list .rank-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-list .rank-count{color:#999;margin-left:6px}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:8px;width:640px;max-width:90vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 6px 16px rgba(0,0,0,.12)}
+.modal-header{padding:14px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:15px;font-weight:600}
+.modal-close{cursor:pointer;font-size:18px;color:#999;line-height:1}
+.modal-close:hover{color:#333}
+.modal-body{padding:20px;overflow-y:auto;flex:1}
+.modal-footer{padding:10px 20px;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:8px}
+.form-item{margin-bottom:14px}
+.form-item label{display:block;font-size:13px;color:#333;margin-bottom:4px}
+.form-item label .req{color:#ff4d4f}
+.form-item input,.form-item select,.form-item textarea{width:100%;height:34px;border:1px solid #d9d9d9;border-radius:4px;padding:0 10px;font-size:13px;outline:none}
+.form-item textarea{height:100px;padding:8px 10px;resize:vertical}
+.form-item input:focus,.form-item select:focus,.form-item textarea:focus{border-color:#1890ff}
+.rte{border:1px solid #d9d9d9;border-radius:4px;overflow:hidden}
+.rte-toolbar{background:#fafafa;border-bottom:1px solid #d9d9d9;padding:4px 6px;display:flex;gap:3px;flex-wrap:wrap}
+.rte-toolbar button{width:26px;height:26px;border:1px solid #d9d9d9;border-radius:3px;background:#fff;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+.rte-toolbar button:hover{border-color:#1890ff;color:#1890ff}
+.rte-body{min-height:160px;padding:10px;outline:none;font-size:13px;line-height:1.7}
+.content-with-tree{display:flex;gap:14px}
+.tree-sidebar{width:220px;background:#fff;border-radius:6px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);flex-shrink:0;max-height:560px;overflow-y:auto}
+.tree-sidebar h4{font-size:13px;font-weight:600;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0}
+.tree-node{padding:5px 6px;cursor:pointer;font-size:12px;border-radius:3px;display:flex;align-items:center;gap:4px;color:#666}
+.tree-node:hover{background:#e6f7ff;color:#1890ff}
+.tree-node.active{background:#e6f7ff;color:#1890ff;font-weight:500}
+.tree-node .arrow{font-size:9px;transition:transform .2s}
+.tree-node .arrow.open{transform:rotate(90deg)}
+.tree-children{padding-left:16px;overflow:hidden;max-height:0;transition:max-height .3s}
+.tree-children.open{max-height:500px}
+.tree-content{flex:1;min-width:0}
+.stats-bar{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.stats-bar .stat-item{background:#fff;border-radius:6px;padding:10px 16px;box-shadow:0 1px 3px rgba(0,0,0,.04);flex:1;min-width:120px}
+.stats-bar .stat-item .stat-label{font-size:11px;color:#999;margin-bottom:2px}
+.stats-bar .stat-item .stat-val{font-size:18px;font-weight:700;color:#333}
+.page{display:none}
+.page.active{display:block}
+.detail-row{display:flex;margin-bottom:10px;font-size:13px}
+.detail-label{width:90px;color:#999;flex-shrink:0}
+.detail-value{flex:1;color:#333}
+.upload-area{border:2px dashed #d9d9d9;border-radius:6px;padding:30px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:14px}
+.upload-area:hover{border-color:#1890ff}
+.upload-area .icon{font-size:32px;color:#1890ff;margin-bottom:8px}
+.upload-area .text{font-size:13px;color:#999}
+.section-divider{font-size:13px;font-weight:600;color:#1890ff;margin:20px 0 12px;padding:8px 0;border-bottom:2px solid #1890ff;display:flex;align-items:center;gap:6px}
+.inner-tabs{display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid #f0f0f0}
+.inner-tabs .inner-tab{padding:8px 20px;cursor:pointer;font-size:13px;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.inner-tabs .inner-tab:hover{color:#1890ff}
+.inner-tabs .inner-tab.active{color:#1890ff;border-bottom-color:#1890ff;font-weight:500}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#52c41a;color:#fff;padding:8px 20px;border-radius:6px;font-size:13px;z-index:9999;display:none;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.dash-header-left{display:flex;align-items:center;gap:12px}
+.dash-header-left h3{font-size:16px;font-weight:600;color:#333}
+.dash-select{height:32px;border:1px solid #d9d9d9;border-radius:4px;padding:0 28px 0 10px;font-size:13px;outline:none;color:#333;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 8px center;cursor:pointer;min-width:160px;appearance:none;-webkit-appearance:none}
+.dash-select:focus{border-color:#1890ff}
+.dash-time-filter{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid #f0f0f0}
+.dash-time-filter .tab{padding:6px 16px;cursor:pointer;font-size:13px;color:#666;border-bottom:2px solid transparent;transition:all .15s}
+.dash-time-filter .tab:hover{color:#1890ff}
+.dash-time-filter .tab.active{color:#1890ff;border-bottom-color:#1890ff;font-weight:500}
+.prompt-card{background:#fff;border:1px solid #f0f0f0;border-radius:6px;padding:16px;margin-bottom:12px;transition:all .15s}
+.prompt-card:hover{border-color:#1890ff;box-shadow:0 2px 8px rgba(24,144,255,.1)}
+.prompt-card .prompt-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.prompt-card .prompt-name{font-size:14px;font-weight:600;color:#333}
+.prompt-card .prompt-desc{font-size:12px;color:#999;margin-bottom:10px}
+.prompt-card .prompt-body{background:#fafafa;border:1px solid #f0f0f0;border-radius:4px;padding:12px;font-size:12px;line-height:1.8;color:#555;max-height:120px;overflow-y:auto;white-space:pre-wrap;font-family:Consolas,'Courier New',monospace}
+.prompt-card .prompt-actions{margin-top:10px;display:flex;gap:6px}
+.prompt-scope-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #f0f0f0}
+.prompt-scope-tabs .scope-tab{padding:8px 22px;cursor:pointer;font-size:13px;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.prompt-scope-tabs .scope-tab:hover{color:#1890ff}
+.prompt-scope-tabs .scope-tab.active{color:#1890ff;border-bottom-color:#1890ff;font-weight:500}
+.book-viewer-overlay{position:fixed;top:0;left:220px;right:0;bottom:0;background:#fff;z-index:900;display:none;flex-direction:column}
+.book-viewer-overlay.show{display:flex}
+.viewer-header{height:50px;background:#fff;display:flex;align-items:center;padding:0 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);justify-content:space-between;flex-shrink:0}
+.viewer-header-left{display:flex;align-items:center;gap:12px}
+.viewer-back{cursor:pointer;font-size:16px;color:#1890ff;display:flex;align-items:center;gap:4px}
+.viewer-back:hover{color:#40a9ff}
+.viewer-breadcrumb{font-size:13px;color:#666}
+.viewer-toolbar{height:42px;background:#fafafa;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0}
+.viewer-toolbar .vt-btn{height:28px;padding:0 12px;border:1px solid #d9d9d9;border-radius:4px;cursor:pointer;font-size:12px;background:#fff;color:#333;display:inline-flex;align-items:center;gap:4px}
+.viewer-toolbar .vt-btn:hover{border-color:#1890ff;color:#1890ff}
+.viewer-toolbar .vt-btn.active{background:#1890ff;color:#fff;border-color:#1890ff}
+.viewer-toolbar .vt-nav{display:flex;align-items:center;gap:6px;font-size:12px;color:#666}
+.viewer-toolbar .vt-nav button{width:24px;height:24px;border:1px solid #d9d9d9;border-radius:3px;background:#fff;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+.viewer-toolbar .vt-nav button:hover{border-color:#1890ff;color:#1890ff}
+.viewer-toolbar .vt-zoom{display:flex;align-items:center;gap:4px;font-size:12px;color:#666}
+.viewer-toolbar .vt-zoom button{width:24px;height:24px;border:1px solid #d9d9d9;border-radius:3px;background:#fff;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+.viewer-toolbar .vt-zoom button:hover{border-color:#1890ff;color:#1890ff}
+.viewer-toolbar .vt-right{margin-left:auto;display:flex;gap:6px}
+.viewer-body{flex:1;display:flex;overflow:hidden}
+.viewer-left{width:360px;border-right:1px solid #f0f0f0;display:flex;flex-direction:column;flex-shrink:0}
+.viewer-tabs{display:flex;border-bottom:2px solid #f0f0f0;flex-shrink:0}
+.viewer-tab{flex:1;padding:10px 0;text-align:center;cursor:pointer;font-size:13px;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.viewer-tab:hover{color:#1890ff}
+.viewer-tab.active{color:#1890ff;border-bottom-color:#1890ff;font-weight:500}
+.viewer-tab-content{flex:1;overflow-y:auto;padding:12px}
+.catalog-item{padding:6px 8px;font-size:12px;cursor:pointer;border-radius:3px;display:flex;align-items:center;gap:4px;color:#333}
+.catalog-item:hover{background:#e6f7ff;color:#1890ff}
+.catalog-item .arrow{font-size:9px;color:#999;transition:transform .2s}
+.catalog-item .arrow.open{transform:rotate(90deg)}
+.catalog-children{padding-left:16px;overflow:hidden;max-height:0;transition:max-height .3s}
+.catalog-children.open{max-height:500px}
+.summary-section{margin-bottom:8px}
+.summary-header{padding:8px 10px;background:#fafafa;border:1px solid #f0f0f0;border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;color:#333}
+.summary-header:hover{background:#e6f7ff}
+.summary-header .arrow{font-size:9px;color:#999;transition:transform .2s}
+.summary-header .arrow.open{transform:rotate(90deg)}
+.summary-body{padding:10px;font-size:12px;line-height:1.8;color:#555;border:1px solid #f0f0f0;border-top:none;border-radius:0 0 4px 4px;display:none}
+.summary-body.show{display:block}
+.chart-desc-item{margin-bottom:14px;border:1px solid #f0f0f0;border-radius:4px;overflow:hidden}
+.chart-desc-item .cdi-title{font-size:13px;font-weight:600;padding:8px 10px;background:#fafafa;border-bottom:1px solid #f0f0f0;color:#333}
+.chart-desc-item .cdi-img{height:100px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#999;font-size:12px;border-bottom:1px solid #f0f0f0}
+.chart-desc-item .cdi-text{padding:8px 10px;font-size:12px;line-height:1.7;color:#555}
+.chart-desc-item .cdi-ai{font-size:10px;color:#999;padding:0 10px;margin-bottom:4px;font-style:italic}
+.chart-desc-item .cdi-actions{padding:6px 10px;border-top:1px solid #f0f0f0;display:flex;gap:6px}
+.viewer-right{flex:1;overflow-y:auto;background:#f5f5f5;display:flex;align-items:flex-start;justify-content:center;padding:20px}
+.doc-preview{background:#fff;width:560px;min-height:700px;box-shadow:0 2px 8px rgba(0,0,0,.1);padding:40px 50px;font-size:13px;line-height:1.8;color:#333}
+.doc-preview h2{text-align:center;font-size:16px;margin-bottom:4px}
+.doc-preview .doc-sub{text-align:center;font-size:12px;color:#999;margin-bottom:20px}
+.doc-preview p{margin-bottom:10px;text-indent:2em}
+.num-input-group{display:flex;align-items:center;gap:0}
+.num-input-group button{width:28px;height:34px;border:1px solid #d9d9d9;background:#fafafa;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:#666}
+.num-input-group button:hover{color:#1890ff;border-color:#1890ff}
+.num-input-group input{width:60px;height:34px;border:1px solid #d9d9d9;border-left:none;border-right:none;text-align:center;font-size:13px;outline:none}
+.switch{position:relative;display:inline-block;width:40px;height:22px;vertical-align:middle}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:22px;transition:.3s}
+.switch .slider:before{content:"";position:absolute;height:18px;width:18px;left:2px;bottom:2px;background:#fff;border-radius:50%;transition:.3s}
+.switch input:checked+.slider{background:#1890ff}
+.switch input:checked+.slider:before{transform:translateX(18px)}
+.perm-tree{border:1px solid #f0f0f0;border-radius:4px;max-height:280px;overflow-y:auto;padding:8px;margin-top:8px}
+.perm-tree-node{padding:4px 0}
+.perm-tree-node .node-row{display:flex;align-items:center;gap:6px;padding:3px 4px;cursor:pointer;border-radius:3px;font-size:13px;color:#333}
+.perm-tree-node .node-row:hover{background:#f0f5ff}
+.perm-tree-node .node-row label{cursor:pointer;display:flex;align-items:center;gap:4px;flex:1;font-size:13px}
+.perm-tree-node .arrow{font-size:9px;color:#999;transition:transform .2s;width:14px;text-align:center;flex-shrink:0}
+.perm-tree-node .arrow.open{transform:rotate(90deg)}
+.perm-tree-children{padding-left:20px;overflow:hidden;max-height:0;transition:max-height .3s}
+.perm-tree-children.open{max-height:800px}
+.perm-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:8px;font-size:12px;color:#666}
+.perm-toolbar label{display:flex;align-items:center;gap:4px;cursor:pointer}
+.confirm-dialog .confirm-icon{font-size:28px;color:#faad14;margin-right:12px;flex-shrink:0}
+.confirm-dialog .confirm-content{display:flex;align-items:flex-start;gap:0;font-size:14px;line-height:1.8}
+.btn-warning{color:#ff4d4f;border-color:#ff4d4f;background:#fff}
+.btn-warning:hover{color:#ff7875;border-color:#ff7875}
+.btn-orange{color:#fa8c16;border-color:#fa8c16;background:#fff}
+.btn-orange:hover{color:#ffa940;border-color:#ffa940}
+.assign-user-view{display:none}
+.assign-user-view.show{display:block}
+.viewer-fullscreen .sidebar{display:none!important}
+.viewer-fullscreen .header{display:none!important}
+.viewer-fullscreen .breadcrumb{display:none!important}
+.viewer-fullscreen .content{padding:0!important}
+.viewer-fullscreen .book-viewer-overlay{left:0;top:0}
+.viewer-split .viewer-body{flex-direction:row-reverse}
+.org-tree-sidebar{width:220px;background:#fff;border-radius:6px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);flex-shrink:0;max-height:500px;overflow-y:auto;margin-right:14px}
+.org-tree-sidebar h4{font-size:13px;font-weight:600;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0}
+.org-tree-sidebar .org-item{padding:6px 8px;font-size:12px;cursor:pointer;border-radius:3px;color:#333}
+.org-tree-sidebar .org-item:hover{background:#e6f7ff;color:#1890ff}
+.org-tree-sidebar .org-item.active{background:#e6f7ff;color:#1890ff;font-weight:500}
+.user-main-content{flex:1;min-width:0}
+.reset-pwd-input{width:100%;height:34px;border:1px solid #d9d9d9;border-radius:4px;padding:0 10px;font-size:13px;outline:none;margin-top:10px}
+.reset-pwd-input:focus{border-color:#1890ff}
+.radio-group{display:flex;gap:16px;align-items:center}
+.radio-group label{display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo"><span class="logo-icon">🔷</span><span class="logo-text">智妍办公AI<br>综合提效平台</span></div>
+  <div class="menu">
+    <div class="menu-item active" onclick="switchPage('dashboard',this,'数据统计')"><span class="menu-icon">📊</span><span class="menu-text">数据统计</span></div>
+    <div class="menu-item" onclick="switchPage('announcement',this,'通知公告')"><span class="menu-icon">📢</span><span class="menu-text">通知公告</span></div>
+    <div class="menu-item" onclick="switchPage('logs',this,'日志管理')"><span class="menu-icon">📋</span><span class="menu-text">日志管理</span></div>
+    <div class="menu-item" onclick="toggleSub(this)"><span class="menu-icon">📚</span><span class="menu-text">资源管理</span><span class="menu-arrow">▸</span></div>
+    <div class="sub-menu">
+      <div class="sub-item" onclick="switchPage('books',this,'资源管理/图书资源')">图书资源</div>
+      <div class="sub-item" onclick="switchPage('writeTemplates',this,'资源管理/写作模版')">写作模版</div>
+      <div class="sub-item" onclick="switchPage('promptManage',this,'资源管理/Prompt管理')">Prompt管理</div>
+    </div>
+    <div class="menu-item" onclick="toggleSub(this)"><span class="menu-icon">⚙️</span><span class="menu-text">系统管理</span><span class="menu-arrow">▸</span></div>
+    <div class="sub-menu">
+      <div class="sub-item" onclick="switchPage('users',this,'系统管理/用户管理')">用户管理</div>
+      <div class="sub-item" onclick="switchPage('roles',this,'系统管理/角色管理')">角色管理</div>
+      <div class="sub-item" onclick="switchPage('orgs',this,'系统管理/组织管理')">组织管理</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="header">
+    <div class="header-left"><span class="header-title">智妍办公AI综合提效平台</span></div>
+    <div class="header-right"><span class="uname">管理员</span><div class="avatar">管</div></div>
+  </div>
+  <div class="breadcrumb" id="breadcrumb">当前位置: <span>数据统计</span></div>
+  <div class="content">
+
+    <!-- ===== 数据统计（下拉框切换） ===== -->
+    <div class="page active" id="page-dashboard">
+      <div class="dash-header">
+        <div class="dash-header-left"><h3>数据统计</h3></div>
+        <select class="dash-select" id="dashScopeSelect" onchange="switchDashScope(this.value)">
+          <option value="all">全部平台数据</option>
+          <option value="kb">国家安全知识库</option>
+          <option value="zht">智会通</option>
+          <option value="xwz">小文助手</option>
+        </select>
+      </div>
+      <div class="dash-time-filter">
+        <div class="tab active" onclick="setDashTimeTab(this)">今天</div>
+        <div class="tab" onclick="setDashTimeTab(this)">昨天</div>
+        <div class="tab" onclick="setDashTimeTab(this)">近7天</div>
+        <div class="tab" style="display:flex;align-items:center;gap:6px;padding:0 8px">
+          <input type="date" style="height:26px;border:1px solid #d9d9d9;border-radius:4px;font-size:11px;padding:0 4px">
+          <span style="color:#999;font-size:12px">至</span>
+          <input type="date" style="height:26px;border:1px solid #d9d9d9;border-radius:4px;font-size:11px;padding:0 4px">
+        </div>
+      </div>
+
+      <!-- 全部平台数据 -->
+      <div id="dashScopeAll">
+        <div class="section-divider">📘 国家安全知识库</div>
+        <div class="stat-cards">
+          <div class="stat-card"><div class="label">用户使用数</div><div class="value">25</div></div>
+          <div class="stat-card"><div class="label">图书资源数</div><div class="value">65</div></div>
+          <div class="stat-card"><div class="label">累计问答数</div><div class="value">574</div></div>
+          <div class="stat-card"><div class="label">累计在线时长</div><div class="value">7.61<span class="unit">万小时</span></div></div>
+        </div>
+        <div class="section-divider">🤝 智会通</div>
+        <div class="stat-cards">
+          <div class="stat-card"><div class="label">会议总数</div><div class="value">9</div></div>
+          <div class="stat-card"><div class="label">语音转写时长</div><div class="value">3.5<span class="unit">小时</span></div></div>
+          <div class="stat-card"><div class="label">AI摘要生成数</div><div class="value">15</div></div>
+          <div class="stat-card"><div class="label">智能问答次数</div><div class="value">86</div></div>
+        </div>
+        <div class="section-divider">✍️ 小文助手</div>
+        <div class="stat-cards">
+          <div class="stat-card"><div class="label">写作模板数</div><div class="value">10</div></div>
+          <div class="stat-card"><div class="label">总套用次数</div><div class="value">387</div></div>
+          <div class="stat-card"><div class="label">总导出次数</div><div class="value">215</div></div>
+          <div class="stat-card"><div class="label">知识库问答数</div><div class="value">142</div></div>
+        </div>
+        <div class="section-divider">📊 全平台数据分析</div>
+        <div class="panel"><div class="panel-title">用户行为分析</div><div class="chart-container"><canvas id="behaviorChart"></canvas></div></div>
+        <div class="panel">
+          <div class="panel-title">各平台使用次数对比</div>
+          <div class="chart-container"><canvas id="usageCompareChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- 国家安全知识库 -->
+      <div id="dashScopeKb" style="display:none">
+        <div class="stat-cards">
+          <div class="stat-card"><div class="label">用户使用数</div><div class="value">25</div></div>
+          <div class="stat-card"><div class="label">图书资源数</div><div class="value">65</div></div>
+          <div class="stat-card"><div class="label">累计问答数</div><div class="value">574</div></div>
+          <div class="stat-card"><div class="label">累计在线时长</div><div class="value">7.61<span class="unit">万小时</span></div></div>
+        </div>
+        <div class="panel"><div class="panel-title">用户行为分析</div><div class="chart-container"><canvas id="kbBehaviorChart"></canvas></div></div>
+        <div class="chart-row">
+          <div class="panel"><div class="panel-title">问答数据统计-领域安全表</div><div class="chart-container"><canvas id="kbDomainChart"></canvas></div></div>
+          <div class="panel"><div class="panel-title">热门阅读榜单</div>
+            <ul class="rank-list">
+              <li><span class="rank">1</span><span class="rank-name">罗兰贝格预见2026中国行业趋势报告</span><span class="rank-count">82次</span></li>
+              <li><span class="rank">2</span><span class="rank-name">中国互联网协会智能体应用发展报告</span><span class="rank-count">52次</span></li>
+              <li><span class="rank">3</span><span class="rank-name">中华人民共和国医药行业标准:医用</span><span class="rank-count">33次</span></li>
+              <li><span class="rank">4</span><span class="rank-name">国家安全思想与理论</span><span class="rank-count">28次</span></li>
+              <li><span class="rank">5</span><span class="rank-name">国家安全理论与方法论</span><span class="rank-count">22次</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="panel"><div class="panel-title">问答数据统计-国家地区表</div><div class="chart-container"><canvas id="kbCountryChart"></canvas></div></div>
+          <div class="panel"><div class="panel-title">图书资源统计</div><div class="chart-container"><canvas id="kbBookChart"></canvas></div></div>
+        </div>
+
+      </div>
+
+      <!-- 智会通（2大功能图表） -->
+      <div id="dashScopeZht" style="display:none">
+        <div class="chart-row">
+          <div class="panel"><div class="panel-title">🎙️ 语音转写与会议分析</div><div class="chart-container"><canvas id="zhtFuncChart1"></canvas></div></div>
+          <div class="panel"><div class="panel-title">🔄 AI重生次数</div><div class="chart-container"><canvas id="zhtFuncChart2"></canvas></div></div>
+        </div>
+        <div class="filters">
+          <div class="filter-group"><label>时间范围</label><div style="display:flex;gap:4px"><input type="date" id="zhtMsStart"><span style="line-height:30px;color:#999;font-size:12px">至</span><input type="date" id="zhtMsEnd"></div></div>
+          <button class="btn btn-primary" onclick="showToast('已刷新统计')">查询</button>
+          <button class="btn" onclick="showToast('已导出')">导出报表</button>
+        </div>
+        <div class="panel"><div class="panel-title">月度会议数量走势</div><div class="chart-container"><canvas id="zhtMonthlyChart"></canvas></div></div>
+      </div>
+
+      <!-- 小文助手（融合AI文稿统计+知识库问答） -->
+      <div id="dashScopeXwz" style="display:none">
+        <div class="stat-cards">
+          <div class="stat-card"><div class="label">文稿生成总数</div><div class="value">387</div></div>
+          <div class="stat-card"><div class="label">平均生成时长</div><div class="value">12.5<span class="unit">秒</span></div></div>
+          <div class="stat-card"><div class="label">模板使用率</div><div class="value">78.3<span class="unit">%</span></div></div>
+        </div>
+        <div class="section-divider">💬 知识库问答</div>
+        <div class="stat-cards">
+          <div class="stat-card"><div class="label">知识库问答数</div><div class="value">142</div></div>
+          <div class="stat-card"><div class="label">素材检索次数</div><div class="value">96</div></div>
+          <div class="stat-card"><div class="label">素材推荐命中率</div><div class="value">82.5<span class="unit">%</span></div></div>
+        </div>
+        <div class="filters" id="xwzFilterBar">
+          <div class="filter-group"><label>时间范围</label><div style="display:flex;gap:4px"><input type="date" id="xwzAsStart"><span style="line-height:30px;color:#999;font-size:12px">至</span><input type="date" id="xwzAsEnd"></div></div>
+          <div class="filter-group"><label>模板类型</label><select id="xwzAsType" onchange="refreshXwzCharts()"><option value="">全部</option><option>通知</option><option>请示</option><option>报告</option><option>通报</option><option>函</option><option>会议纪要</option><option>工作方案</option><option>总结材料</option><option>计划与规划</option><option>意见建议</option></select></div>
+          <button class="btn btn-primary" onclick="refreshXwzCharts()">查询</button>
+          <button class="btn" onclick="showToast('已导出')">导出报表</button>
+        </div>
+        <div class="chart-row">
+          <div class="panel"><div class="panel-title">各模板使用频次</div><div class="chart-container"><canvas id="xwzStatsTplChart"></canvas></div></div>
+          <div class="panel"><div class="panel-title">素材数量与使用统计</div><div class="chart-container"><canvas id="xwzMaterialChart"></canvas></div></div>
+        </div>
+        <div class="panel"><div class="panel-title">公文类型分布</div><div class="chart-container"><canvas id="xwzTypePieChart"></canvas></div></div>
+        <div class="chart-row" style="margin-top:16px">
+          <div class="panel"><div class="panel-title">公文生成量月度趋势</div><div class="chart-container"><canvas id="xwzMonthlyChart"></canvas></div></div>
+          <div class="panel"><div class="panel-title">知识采辑量趋势</div><div class="chart-container"><canvas id="xwzQaChart"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 通知公告 ===== -->
+    <div class="page" id="page-announcement">
+      <div class="panel">
+        <div class="filters">
+          <div class="filter-group"><label>标题</label><input id="annFilterTitle" placeholder="请输入标题关键字"></div>
+          <div class="filter-group"><label>创建时间</label><input type="date" id="annFilterDate"></div>
+          <button class="btn btn-primary" onclick="renderAnnTable()">搜索</button>
+          <button class="btn" onclick="document.getElementById('annFilterTitle').value='';document.getElementById('annFilterDate').value='';renderAnnTable()">重置</button>
+        </div>
+        <div style="margin-bottom:10px"><button class="btn btn-primary" onclick="openAnnModal()">+ 新增公告</button></div>
+        <div class="table-wrap"><table><thead><tr><th>序号</th><th>标题</th><th>创建日期</th><th>操作</th></tr></thead><tbody id="annTableBody"></tbody></table></div>
+        <div class="pagination" id="annPagination"></div>
+      </div>
+    </div>
+
+    <!-- ===== 日志管理 ===== -->
+    <div class="page" id="page-logs">
+      <div class="panel">
+        <div class="panel-title">操作日志记录</div>
+        <div class="filters">
+          <div class="filter-group"><label>操作人</label><input id="logFilterUser" placeholder="请输入操作人" oninput="renderLogTable()"></div>
+          <div class="filter-group"><label>操作类型</label><select id="logFilterType" onchange="renderLogTable()"><option value="">全部</option><option>新增</option><option>删除</option><option>修改</option><option>问答</option><option>录音</option><option>写作</option><option>导出</option><option>转写</option></select></div>
+          <div class="filter-group"><label>所属模块</label><select id="logFilterModule" onchange="renderLogTable()"><option value="">全部</option><option>国家安全知识库</option><option>智会通</option><option>小文助手</option></select></div>
+          <div class="filter-group"><label>操作时间范围</label><div style="display:flex;gap:4px"><input type="date" id="logFilterStart"><span style="line-height:30px;color:#999;font-size:12px">至</span><input type="date" id="logFilterEnd"></div></div>
+          <button class="btn btn-primary" onclick="renderLogTable()">搜索</button>
+          <button class="btn" onclick="document.getElementById('logFilterUser').value='';document.getElementById('logFilterType').selectedIndex=0;document.getElementById('logFilterModule').selectedIndex=0;document.getElementById('logFilterStart').value='';document.getElementById('logFilterEnd').value='';renderLogTable()">重置</button>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>序号</th><th>操作人</th><th>操作时间</th><th>操作类型</th><th>所属模块</th><th>操作内容</th><th>操作结果</th></tr></thead><tbody id="logTableBody"></tbody></table></div>
+        <div class="pagination" id="logPagination"></div>
+      </div>
+    </div>
+
+    <!-- ===== 图书资源（含资源解析Tab） ===== -->
+    <div class="page" id="page-books">
+      <div class="panel">
+        <div class="inner-tabs">
+          <div class="inner-tab active" onclick="switchBookTab('list',this)">图书资源</div>
+          <div class="inner-tab" onclick="switchBookTab('parse',this)">资源解析</div>
+        </div>
+        <div id="bookListView">
+          <div class="content-with-tree">
+            <div class="tree-sidebar">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0">
+                <h4 style="margin:0">图书层级目录</h4>
+                <div style="display:flex;gap:4px">
+                  <button class="btn" style="height:26px;font-size:11px;padding:0 10px" onclick="showToast('筛选目录')">筛选</button>
+                  <button class="btn btn-primary" style="height:26px;font-size:11px;padding:0 10px" onclick="openAddLevelModal()">新增</button>
+                </div>
+              </div>
+              <div class="tree-node" onclick="toggleTreeNode(this)"><span class="arrow">▸</span>人工智能</div>
+              <div class="tree-children"><div class="tree-node" onclick="selectTreeNode(this,'人工智能')">人工智能</div></div>
+              <div class="tree-node" onclick="toggleTreeNode(this)"><span class="arrow">▸</span>法院</div>
+              <div class="tree-children"><div class="tree-node" onclick="selectTreeNode(this,'法院')">法院测试库</div></div>
+              <div class="tree-node" onclick="toggleTreeNode(this)"><span class="arrow">▸</span>医院</div>
+              <div class="tree-children"><div class="tree-node" onclick="selectTreeNode(this,'医院')">医院库</div></div>
+              <div class="tree-node" onclick="toggleTreeNode(this)"><span class="arrow">▸</span>国家安全</div>
+              <div class="tree-children">
+                <div class="tree-node" onclick="toggleTreeNode(this)"><span class="arrow">▸</span>国家安全思想与理论</div>
+                <div class="tree-children">
+                  <div class="tree-node" onclick="selectTreeNode(this,'国家安全理论与方法论')">国家安全理论与方法论</div>
+                  <div class="tree-node" onclick="selectTreeNode(this,'国家安全史')">国家安全史</div>
+                </div>
+                <div class="tree-node" onclick="toggleTreeNode(this)"><span class="arrow">▸</span>国家安全战略</div>
+                <div class="tree-children">
+                  <div class="tree-node" onclick="selectTreeNode(this,'国家安全政策、制度')">国家安全政策、制度</div>
+                </div>
+                <div class="tree-node" onclick="toggleTreeNode(this)"><span class="arrow">▸</span>国家安全治理</div>
+                <div class="tree-children">
+                  <div class="tree-node" onclick="selectTreeNode(this,'国家安全管理')">国家安全管理</div>
+                  <div class="tree-node" onclick="selectTreeNode(this,'国家安全教育')">国家安全教育</div>
+                  <div class="tree-node" onclick="selectTreeNode(this,'国家安全保障')">国家安全保障</div>
+                </div>
+              </div>
+              <div class="tree-node" onclick="toggleTreeNode(this)"><span class="arrow">▸</span>世界</div>
+              <div class="tree-children">
+                <div class="tree-node" onclick="toggleTreeNode(this)"><span class="arrow">▸</span>国家安全</div>
+                <div class="tree-children">
+                  <div class="tree-node" onclick="selectTreeNode(this,'国家安全思想与理论')">国家安全思想与理论</div>
+                  <div class="tree-node" onclick="selectTreeNode(this,'国家安全理论与方法论')">国家安全理论与方法论</div>
+                  <div class="tree-node" onclick="selectTreeNode(this,'国家安全史')">国家安全史</div>
+                  <div class="tree-node" onclick="selectTreeNode(this,'国家安全战略')">国家安全战略</div>
+                  <div class="tree-node" onclick="selectTreeNode(this,'国家安全治理')">国家安全治理</div>
+                </div>
+              </div>
+            </div>
+            <div class="tree-content">
+              <div class="filters">
+                <div class="filter-group"><label>书名</label><input id="bookFilterName" placeholder="请输入书名" oninput="renderBookTable()"></div>
+                <div class="filter-group"><label>状态</label><select id="bookFilterStatus" onchange="renderBookTable()"><option value="">请选择</option><option>解析成功</option><option>推送中</option><option>解析中</option><option>未解析</option><option>解析失败</option></select></div>
+                <button class="btn btn-primary" onclick="renderBookTable()">搜索</button>
+                <button class="btn" onclick="document.getElementById('bookFilterName').value='';document.getElementById('bookFilterStatus').selectedIndex=0;renderBookTable()">重置</button>
+              </div>
+              <div style="margin-bottom:10px;display:flex;gap:6px"><button class="btn btn-primary" onclick="openBookUploadModal()">上传图书</button><button class="btn btn-danger" onclick="batchDeleteBooks()">批量删除</button></div>
+              <div class="table-wrap"><table><thead><tr><th><input type="checkbox" onchange="toggleAllBooks(this)"></th><th>条形码</th><th>书名</th><th>责任人</th><th>出版社</th><th>出版年份</th><th>编码</th><th>分类号</th><th>分类号2</th><th>状态</th><th>操作</th></tr></thead><tbody id="bookTableBody"></tbody></table></div>
+              <div class="pagination" id="bookPagination"></div>
+            </div>
+          </div>
+        </div>
+        <div id="bookParseView" style="display:none">
+          <div class="stats-bar" style="margin-top:14px">
+            <div class="stat-item"><div class="stat-label">服务器图书资源路径</div><div class="stat-val" style="font-size:12px;font-weight:400;color:#666">/data/books</div></div>
+            <div class="stat-item"><div class="stat-label">文件量</div><div class="stat-val">100<span style="font-size:11px;color:#999">/个</span></div></div>
+            <div class="stat-item"><div class="stat-label">匹配数</div><div class="stat-val" style="color:#52c41a">65<span style="font-size:11px;color:#999">/个</span></div></div>
+            <div class="stat-item"><div class="stat-label">未归档</div><div class="stat-val" style="color:#faad14">35<span style="font-size:11px;color:#999">/个</span></div></div>
+          </div>
+          <div style="margin-bottom:10px"><button class="btn btn-primary" onclick="showToast('导入任务已提交')">导入</button></div>
+          <div class="table-wrap"><table><thead><tr><th>序号</th><th>条形码</th><th>题名</th><th>责任人</th><th>出版社</th><th>出版年份</th><th>版次</th><th>编码</th><th>分类号</th><th>分类号2</th><th>匹配状态</th><th>操作</th></tr></thead><tbody id="parseTableBody"></tbody></table></div>
+          <div class="pagination" id="parsePagination"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 写作模版 ===== -->
+    <div class="page" id="page-writeTemplates">
+      <div class="panel">
+        <div class="panel-title">写作模版管理</div>
+        <div class="filters">
+          <div class="filter-group"><label>模板名称</label><input id="wtFilterName" placeholder="请输入模板名称" oninput="renderWriteTemplateTable()"></div>
+          <div class="filter-group"><label>模板类型</label><select id="wtFilterType" onchange="renderWriteTemplateTable()"><option value="">全部</option><option>通知</option><option>请示</option><option>报告</option><option>通报</option><option>函</option><option>会议纪要</option><option>工作方案</option><option>总结材料</option><option>计划与规划</option><option>意见建议</option></select></div>
+          <div class="filter-group"><label>状态</label><select id="wtFilterStatus" onchange="renderWriteTemplateTable()"><option value="">请选择</option><option>启用</option><option>停用</option></select></div>
+          <button class="btn btn-primary" onclick="renderWriteTemplateTable()">搜索</button>
+          <button class="btn" onclick="document.getElementById('wtFilterName').value='';document.getElementById('wtFilterType').selectedIndex=0;document.getElementById('wtFilterStatus').selectedIndex=0;renderWriteTemplateTable()">重置</button>
+        </div>
+        <div style="margin-bottom:10px"><button class="btn btn-primary" onclick="openWriteTemplateModal()">+ 新增模板</button></div>
+        <div class="table-wrap"><table><thead><tr><th>序号</th><th>模板名称</th><th>模板类型</th><th>套用次数</th><th>导出次数</th><th>导出率</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="writeTemplateTableBody"></tbody></table></div>
+        <div class="pagination" id="writeTemplatePagination"></div>
+      </div>
+    </div>
+
+    <!-- ===== Prompt管理（合并三个平台） ===== -->
+    <div class="page" id="page-promptManage">
+      <div class="panel">
+        <div class="panel-title">Prompt管理</div>
+        <p style="font-size:12px;color:#999;margin-bottom:16px">管理各平台功能模块的Prompt模板，控制问答、检索、写作等场景的输出行为。</p>
+        <div class="prompt-scope-tabs">
+          <div class="scope-tab active" onclick="switchPromptScope('kb',this)">国家安全知识库</div>
+          <div class="scope-tab" onclick="switchPromptScope('zht',this)">智会通</div>
+          <div class="scope-tab" onclick="switchPromptScope('xwz',this)">小文助手</div>
+        </div>
+        <div id="promptListContainer"></div>
+        <div style="margin-top:16px"><button class="btn btn-primary" onclick="openPromptModal(currentPromptScope)">+ 新增Prompt</button></div>
+      </div>
+    </div>
+
+    <!-- ===== 用户管理 ===== -->
+    <div class="page" id="page-users">
+      <div class="panel">
+        <div class="filters">
+          <div class="filter-group"><label>用户账号</label><input id="userFilterAccount" placeholder="请输入用户账号"></div>
+          <div class="filter-group"><label>手机号码</label><input id="userFilterPhone" placeholder="请输入手机号码"></div>
+          <div class="filter-group"><label>状态</label><select id="userFilterStatus"><option value="">用户状态</option><option value="正常">正常</option><option value="停用">停用</option></select></div>
+          <div class="filter-group"><label>创建时间</label><div style="display:flex;gap:4px;align-items:center"><input type="date" id="userFilterStart" style="height:30px;border:1px solid #d9d9d9;border-radius:4px;font-size:12px;padding:0 4px"><span style="color:#999;font-size:12px">-</span><input type="date" id="userFilterEnd" style="height:30px;border:1px solid #d9d9d9;border-radius:4px;font-size:12px;padding:0 4px"></div></div>
+          <button class="btn btn-primary" onclick="renderUserTable()">搜索</button>
+          <button class="btn" onclick="document.getElementById('userFilterAccount').value='';document.getElementById('userFilterPhone').value='';document.getElementById('userFilterStatus').selectedIndex=0;document.getElementById('userFilterStart').value='';document.getElementById('userFilterEnd').value='';renderUserTable()">重置</button>
+        </div>
+        <div style="display:flex;gap:0">
+          <div class="org-tree-sidebar">
+            <div class="form-item" style="margin-bottom:8px"><input id="orgTreeSearch" placeholder="请输入组织名称" style="height:28px;font-size:12px"></div>
+            <div id="orgTreeList"></div>
+          </div>
+          <div class="user-main-content">
+            <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:600">数据列表</span><button class="btn btn-primary" onclick="openUserModal()">+ 新增</button></div>
+            <div class="table-wrap"><table><thead><tr><th>用户编号</th><th>用户账号</th><th>姓名</th><th>组织</th><th>所属角色</th><th>手机号码</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="userTableBody"></tbody></table></div>
+            <div class="pagination" id="userPagination"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 角色管理 ===== -->
+    <div class="page" id="page-roles">
+      <!-- 角色列表视图 -->
+      <div id="roleListView">
+        <div class="panel">
+          <div class="filters">
+            <div class="filter-group"><label>角色名称</label><input id="roleFilterName" placeholder="请输入角色名称"></div>
+            <div class="filter-group"><label>权限字符</label><input id="roleFilterKey" placeholder="请输入权限字符"></div>
+            <div class="filter-group"><label>状态</label><select id="roleFilterStatus"><option value="">请选择</option><option value="正常">开启</option><option value="停用">关闭</option></select></div>
+            <div class="filter-group"><label>创建时间</label><div style="display:flex;gap:4px;align-items:center"><input type="date" id="roleFilterStart" style="height:30px;border:1px solid #d9d9d9;border-radius:4px;font-size:12px;padding:0 4px"><span style="color:#999;font-size:12px">-</span><input type="date" id="roleFilterEnd" style="height:30px;border:1px solid #d9d9d9;border-radius:4px;font-size:12px;padding:0 4px"></div></div>
+            <button class="btn btn-primary" onclick="renderRoleTable()">搜索</button>
+            <button class="btn" onclick="document.getElementById('roleFilterName').value='';document.getElementById('roleFilterKey').value='';document.getElementById('roleFilterStatus').selectedIndex=0;document.getElementById('roleFilterStart').value='';document.getElementById('roleFilterEnd').value='';renderRoleTable()">重置</button>
+          </div>
+          <div style="margin-bottom:10px"><button class="btn btn-primary" onclick="openRoleModal()">+ 新增</button></div>
+          <div class="table-wrap"><table><thead><tr><th>角色编号</th><th>角色名称</th><th>权限字符</th><th>显示顺序</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="roleTableBody"></tbody></table></div>
+          <div class="pagination" id="rolePagination"></div>
+        </div>
+      </div>
+      <!-- 分配用户视图 -->
+      <div class="assign-user-view" id="assignUserView">
+        <div class="panel">
+          <div class="filters">
+            <div class="filter-group"><label>用户账号</label><input id="assignFilterUser" placeholder="请输入用户账号"></div>
+            <div class="filter-group"><label>手机号码</label><input id="assignFilterPhone" placeholder="请输入手机号码"></div>
+            <button class="btn btn-primary" onclick="renderAssignUserTable()">搜索</button>
+            <button class="btn" onclick="document.getElementById('assignFilterUser').value='';document.getElementById('assignFilterPhone').value='';renderAssignUserTable()">重置</button>
+          </div>
+          <div style="margin-bottom:10px;display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="openSelectUserModal()">+ 添加用户</button>
+            <button class="btn btn-warning" onclick="batchCancelAuth()">批量取消授权</button>
+            <button class="btn btn-orange" onclick="closeAssignUser()">× 关闭</button>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th><input type="checkbox" id="assignCheckAll" onchange="toggleAllAssign(this)"></th><th>用户账号</th><th>用户姓名</th><th>邮箱</th><th>手机</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="assignUserTableBody"></tbody></table></div>
+          <div class="pagination" id="assignUserPagination"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 组织管理 ===== -->
+    <div class="page" id="page-orgs">
+      <div class="panel">
+        <div class="filters">
+          <div class="filter-group"><label>单位名称</label><input id="orgFilterName" placeholder="请输入单位名称"></div>
+          <button class="btn btn-primary" onclick="renderOrgTable()">搜索</button>
+          <button class="btn" onclick="document.getElementById('orgFilterName').value='';renderOrgTable()">重置</button>
+        </div>
+        <div style="margin-bottom:10px"><button class="btn btn-primary" onclick="openOrgModal()">+ 新增</button></div>
+        <div class="table-wrap"><table><thead><tr><th>序号</th><th>组织名称</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="orgTableBody"></tbody></table></div>
+        <div class="pagination" id="orgPagination"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="annModal"><div class="modal"><div class="modal-header"><h3 id="annModalTitle">新增公告</h3><span class="modal-close" onclick="closeModal('annModal')">×</span></div><div class="modal-body"><div class="form-item"><label><span class="req">*</span>标题</label><input id="annFormTitle" placeholder="请输入标题"></div><div class="form-item"><label><span class="req">*</span>文章内容</label><div class="rte"><div class="rte-toolbar"><button onclick="execRTE('bold')"><b>B</b></button><button onclick="execRTE('italic')"><i>I</i></button><button onclick="execRTE('underline')"><u>U</u></button></div><div class="rte-body" id="annFormContent" contenteditable="true"></div></div></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('annModal')">取消</button><button class="btn btn-primary" onclick="saveAnn()">提交</button></div></div></div>
+<div class="modal-overlay" id="annDetailModal"><div class="modal"><div class="modal-header"><h3>公告详情</h3><span class="modal-close" onclick="closeModal('annDetailModal')">×</span></div><div class="modal-body" id="annDetailBody"></div><div class="modal-footer"><button class="btn" onclick="closeModal('annDetailModal')">关闭</button></div></div></div>
+<div class="modal-overlay" id="bookUploadModal"><div class="modal"><div class="modal-header"><h3>上传图书</h3><span class="modal-close" onclick="closeModal('bookUploadModal')">×</span></div><div class="modal-body"><div class="upload-area" onclick="showToast('请选择文件')"><div class="icon">📁</div><div class="text">点击或拖拽文件上传<br><small>支持 PDF、EPUB、TXT</small></div></div><div class="form-item"><label><span class="req">*</span>书名</label><input id="bookFormName" placeholder="请输入书名"></div><div class="form-item"><label>责任人</label><input id="bookFormAuthor" placeholder="请输入责任人"></div><div class="form-item"><label>出版社</label><input id="bookFormPublisher" placeholder="请输入出版社"></div><div class="form-item"><label>分类号</label><input id="bookFormCategory" placeholder="请输入分类号"></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('bookUploadModal')">取消</button><button class="btn btn-primary" onclick="saveBookUpload()">提交</button></div></div></div>
+
+<div class="modal-overlay" id="addLevelModal"><div class="modal" style="width:480px"><div class="modal-header"><h3>新增层级</h3><span class="modal-close" onclick="closeModal('addLevelModal')">×</span></div><div class="modal-body"><div class="form-item"><label><span class="req">*</span>层级名称</label><input id="levelFormName" placeholder="请输入层级名称"></div><div class="form-item"><label><span class="req">*</span>层级编码</label><input id="levelFormCode" placeholder="请输入层级编码"></div><div class="form-item"><label>排序</label><input type="number" id="levelFormOrder" placeholder="请输入排序" value="0" min="0"></div><div class="form-item"><label>上级层级</label><select id="levelFormParent"><option value="">选择上级层级</option><option>人工智能</option><option>法院</option><option>医院</option><option>国家安全</option><option>国家安全思想与理论</option><option>国家安全战略</option><option>国家安全治理</option></select></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('addLevelModal')">取消</button><button class="btn btn-primary" onclick="saveAddLevel()">提交</button></div></div></div>
+<div class="modal-overlay" id="userModal"><div class="modal" style="width:560px"><div class="modal-header"><h3 id="userModalTitle">新增用户</h3><span class="modal-close" onclick="closeModal('userModal')">×</span></div><div class="modal-body"><div class="form-item"><label><span class="req">*</span>姓名</label><input id="userFormName" placeholder="请输入姓名"></div><div class="form-item"><label><span class="req">*</span>所属组织</label><select id="userFormOrg"><option value="">请选择</option><option>北京昇腾创新人工智能有限公司</option><option>ceshi</option><option>3123123</option><option>111</option></select></div><div class="form-item"><label>手机号码</label><input id="userFormPhone" placeholder="请输入手机号码"></div><div class="form-item"><label>邮箱</label><input id="userFormEmail" placeholder="请输入邮箱"></div><div class="form-item"><label>性别</label><select id="userFormGender"><option value="">请选择</option><option>男</option><option>女</option></select></div><div class="form-item"><label>状态</label><div class="radio-group"><label><input type="radio" name="userFormStatus" value="正常" checked> 正常</label><label><input type="radio" name="userFormStatus" value="停用"> 停用</label></div></div><div class="form-item"><label><span class="req">*</span>角色</label><select id="userFormRole"><option value="">请选择</option><option>后台管理员</option><option>前台用户</option><option>法院后台管理员</option></select></div><div class="form-item"><label>备注</label><textarea id="userFormRemark" placeholder="请输入内容" style="height:60px"></textarea></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('userModal')">取消</button><button class="btn btn-primary" onclick="saveUser()">确定</button></div></div></div>
+<div class="modal-overlay" id="userDeleteModal"><div class="modal" style="width:420px"><div class="modal-header"><h3>系统提示</h3><span class="modal-close" onclick="closeModal('userDeleteModal')">×</span></div><div class="modal-body"><div class="confirm-dialog"><div class="confirm-content"><span class="confirm-icon">⚠</span><span id="userDeleteMsg">是否确认删除用户编号为"257"的数据项?</span></div></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('userDeleteModal')">取消</button><button class="btn btn-primary" onclick="confirmDeleteUser()">确定</button></div></div></div>
+<div class="modal-overlay" id="userStatusModal"><div class="modal" style="width:420px"><div class="modal-header"><h3>系统提示</h3><span class="modal-close" onclick="cancelUserStatusChange()">×</span></div><div class="modal-body"><div class="confirm-dialog"><div class="confirm-content"><span class="confirm-icon">⚠</span><span id="userStatusMsg">确认要"停用""houtai1"用户吗?</span></div></div></div><div class="modal-footer"><button class="btn" onclick="cancelUserStatusChange()">取消</button><button class="btn btn-primary" onclick="confirmUserStatusChange()">确定</button></div></div></div>
+<div class="modal-overlay" id="resetPwdModal"><div class="modal" style="width:420px"><div class="modal-header"><h3>提示</h3><span class="modal-close" onclick="closeModal('resetPwdModal')">×</span></div><div class="modal-body"><div style="font-size:14px;color:#333"><span id="resetPwdMsg">请输入"houtai1"的新密码</span><input class="reset-pwd-input" id="resetPwdInput" placeholder="请输入新密码" type="password"></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('resetPwdModal')">取消</button><button class="btn btn-primary" onclick="confirmResetPwd()">确定</button></div></div></div>
+<div class="modal-overlay" id="parseEditModal"><div class="modal" style="width:560px"><div class="modal-header"><h3>编辑</h3><span class="modal-close" onclick="closeModal('parseEditModal')">×</span></div><div class="modal-body"><div class="form-item"><label><span class="req">*</span>条形码</label><input id="parseFormBarcode" placeholder="请输入条形码"></div><div class="form-item"><label><span class="req">*</span>题名</label><input id="parseFormTitle" placeholder="请输入题名"></div><div class="form-item"><label>责任人</label><input id="parseFormAuthor" placeholder="请输入责任人"></div><div class="form-item"><label>出版社</label><input id="parseFormPublisher" placeholder="请输入出版社"></div><div class="form-item"><label>版次</label><input id="parseFormEdition" placeholder="请输入版次"></div><div class="form-item"><label>编码</label><input id="parseFormCode" placeholder="请输入编码"></div><div class="form-item"><label>出版年份</label><select id="parseFormYear"><option value="">请选择出版年份</option><script>for(let y=2025;y>=1990;y--)document.write('<option>'+y+'</option>')</script></select></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('parseEditModal')">取消</button><button class="btn btn-primary" onclick="saveParseEdit()">确定</button></div></div></div>
+<div class="modal-overlay" id="roleModal"><div class="modal" style="width:800px"><div class="modal-header"><h3 id="roleModalTitle">新增角色</h3><span class="modal-close" onclick="closeModal('roleModal')">×</span></div><div class="modal-body"><div class="form-item"><label><span class="req">*</span>角色名称</label><input id="roleFormName" placeholder="请输入角色名称"></div><div class="form-item"><label><span class="req">*</span>权限字符</label><input id="roleFormKey" placeholder="请输入权限字符"></div><div class="form-item"><label><span class="req">*</span>角色顺序</label><input id="roleFormOrder" type="number" value="0"></div><div class="form-item"><label><span class="req">*</span>状态</label><select id="roleFormStatus"><option>正常</option><option>停用</option></select></div><div class="form-item"><label>菜单权限</label><div class="perm-toolbar"><a href="javascript:void(0)" onclick="togglePermTreeAll(true)" style="color:#1890ff;font-size:12px">展开/折叠</a><label><input type="checkbox" id="permCheckAll" onchange="toggleAllPermCheck(this)"> 全选/取消全选</label><label><input type="checkbox" id="permLinkParent" checked> 父子联动</label></div><div class="perm-tree" id="permTree"></div></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('roleModal')">取消</button><button class="btn btn-primary" onclick="saveRole()">提交</button></div></div></div>
+<div class="modal-overlay" id="roleConfirmModal"><div class="modal" style="width:420px"><div class="modal-header"><h3>系统提示</h3><span class="modal-close" onclick="closeModal('roleConfirmModal')">×</span></div><div class="modal-body"><div class="confirm-dialog"><div class="confirm-content"><span class="confirm-icon">⚠</span><span id="roleConfirmMsg">确认要"停用""后台管理员"角色吗?</span></div></div></div><div class="modal-footer"><button class="btn" onclick="cancelRoleStatusChange()">取消</button><button class="btn btn-primary" onclick="confirmRoleStatusChange()">确定</button></div></div></div>
+<div class="modal-overlay" id="dataPermModal"><div class="modal" style="width:560px"><div class="modal-header"><h3>分配数据权限</h3><span class="modal-close" onclick="closeModal('dataPermModal')">×</span></div><div class="modal-body"><div class="perm-tree" id="dataPermTree"></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('dataPermModal')">取消</button><button class="btn btn-primary" onclick="saveDataPerm()">确定</button></div></div></div>
+<div class="modal-overlay" id="selectUserModal"><div class="modal" style="width:720px"><div class="modal-header"><h3>选择用户</h3><span class="modal-close" onclick="closeModal('selectUserModal')">×</span></div><div class="modal-body"><div class="filters" style="margin-bottom:14px"><div class="filter-group"><label>用户账号</label><input id="selectFilterUser" placeholder="请输入用户账号"></div><div class="filter-group"><label>手机号码</label><input id="selectFilterPhone" placeholder="请输入手机号码"></div><button class="btn btn-primary" onclick="renderSelectUserTable()">搜索</button><button class="btn" onclick="document.getElementById('selectFilterUser').value='';document.getElementById('selectFilterPhone').value='';renderSelectUserTable()">重置</button></div><div class="table-wrap"><table><thead><tr><th></th><th>用户账号</th><th>用户姓名</th><th>邮箱</th><th>手机</th><th>状态</th><th>创建时间</th></tr></thead><tbody id="selectUserTableBody"></tbody></table></div><div class="pagination" id="selectUserPagination"></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('selectUserModal')">取消</button><button class="btn btn-primary" onclick="confirmSelectUser()">确定</button></div></div></div>
+<div class="modal-overlay" id="orgModal"><div class="modal" style="width:520px"><div class="modal-header"><h3 id="orgModalTitle">新增部门</h3><span class="modal-close" onclick="closeModal('orgModal')">×</span></div><div class="modal-body"><div class="form-item"><label><span class="req">*</span>组织名称</label><input id="orgFormName" placeholder="请输入组织名称"></div><div class="form-item"><label><span class="req">*</span>显示排序</label><div class="num-input-group"><button onclick="adjustNum('orgFormOrder',-1)">-</button><input id="orgFormOrder" value="0" style="width:80px"><button onclick="adjustNum('orgFormOrder',1)">+</button></div></div><div class="form-item"><label>负责人</label><input id="orgFormLeader" placeholder="请输入负责人"></div><div class="form-item"><label>联系电话</label><input id="orgFormPhone" placeholder="请输入联系电话"></div><div class="form-item"><label>邮箱</label><input id="orgFormEmail" placeholder="请输入邮箱"></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('orgModal')">取消</button><button class="btn btn-primary" onclick="saveOrg()">确定</button></div></div></div>
+<div class="modal-overlay" id="writeTemplateModal"><div class="modal"><div class="modal-header"><h3 id="wtModalTitle">新增写作模板</h3><span class="modal-close" onclick="closeModal('writeTemplateModal')">×</span></div><div class="modal-body"><div class="form-item"><label><span class="req">*</span>模板名称</label><input id="wtFormName" placeholder="请输入模板名称"></div><div class="form-item"><label><span class="req">*</span>模板类型</label><select id="wtFormType"><option>通知</option><option>请示</option><option>报告</option><option>通报</option><option>函</option><option>会议纪要</option><option>工作方案</option><option>总结材料</option><option>计划与规划</option><option>意见建议</option></select></div><div class="form-item"><label>模板描述</label><textarea id="wtFormDesc" placeholder="请输入模板描述"></textarea></div><div class="form-item"><label>状态</label><select id="wtFormStatus"><option>启用</option><option>停用</option></select></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('writeTemplateModal')">取消</button><button class="btn btn-primary" onclick="saveWriteTemplate()">提交</button></div></div></div>
+<div class="modal-overlay" id="promptModal"><div class="modal" style="width:720px"><div class="modal-header"><h3 id="promptModalTitle">新增Prompt</h3><span class="modal-close" onclick="closeModal('promptModal')">×</span></div><div class="modal-body"><div class="form-item"><label><span class="req">*</span>Prompt名称</label><input id="promptFormName" placeholder="请输入Prompt名称"></div><div class="form-item"><label>功能场景</label><select id="promptFormScene"><option>问答</option><option>检索</option><option>摘要</option><option>写作</option><option>转写</option><option>翻译</option><option>其他</option></select></div><div class="form-item"><label>描述</label><input id="promptFormDesc" placeholder="请输入描述"></div><div class="form-item"><label><span class="req">*</span>Prompt内容</label><textarea id="promptFormContent" placeholder="请输入Prompt模板内容" style="height:200px;font-family:Consolas,'Courier New',monospace"></textarea></div><div class="form-item"><label>状态</label><select id="promptFormStatus"><option>启用</option><option>停用</option></select></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('promptModal')">取消</button><button class="btn btn-primary" onclick="savePrompt()">提交</button></div></div></div>
+
+<!-- 编辑分类层级弹窗 -->
+<div class="modal-overlay" id="editCatModal">
+  <div class="modal" style="width:480px">
+    <div class="modal-header"><h3>编辑分类层级</h3><span class="modal-close" onclick="closeModal('editCatModal')">&times;</span></div>
+    <div class="modal-body">
+      <input type="hidden" id="editCatBookId">
+      <div class="form-item"><label>书名 <span class="req">*</span></label><input id="editCatBookName" readonly style="background:#f5f5f5"></div>
+      <div class="form-item"><label>分类层级 <span class="req">*</span></label><select id="editCatLevel"><option value="">请选择分类层级</option><option>人工智能</option><option>法院</option><option>医院</option><option>国家安全</option><option>国家安全思想与理论</option><option>国家安全理论与方法论</option><option>国家安全史</option><option>国家安全战略</option><option>国家安全政策、制度</option><option>国家安全治理</option><option>国家安全管理</option><option>国家安全教育</option><option>国家安全保障</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="saveEditCat()">提交</button><button class="btn" onclick="closeModal('editCatModal')">取消</button></div>
+  </div>
+</div>
+
+<!-- 新增目录弹窗 -->
+<div class="modal-overlay" id="addCatalogModal">
+  <div class="modal" style="width:480px">
+    <div class="modal-header"><h3>新增目录</h3><span class="modal-close" onclick="closeModal('addCatalogModal')">&times;</span></div>
+    <div class="modal-body">
+      <div class="form-item"><label>目录名称</label><input id="catalogFormName" placeholder="请输入目录名称"></div>
+      <div class="form-item"><label>页码</label><div class="num-input-group"><button onclick="adjustNum('catalogFormPage',-1)">-</button><input id="catalogFormPage" value="1"><button onclick="adjustNum('catalogFormPage',1)">+</button></div></div>
+      <div class="form-item"><label>排序 <span class="req">*</span></label><div class="num-input-group"><button onclick="adjustNum('catalogFormOrder',-1)">-</button><input id="catalogFormOrder" value="1"><button onclick="adjustNum('catalogFormOrder',1)">+</button></div></div>
+      <div class="form-item"><label>上级目录</label><select id="catalogFormParent"><option value="">选择上级目录</option><option>纤维内窥镜技术要求与测试方法</option><option>医用纤维内窥镜技术要求与测试规范</option><option>纤维内窥镜测试方法与性能评估</option><option>纤维内窥镜机械性能与功能测试</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="saveAddCatalog()">提交</button><button class="btn" onclick="closeModal('addCatalogModal')">取消</button></div>
+  </div>
+</div>
+
+<!-- 图书查看/编辑覆盖层 -->
+<div class="book-viewer-overlay" id="bookViewerOverlay">
+  <div class="viewer-header">
+    <div class="viewer-header-left">
+      <span class="viewer-back" onclick="closeBookViewer()">◂ 返回</span>
+      <span class="viewer-breadcrumb" id="viewerBreadcrumb">资源管理 / 图书资源 / 图书编辑</span>
+    </div>
+    <div style="font-size:13px;color:#333;font-weight:600" id="viewerBookTitle">图书编辑</div>
+  </div>
+  <div class="viewer-toolbar">
+    <button class="vt-btn active" onclick="showToast('数字阅读模式')">数字阅读</button>
+    <div class="vt-nav">
+      <button onclick="showToast('上一页')">◂</button>
+      <span>1/20</span>
+      <button onclick="showToast('下一页')">▸</button>
+    </div>
+    <div class="vt-zoom">
+      <button onclick="showToast('缩小')">-</button>
+      <span>100%</span>
+      <button onclick="showToast('放大')">+</button>
+    </div>
+    <div class="vt-right" id="viewerRightBtns">
+      <button class="vt-btn" id="btnSplitScreen" onclick="toggleSplitScreen()">切换左右分屏</button>
+      <button class="vt-btn" onclick="showToast('护眼模式已开启')">打开护眼</button>
+      <button class="vt-btn" id="btnFullScreen" onclick="toggleFullScreen()">全屏</button>
+    </div>
+  </div>
+  <div class="viewer-body">
+    <div class="viewer-left">
+      <div class="viewer-tabs">
+        <div class="viewer-tab active" data-tab="catalog" onclick="switchViewerTab('catalog',this)">目录</div>
+        <div class="viewer-tab" data-tab="summary" onclick="switchViewerTab('summary',this)">阅读精要</div>
+        <div class="viewer-tab" data-tab="charts" onclick="switchViewerTab('charts',this)">图表</div>
+      </div>
+      <!-- 目录Tab -->
+      <div class="viewer-tab-content" id="viewerTabCatalog">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <button class="btn btn-primary" style="height:26px;font-size:11px;padding:0 10px" onclick="openAddCatalogModal()">新增</button>
+        </div>
+        <div class="catalog-item" onclick="toggleCatalogChildren(this)"><span class="arrow open">▸</span>纤维内窥镜技术要求与测试方法</div>
+        <div class="catalog-children open">
+          <div class="catalog-item" onclick="showToast('跳转至: 医用纤维内窥镜技术要求与测试规范')">医用纤维内窥镜技术要求与测试规范</div>
+          <div class="catalog-item" onclick="showToast('跳转至: 纤维内窥镜测试方法与性能评估')">纤维内窥镜测试方法与性能评估</div>
+          <div class="catalog-item" onclick="showToast('跳转至: 纤维内窥镜机械性能与功能测试')">纤维内窥镜机械性能与功能测试</div>
+        </div>
+      </div>
+      <!-- 阅读精要Tab -->
+      <div class="viewer-tab-content" id="viewerTabSummary" style="display:none">
+        <div class="summary-section">
+          <div class="summary-header" onclick="toggleSummarySection(this)"><span class="arrow open">▸</span>图书精要</div>
+          <div class="summary-body show">本标准通过整合多个内窥镜相关旧版标准并进行更新与合并，旨在提升测试方法的科学性与行业统一性。</div>
+        </div>
+        <div class="summary-section">
+          <div class="summary-header" onclick="toggleSummarySection(this)"><span class="arrow">▸</span>研究目标</div>
+          <div class="summary-body">规范医用纤维内窥镜的技术要求与测试方法，确保产品安全性和有效性。</div>
+        </div>
+        <div class="summary-section">
+          <div class="summary-header" onclick="toggleSummarySection(this)"><span class="arrow">▸</span>研究方法</div>
+          <div class="summary-body">采用实验室测试与临床验证相结合的方法，对纤维内窥镜的光学性能、机械性能等进行全面评估。</div>
+        </div>
+        <div class="summary-section">
+          <div class="summary-header" onclick="toggleSummarySection(this)"><span class="arrow">▸</span>研究结果</div>
+          <div class="summary-body">提出了完整的测试指标体系，包括视向角、分辨率、光照度等关键参数的测量方法与合格判定标准。</div>
+        </div>
+        <div class="summary-section">
+          <div class="summary-header" onclick="toggleSummarySection(this)"><span class="arrow">▸</span>研究创新</div>
+          <div class="summary-body">首次将柔性内窥镜与刚性内窥镜的测试方法统一整合，简化了行业标准体系。</div>
+        </div>
+        <div style="margin-top:12px;text-align:right"><button class="btn btn-primary" onclick="showToast('精要已保存')">保存</button></div>
+      </div>
+      <!-- 图表Tab -->
+      <div class="viewer-tab-content" id="viewerTabCharts" style="display:none">
+        <div class="chart-desc-item">
+          <div class="cdi-title">标称视向角与不均匀性关系表</div>
+          <div class="cdi-img">[表格预览区域]</div>
+          <div class="cdi-text chart-ai-desc">该表格展示了标称视向角θ与不均匀性UL之间的对应关系。随着标称视向角θ的增大，允许的最大不均匀性UL也随之升高。</div>
+          <div class="cdi-ai">*以上描述为AI生成</div>
+          <div class="cdi-actions"><button class="btn-link" onclick="editChartDesc(this)">编辑</button><button class="btn-link" onclick="locateOriginal()">定位原文</button><button class="btn-link danger" onclick="deleteChartItem(this)">删除</button></div>
+        </div>
+        <div class="chart-desc-item">
+          <div class="cdi-title">关节式机械臂结构示意图</div>
+          <div class="cdi-img">[图片预览区域]</div>
+          <div class="cdi-text chart-ai-desc">该图展示了一种柔性内窥镜的结构示意图，其核心为可弯曲的管状探头。图中明确标示了探头前端的光学镜头组件与后端操作手柄的连接关系。</div>
+          <div class="cdi-ai">*以上描述为AI生成</div>
+          <div class="cdi-actions"><button class="btn-link" onclick="editChartDesc(this)">编辑</button><button class="btn-link" onclick="locateOriginal()">定位原文</button><button class="btn-link danger" onclick="deleteChartItem(this)">删除</button></div>
+        </div>
+        <div class="chart-desc-item">
+          <div class="cdi-title">可弯曲内窥镜结构示意图</div>
+          <div class="cdi-img">[图片预览区域]</div>
+          <div class="cdi-text chart-ai-desc">该图展示了一种可弯曲内窥镜的结构示意图。其核心部件为一细长管状体，一端连接控制手柄，另一端为可弯曲的观察端。</div>
+          <div class="cdi-ai">*以上描述为AI生成</div>
+          <div class="cdi-actions"><button class="btn-link" onclick="editChartDesc(this)">编辑</button><button class="btn-link" onclick="locateOriginal()">定位原文</button><button class="btn-link danger" onclick="deleteChartItem(this)">删除</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="viewer-right">
+      <div class="doc-preview">
+        <div style="text-align:center;margin-bottom:16px"><span style="font-size:28px;font-weight:700;color:#333">YY</span></div>
+        <div style="font-size:11px;color:#999;margin-bottom:4px">ICS 11.040 &nbsp; CCS C 40</div>
+        <h2>中华人民共和国医药行业标准</h2>
+        <p style="text-align:center;font-size:14px;font-weight:600;text-indent:0;margin:10px 0">医用内窥镜 纤维内窥镜</p>
+        <p style="text-align:center;font-size:12px;color:#666;text-indent:0;margin-bottom:10px">Medical endoscopes—Fiber endoscopes</p>
+        <div style="text-align:center;margin:16px 0">
+          <p style="text-indent:0;font-size:13px;font-weight:600">YY/T 1029-2023</p>
+          <p style="text-indent:0;font-size:11px;color:#999">代替YY/T 1029-2001, YY/T 0281-2007</p>
+        </div>
+        <div style="text-align:center;margin:20px 0;border-top:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8;padding:12px 0">
+          <p style="text-indent:0;font-size:12px">2023-09-05 发布</p>
+          <p style="text-indent:0;font-size:12px">2024-09-15 实施</p>
+          <p style="text-indent:0;font-size:11px;color:#999;margin-top:6px">国家药品监督管理局 发布</p>
+        </div>
+        <p>本标准按照GB/T 1.1—2020《标准化工作导则 第1部分：标准化文件的结构和起草规则》的规定起草。</p>
+        <p>本标准代替YY/T 1029-2001《医用内窥镜 纤维内窥镜》和YY/T 0281-2007《医用内窥镜 纤维内窥镜专用技术条件》。</p>
+        <p>本标准与YY/T 1029-2001相比，除编辑性修改外主要技术变化如下……</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let editingId=null,nextId=1000,editingPromptScope='',currentPromptScope='kb',currentViewBook=null;
+let pendingStatusRoleId=null,currentAssignRoleId=null;
+let pendingUserStatusId=null,pendingDeleteUserId=null,pendingResetPwdId=null;
+let viewerSplit=false,viewerFull=false;
+const menuPermTree=[
+  {name:'数据统计',children:[]},
+  {name:'通知公告',children:[]},
+  {name:'日志管理',children:[]},
+  {name:'资源管理',children:[{name:'图书资源',children:[]},{name:'资源解析',children:[]},{name:'写作模版',children:[]},{name:'Prompt管理',children:[]}]},
+  {name:'系统管理',children:[{name:'用户管理',children:[]},{name:'角色管理',children:[]},{name:'组织管理',children:[]}]}
+];
+const dataPermTreeData=[
+  {name:'国家安全知识库',children:[{name:'图书资源',children:[]},{name:'知识问答',children:[]},{name:'阅读数据',children:[]}]},
+  {name:'智会通',children:[{name:'会议数据',children:[]},{name:'转写数据',children:[]},{name:'AI摘要',children:[]}]},
+  {name:'小文助手',children:[{name:'写作模板',children:[]},{name:'素材库',children:[]},{name:'知识采辑',children:[]}]}
+];
+const D={
+  ann:[
+    {id:1,title:'关于开展2026年度国家安全教育日活动的通知',date:'2026-04-10',content:'为深入贯彻总体国家安全观，增强全民国家安全意识，现就开展2026年度全民国家安全教育日活动通知如下...'},
+    {id:2,title:'国家安全知识库系统升级维护公告',date:'2026-03-28',content:'为提升系统性能和用户体验，知识库系统将于2026年4月1日凌晨0:00-6:00进行升级维护...'},
+    {id:3,title:'关于新增人工智能安全领域资源的通知',date:'2026-03-15',content:'根据国家安全战略需求，知识库新增人工智能安全领域专题资源...'},
+  ],
+  logs:[
+    {id:1,user:'admin',time:'2026-05-26 09:15:32',type:'新增',module:'智会通',content:'新建会议：项目周会-5月第4周',result:'成功'},
+    {id:2,user:'qiantai2',time:'2026-05-26 08:30:15',type:'问答',module:'国家安全知识库',content:'查询图书《国家安全思想与理论》相关问题',result:'成功'},
+    {id:3,user:'admin',time:'2026-05-25 16:45:20',type:'删除',module:'国家安全知识库',content:'删除用户user001的书架关联记录',result:'成功'},
+    {id:4,user:'super',time:'2026-05-25 14:20:10',type:'转写',module:'智会通',content:'上传会议录音并转写：项目周会-5月第3周',result:'成功'},
+    {id:5,user:'qiantai3',time:'2026-05-25 10:05:33',type:'写作',module:'小文助手',content:'套用模板：公文写作-关于XX的通知',result:'成功'},
+    {id:6,user:'admin',time:'2026-05-24 15:30:45',type:'修改',module:'智会通',content:'修改会议信息：项目进度讨论会',result:'成功'},
+    {id:7,user:'super',time:'2026-05-24 11:12:08',type:'导出',module:'小文助手',content:'导出文档：工作总结报告-5月 (DOCX)',result:'成功'},
+    {id:8,user:'admin',time:'2026-05-23 09:45:22',type:'新增',module:'国家安全知识库',content:'上传共享文件夹：2026年政策文件汇编',result:'成功'},
+    {id:9,user:'qiantai2',time:'2026-05-23 14:20:05',type:'问答',module:'小文助手',content:'知识库问答：检索素材并推荐模板',result:'成功'},
+    {id:10,user:'admin',time:'2026-05-22 16:10:30',type:'问答',module:'智会通',content:'AI Agent智能问答：会议待办事项查询',result:'成功'},
+  ],
+  books:[
+    {id:1,barcode:'0005987986',name:'中华人民共和国数据安全法释义',author:'-',publisher:'-',year:'',code:'DZ1-3',cat1:'',cat2:'',status:'解析成功'},
+    {id:2,barcode:'0005923456',name:'中华人民共和国网络安全法解读',author:'-',publisher:'-',year:'',code:'DZ1-3',cat1:'',cat2:'',status:'解析成功'},
+    {id:3,barcode:'0005623326',name:'国家安全思想与理论',author:'刘跃进',publisher:'时事出版社',year:'2020',code:'DZ4-3',cat1:'国家安全',cat2:'思想理论',status:'解析成功'},
+    {id:4,barcode:'0005711234',name:'国家安全战略',author:'李大光',publisher:'军事科学出版社',year:'2021',code:'D631',cat1:'国家安全',cat2:'战略',status:'解析中'},
+    {id:5,barcode:'0005854567',name:'总体国家安全观学习纲要',author:'中共中央',publisher:'人民出版社',year:'2022',code:'D631',cat1:'国家安全',cat2:'理论',status:'解析成功'},
+    {id:6,barcode:'YY0068100',name:'中华人民共和国医药行业标准:医用内窥镜 纤维内窥镜',author:'国家药品监督管理局',publisher:'中国标准出版社',year:'2023',code:'C40',cat1:'a112a112',cat2:'',status:'未解析'},
+  ],
+  parse:[
+    {id:1,barcode:'BK001006',title:'国家数据安全治理',author:'赵鹏',publisher:'法律出版社',year:'2023',edition:'1版',code:'D922',cat1:'数据安全',cat2:'治理',status:'已匹配'},
+    {id:2,barcode:'BK001007',title:'网络安全法教程',author:'周汉华',publisher:'中国人民大学出版社',year:'2022',edition:'2版',code:'D922',cat1:'网络安全',cat2:'法律',status:'已匹配'},
+    {id:3,barcode:'BK001008',title:'海外利益安全研究',author:'张晓通',publisher:'世界知识出版社',year:'2023',edition:'1版',code:'D822',cat1:'海外利益',cat2:'安全',status:'未匹配'},
+  ],
+  writeTemplates:[
+    {id:1,name:'通知-标准格式',type:'通知',uses:128,exports:89,rate:'69.5%',status:'启用',created:'2026-01-15 10:00:00'},
+    {id:2,name:'请示-标准格式',type:'请示',uses:96,exports:62,rate:'64.6%',status:'启用',created:'2026-01-15 10:30:00'},
+    {id:3,name:'报告-工作汇报',type:'报告',uses:82,exports:52,rate:'63.4%',status:'启用',created:'2026-01-18 09:00:00'},
+    {id:4,name:'通报-表彰通报',type:'通报',uses:65,exports:41,rate:'63.1%',status:'启用',created:'2026-02-01 09:00:00'},
+    {id:5,name:'函-商洽函',type:'函',uses:45,exports:38,rate:'84.4%',status:'启用',created:'2026-02-10 14:00:00'},
+    {id:6,name:'会议纪要-通用格式',type:'会议纪要',uses:72,exports:48,rate:'66.7%',status:'启用',created:'2026-02-15 11:00:00'},
+    {id:7,name:'工作方案-项目方案',type:'工作方案',uses:58,exports:35,rate:'60.3%',status:'启用',created:'2026-03-01 11:00:00'},
+    {id:8,name:'总结材料-年度总结',type:'总结材料',uses:52,exports:30,rate:'57.7%',status:'启用',created:'2026-03-10 16:00:00'},
+    {id:9,name:'计划与规划-五年规划',type:'计划与规划',uses:38,exports:22,rate:'57.9%',status:'启用',created:'2026-03-20 16:00:00'},
+    {id:10,name:'意见建议-征求意见',type:'意见建议',uses:29,exports:15,rate:'51.7%',status:'停用',created:'2026-04-01 10:00:00'},
+  ],
+  prompts:{
+    kb:[
+      {id:1,name:'安全领域问答Prompt',scene:'问答',desc:'针对国家安全领域的专业问答Prompt',content:'你是一名国家安全领域的专业顾问，请基于提供的知识库内容，准确回答用户关于国家安全领域的问题。要求：\n1. 回答需引用具体知识来源\n2. 区分不同安全领域的边界\n3. 对涉密内容提示脱敏处理\n4. 不确定的内容明确标注',status:'启用',updated:'2026-05-20 10:30'},
+      {id:2,name:'图书检索Prompt',scene:'检索',desc:'基于图书资源的智能检索Prompt',content:'你是一名图书检索助手，请根据用户输入的关键词，从知识库中匹配最相关的图书资源。要求：\n1. 支持模糊匹配和语义搜索\n2. 返回结果按相关度排序\n3. 每次最多返回10条结果\n4. 标注匹配的关键词和段落',status:'启用',updated:'2026-05-18 14:20'},
+      {id:3,name:'知识摘要生成Prompt',scene:'摘要',desc:'自动生成知识内容摘要的Prompt',content:'你是一名知识摘要专家，请对提供的国家安全知识内容进行精炼摘要。要求：\n1. 摘要不超过300字\n2. 保留核心观点和关键数据\n3. 按逻辑结构组织摘要内容\n4. 标注信息来源',status:'停用',updated:'2026-05-15 09:45'},
+    ],
+    zht:[
+      {id:4,name:'会议纪要生成Prompt',scene:'摘要',desc:'自动生成结构化会议纪要的Prompt',content:'你是一名会议纪要助手，请根据会议转写内容生成标准化会议纪要。要求：\n1. 包含会议主题、参会人员、时间地点\n2. 按议题结构化整理讨论内容\n3. 明确标注决策事项和待办任务\n4. 未决事项单独列出',status:'启用',updated:'2026-05-22 16:00'},
+      {id:5,name:'思维导图生成Prompt',scene:'摘要',desc:'基于会议议题自动生成思维导图的Prompt',content:'你是一名思维导图生成助手，请根据会议内容生成可视化思维导图。要求：\n1. 以会议主题为中心节点\n2. 按议题和子议题展开分支\n3. 标注关键发言人和决策点\n4. 生成Mermaid格式输出',status:'启用',updated:'2026-05-21 11:30'},
+      {id:6,name:'语音转写优化Prompt',scene:'转写',desc:'优化语音转写结果的Prompt',content:'你是一名语音转写优化助手，请对转写文本进行优化处理。要求：\n1. 修正语音识别错误\n2. 补充标点符号\n3. 按说话人分段标注\n4. 保留口语化表达的同时提升可读性',status:'启用',updated:'2026-05-19 15:00'},
+      {id:7,name:'AI Agent问答Prompt',scene:'问答',desc:'智会通AI Agent智能问答Prompt',content:'你是智会通的AI Agent智能问答助手，请基于所选会议及历史会议内容，精准回答用户问题。要求：\n1. 关联上下文多轮交互，精准识别意图\n2. 支持追问与历史追溯\n3. 快速检索纪要、决策等内容\n4. 调用知识库辅助解答与推荐\n5. 内容可编辑留存',status:'启用',updated:'2026-05-23 09:00'},
+    ],
+    xwz:[
+      {id:8,name:'公文写作Prompt',scene:'写作',desc:'公文写作场景的核心Prompt',content:'你是一名公文写作助手，请根据用户需求生成规范的公文。要求：\n1. 严格遵循公文格式规范\n2. 语言正式、严谨，符合党政机关公文标准\n3. 结构清晰，逻辑严密\n4. 支持通知、请示、报告、通报、函、会议纪要、工作方案、总结材料、计划与规划、意见建议等公文类型\n5. 内容智能校对，自动校正错别字\n6. 确保行文规范，符合B端/G端办公场景',status:'启用',updated:'2026-05-22 10:00'},
+      {id:9,name:'知识库问答Prompt',scene:'问答',desc:'小文助手知识库问答场景的Prompt',content:'你是小文助手的知识库问答助手，请基于写作素材库和知识库为用户提供精准问答服务。要求：\n1. 结合用户写作上下文理解问题\n2. 从素材库检索相关内容辅助回答\n3. 推荐可用的写作模板和素材\n4. 支持多轮对话深入理解需求\n5. 问答内容可引用至写作区',status:'启用',updated:'2026-05-23 14:00'},
+      {id:10,name:'素材推荐Prompt',scene:'检索',desc:'根据写作内容智能推荐素材的Prompt',content:'根据用户当前写作内容和上下文，从素材库中推荐最相关的素材资源。要求：\n1. 分析写作主题和关键词\n2. 匹配素材库中的模板、文本、图片等\n3. 返回最多5条推荐\n4. 说明推荐理由',status:'启用',updated:'2026-05-23 14:00'},
+    ],
+  },
+  users:[
+    {id:257,account:'houtai1',name:'后台1',org:'北京昇腾创新人工智能有限公司',role:'后台管理员',phone:'13800000001',email:'',gender:'',status:'正常',created:'2025-11-17 14:03:41',remark:''},
+    {id:258,account:'qiantai2',name:'前台用户2',org:'北京昇腾创新人工智能有限公司',role:'前台用户',phone:'13900000002',email:'',gender:'',status:'正常',created:'2025-11-18 15:40:37',remark:''},
+    {id:259,account:'hehe',name:'贺文欣',org:'北京昇腾创新人工智能有限公司',role:'前台用户',phone:'13700000001',email:'',gender:'女',status:'正常',created:'2025-11-20 09:21:02',remark:''},
+    {id:260,account:'qiantai3',name:'前台3',org:'北京昇腾创新人工智能有限公司',role:'前台用户',phone:'',email:'',gender:'',status:'正常',created:'2025-11-20 11:11:30',remark:''},
+    {id:261,account:'admin',name:'超级管理员',org:'北京昇腾创新人工智能有限公司',role:'后台管理员',phone:'',email:'',gender:'',status:'正常',created:'2025-08-15 20:54:38',remark:''},
+    {id:262,account:'fayuan_admin',name:'法院管理员',org:'3123123',role:'法院后台管理员',phone:'',email:'',gender:'',status:'正常',created:'2026-01-26 09:47:04',remark:''},
+  ],
+  roles:[
+    {id:137,name:'后台管理员',key:'Gadmin',order:0,created:'2025-08-15 20:54:38',status:'正常'},
+    {id:141,name:'前台用户',key:'qiantai',order:1,created:'2025-11-14 15:54:52',status:'正常'},
+    {id:142,name:'法院后台管理员',key:'legacy',order:4,created:'2026-01-26 09:47:04',status:'正常'},
+  ],
+  roleUsers:{
+    137:[{account:'houtail',name:'后台1',email:'-',phone:'-',status:'正常',created:'2025-11-17 14:03:41'},{account:'shengteng1',name:'昇腾测试',email:'-',phone:'-',status:'正常',created:'2025-12-22 14:29:00'}],
+    141:[{account:'qiantai2',name:'前台用户2',email:'-',phone:'-',status:'正常',created:'2025-11-14 15:54:52'}],
+    142:[{account:'fayuan_admin',name:'法院管理员',email:'-',phone:'-',status:'正常',created:'2026-01-26 09:47:04'}]
+  },
+  availableUsers:[
+    {account:'33070223test',name:'33070223test',email:'-',phone:'-',status:'停用',created:'2025-12-11 16:04:39'},
+    {account:'newuser01',name:'新用户01',email:'new01@test.com',phone:'13800000001',status:'正常',created:'2026-02-15 10:30:00'},
+    {account:'newuser02',name:'新用户02',email:'-',phone:'-',status:'正常',created:'2026-03-20 14:00:00'}
+  ],
+  orgs:[
+    {id:1,name:'3123123',order:0,leader:'',phone:'',email:'',created:'2025-11-26 11:20:36'},
+    {id:2,name:'ceshi',order:0,leader:'',phone:'',email:'',created:'2025-11-27 11:35:38'},
+    {id:3,name:'111',order:0,leader:'',phone:'',email:'',created:'2025-11-27 17:08:10'},
+    {id:4,name:'北京昇腾创新人工智能有限公司',order:0,leader:'',phone:'',email:'',created:''},
+  ],
+};
+
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function execRTE(cmd,val){document.execCommand(cmd,false,val||null)}
+
+// 数据统计-下拉框切换
+function switchDashScope(val){
+  document.getElementById('dashScopeAll').style.display=val==='all'?'':'none';
+  document.getElementById('dashScopeKb').style.display=val==='kb'?'':'none';
+  document.getElementById('dashScopeZht').style.display=val==='zht'?'':'none';
+  document.getElementById('dashScopeXwz').style.display=val==='xwz'?'':'none';
+  if(val==='kb')initKbDashCharts();
+  if(val==='zht')initZhtDashCharts();
+  if(val==='xwz')initXwzDashCharts();
+}
+function setDashTimeTab(el){el.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');showToast('已切换至: '+el.textContent.trim())}
+
+function toggleSub(el){const sub=el.nextElementSibling;if(!sub||!sub.classList.contains('sub-menu'))return;sub.classList.toggle('open');const a=el.querySelector('.menu-arrow');if(a)a.classList.toggle('open')}
+function switchPage(pid,el,bc){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+pid).classList.add('active');if(el){document.querySelectorAll('.menu-item,.sub-item').forEach(m=>m.classList.remove('active'));el.classList.add('active')}document.getElementById('breadcrumb').innerHTML='当前位置: <span>'+bc+'</span>';renderPage(pid)}
+function renderPage(pid){switch(pid){case'announcement':renderAnnTable();break;case'logs':renderLogTable();break;case'books':renderBookTable();renderParseTable();break;case'writeTemplates':renderWriteTemplateTable();break;case'promptManage':renderPromptList(currentPromptScope);break;case'users':renderUserTable();break;case'roles':renderRoleTable();break;case'orgs':renderOrgTable();break;case'dashboard':initDashCharts();break}}
+function toggleTreeNode(el){const ch=el.nextElementSibling;if(!ch||!ch.classList.contains('tree-children'))return;ch.classList.toggle('open');const a=el.querySelector('.arrow');if(a)a.classList.toggle('open')}
+function selectTreeNode(el,n){document.querySelectorAll('.tree-node').forEach(x=>x.classList.remove('active'));el.classList.add('active');showToast('选择分类: '+n)}
+function toggleAllBooks(el){document.querySelectorAll('.book-check').forEach(c=>c.checked=el.checked)}
+
+// 图书资源Tab
+function switchBookTab(tab,el){document.querySelectorAll('#page-books .inner-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.getElementById('bookListView').style.display=tab==='list'?'':'none';document.getElementById('bookParseView').style.display=tab==='parse'?'':'none'}
+
+// === Announcements ===
+function renderAnnTable(){const tb=document.getElementById('annTableBody');tb.innerHTML=D.ann.map((d,i)=>`<tr><td>${i+1}</td><td>${d.title}</td><td>${d.date}</td><td><button class="btn-link" onclick="viewAnn(${d.id})">详情</button><button class="btn-link" onclick="editAnn(${d.id})">编辑</button><button class="btn-link danger" onclick="deleteAnn(${d.id})">删除</button></td></tr>`).join('');document.getElementById('annPagination').innerHTML=`当前第1页,共${D.ann.length}条数据`}
+function openAnnModal(id){editingId=id||null;document.getElementById('annModalTitle').textContent=id?'编辑公告':'新增公告';if(id){const d=D.ann.find(a=>a.id===id);document.getElementById('annFormTitle').value=d.title;document.getElementById('annFormContent').innerText=d.content}else{document.getElementById('annFormTitle').value='';document.getElementById('annFormContent').innerText=''}document.getElementById('annModal').classList.add('show')}
+function viewAnn(id){const d=D.ann.find(a=>a.id===id);document.getElementById('annDetailBody').innerHTML=`<div class="detail-row"><div class="detail-label">标题</div><div class="detail-value">${d.title}</div></div><div class="detail-row"><div class="detail-label">创建日期</div><div class="detail-value">${d.date}</div></div><div class="detail-row"><div class="detail-label">内容</div><div class="detail-value">${d.content}</div></div>`;document.getElementById('annDetailModal').classList.add('show')}
+function editAnn(id){openAnnModal(id)}
+function deleteAnn(id){if(!confirm('确认删除？'))return;D.ann=D.ann.filter(a=>a.id!==id);renderAnnTable();showToast('删除成功')}
+function saveAnn(){const t=document.getElementById('annFormTitle').value.trim(),c=document.getElementById('annFormContent').innerText.trim();if(!t){showToast('请输入标题');return}if(editingId){const d=D.ann.find(a=>a.id===editingId);d.title=t;d.content=c;showToast('修改成功')}else{D.ann.unshift({id:++nextId,title:t,date:new Date().toISOString().slice(0,10),content:c});showToast('新增成功')}closeModal('annModal');renderAnnTable()}
+
+// === Logs ===
+function renderLogTable(){
+  const filterUser=document.getElementById('logFilterUser').value.trim().toLowerCase();
+  const filterType=document.getElementById('logFilterType').value;
+  const filterModule=document.getElementById('logFilterModule').value;
+  const filterStart=document.getElementById('logFilterStart').value;
+  const filterEnd=document.getElementById('logFilterEnd').value;
+  let filtered=D.logs;
+  if(filterUser)filtered=filtered.filter(d=>d.user.toLowerCase().includes(filterUser));
+  if(filterType)filtered=filtered.filter(d=>d.type===filterType);
+  if(filterModule)filtered=filtered.filter(d=>d.module===filterModule);
+  if(filterStart)filtered=filtered.filter(d=>d.time>=filterStart);
+  if(filterEnd)filtered=filtered.filter(d=>d.time<=filterEnd+'z');
+  const tb=document.getElementById('logTableBody');
+  tb.innerHTML=filtered.map((d,i)=>{const tc=d.type==='删除'?'tag-error':d.type==='新增'?'tag-success':d.type==='问答'?'tag-blue':d.type==='录音'||d.type==='转写'?'tag-purple':d.type==='写作'?'tag-cyan':d.type==='导出'?'tag-orange':'tag-warning';return`<tr><td>${i+1}</td><td>${d.user}</td><td>${d.time}</td><td><span class="tag ${tc}">${d.type}</span></td><td>${d.module}</td><td style="max-width:260px;overflow:hidden;text-overflow:ellipsis">${d.content}</td><td><span class="tag tag-success">${d.result}</span></td></tr>`}).join('');document.getElementById('logPagination').innerHTML=`当前第1页,共${filtered.length}条数据`}
+
+// === Books ===
+function renderBookTable(){
+  const filterName=document.getElementById('bookFilterName').value.trim().toLowerCase();
+  const filterStatus=document.getElementById('bookFilterStatus').value;
+  let filtered=D.books;
+  if(filterName)filtered=filtered.filter(d=>d.name.toLowerCase().includes(filterName));
+  if(filterStatus)filtered=filtered.filter(d=>d.status===filterStatus);
+  const tb=document.getElementById('bookTableBody');tb.innerHTML=filtered.map(d=>{
+    const st=d.status==='解析成功'?'tag-success':d.status==='推送中'?'tag-purple':d.status==='解析中'?'tag-blue':d.status==='解析失败'?'tag-error':'tag-warning';
+    const pushBtn=(d.status==='解析成功'||d.status==='未解析'||d.status==='解析失败')?'<button class="btn-link" onclick="pushBook('+d.id+')">推送</button>':'';
+    return`<tr><td><input type="checkbox" class="book-check" value="${d.id}"></td><td>${d.barcode}</td><td>${d.name}</td><td>${d.author}</td><td>${d.publisher}</td><td>${d.year}</td><td>${d.code}</td><td id="cat1-${d.id}">${d.cat1}</td><td id="cat2-${d.id}">${d.cat2}</td><td><span class="tag ${st}">${d.status}</span></td><td>${pushBtn}<button class="btn-link" onclick="openBookViewer(${d.id})">查看</button><button class="btn-link" onclick="openEditCatModal(${d.id})">编辑分类</button></td></tr>`}).join('');document.getElementById('bookPagination').innerHTML=`当前第1页,共${filtered.length}条数据`}
+function pushBook(id){const d=D.books.find(b=>b.id===id);if(d.status==='解析成功'){d.status='推送中';showToast('已推送，状态变为推送中')}else{d.status='解析中';showToast('已推送，状态变为解析中')}renderBookTable()}
+function openEditCatModal(id){const d=D.books.find(b=>b.id===id);document.getElementById('editCatBookName').value=d.name;const sel=document.getElementById('editCatLevel');sel.value=d.cat1||'';document.getElementById('editCatBookId').value=id;document.getElementById('editCatModal').classList.add('show')}
+function saveEditCat(){const id=+document.getElementById('editCatBookId').value;const d=D.books.find(b=>b.id===id);d.cat1=document.getElementById('editCatLevel').value;renderBookTable();closeModal('editCatModal');showToast('分类已更新')}
+function openBookViewer(id){const d=D.books.find(b=>b.id===id);if(!d)return;currentViewBook=d;document.getElementById('viewerBookTitle').textContent=d.name;document.getElementById('viewerBreadcrumb').innerHTML='资源管理 / 图书资源 / 图书编辑';document.getElementById('bookViewerOverlay').classList.add('show');switchViewerTab('catalog',document.querySelector('.viewer-tab[data-tab="catalog"]'))}
+function closeBookViewer(){document.getElementById('bookViewerOverlay').classList.remove('show');currentViewBook=null;if(viewerFull){document.body.classList.remove('viewer-fullscreen');viewerFull=false;document.getElementById('btnFullScreen').textContent='全屏'}if(viewerSplit){document.getElementById('bookViewerOverlay').classList.remove('viewer-split');viewerSplit=false}}
+function toggleSplitScreen(){
+  viewerSplit=!viewerSplit;
+  document.getElementById('bookViewerOverlay').classList.toggle('viewer-split',viewerSplit);
+  document.getElementById('btnSplitScreen').textContent=viewerSplit?'切换左右分屏':'切换左右分屏';
+  showToast(viewerSplit?'已切换为左右分屏':'已恢复默认布局')
+}
+function toggleFullScreen(){
+  viewerFull=!viewerFull;
+  document.body.classList.toggle('viewer-fullscreen',viewerFull);
+  if(viewerFull){
+    document.getElementById('btnFullScreen').textContent='收起';
+    document.getElementById('bookViewerOverlay').classList.add('show')
+  }else{
+    document.getElementById('btnFullScreen').textContent='全屏'
+  }
+  showToast(viewerFull?'已进入全屏模式':'已退出全屏模式')
+}
+function switchViewerTab(tab,el){document.querySelectorAll('.viewer-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.getElementById('viewerTabCatalog').style.display=tab==='catalog'?'':'none';document.getElementById('viewerTabSummary').style.display=tab==='summary'?'':'none';document.getElementById('viewerTabCharts').style.display=tab==='charts'?'':'none'}
+function toggleSummarySection(el){const body=el.nextElementSibling;if(body)body.style.display=body.style.display==='none'?'':'none';el.querySelector('.arrow').classList.toggle('open')}
+function openAddCatalogModal(){document.getElementById('catalogFormName').value='';document.getElementById('catalogFormPage').value='1';document.getElementById('catalogFormOrder').value='1';document.getElementById('catalogFormParent').selectedIndex=0;document.getElementById('addCatalogModal').classList.add('show')}
+function saveAddCatalog(){const n=document.getElementById('catalogFormName').value.trim();if(!n){showToast('请输入目录名称');return}showToast('目录 "'+n+'" 新增成功');closeModal('addCatalogModal')}
+function adjustNum(id,delta){const inp=document.getElementById(id);let v=parseInt(inp.value)||0;v=Math.max(0,v+delta);inp.value=v}
+function editChartDesc(el){const p=el.closest('.chart-desc-item');const desc=p.querySelector('.chart-ai-desc');const txt=desc.textContent;desc.innerHTML=`<input style="width:100%;height:28px;border:1px solid #1890ff;border-radius:3px;padding:0 6px;font-size:12px" value="${txt}" onblur="saveChartDesc(this)" onkeydown="if(event.key==='Enter')this.blur()">`;desc.querySelector('input').focus()}
+function saveChartDesc(inp){const p=inp.closest('.chart-desc-item');inp.parentElement.textContent=inp.value;showToast('描述已保存')}
+function locateOriginal(){showToast('已定位到原文位置')}
+function deleteChartItem(el){if(!confirm('确认删除？'))return;el.closest('.chart-desc-item').remove();showToast('已删除')}
+function toggleCatalogChildren(el){const ch=el.nextElementSibling;if(!ch||!ch.classList.contains('catalog-children'))return;ch.classList.toggle('open');const a=el.querySelector('.arrow');if(a)a.classList.toggle('open')}
+function openAddLevelModal(){document.getElementById('levelFormName').value='';document.getElementById('levelFormCode').value='';document.getElementById('levelFormOrder').value='0';document.getElementById('levelFormParent').selectedIndex=0;document.getElementById('addLevelModal').classList.add('show')}
+function saveAddLevel(){const n=document.getElementById('levelFormName').value.trim();const c=document.getElementById('levelFormCode').value.trim();if(!n||!c){showToast('请填写层级名称和编码');return}showToast('层级 "'+n+'" 新增成功');closeModal('addLevelModal')}
+function openBookUploadModal(){document.getElementById('bookFormName').value='';document.getElementById('bookFormAuthor').value='';document.getElementById('bookFormPublisher').value='';document.getElementById('bookFormCategory').value='';document.getElementById('bookUploadModal').classList.add('show')}
+function saveBookUpload(){const n=document.getElementById('bookFormName').value.trim();if(!n){showToast('请输入书名');return}D.books.push({id:++nextId,barcode:'NEW'+String(nextId).padStart(6,'0'),name:n,author:document.getElementById('bookFormAuthor').value||'-',publisher:document.getElementById('bookFormPublisher').value||'-',year:new Date().getFullYear().toString(),code:document.getElementById('bookFormCategory').value||'-',cat1:document.getElementById('bookFormCategory').value||'-',cat2:'',status:'未解析'});closeModal('bookUploadModal');renderBookTable();showToast('上传成功')}
+function batchDeleteBooks(){const ck=document.querySelectorAll('.book-check:checked');if(!ck.length){showToast('请先选择');return}if(!confirm(`确认删除${ck.length}本？`))return;const ids=Array.from(ck).map(c=>+c.value);D.books=D.books.filter(b=>!ids.includes(b.id));renderBookTable();showToast('删除成功')}
+
+// === Parse ===
+function renderParseTable(){const tb=document.getElementById('parseTableBody');tb.innerHTML=D.parse.map((d,i)=>{const st=d.status==='已匹配'?'tag-success':'tag-warning';return`<tr><td>${i+1}</td><td>${d.barcode}</td><td>${d.title}</td><td>${d.author}</td><td>${d.publisher}</td><td>${d.year}</td><td>${d.edition}</td><td>${d.code}</td><td>${d.cat1}</td><td>${d.cat2}</td><td><span class="tag ${st}">${d.status}</span></td><td><button class="btn-link" onclick="openParseEditModal(${d.id})">修改</button></td></tr>`}).join('');document.getElementById('parsePagination').innerHTML=`当前第1页,共${D.parse.length}条数据`}
+function openParseEditModal(id){
+  editingId=id;
+  const d=D.parse.find(p=>p.id===id);
+  document.getElementById('parseFormBarcode').value=d.barcode;
+  document.getElementById('parseFormTitle').value=d.title;
+  document.getElementById('parseFormAuthor').value=d.author;
+  document.getElementById('parseFormPublisher').value=d.publisher;
+  document.getElementById('parseFormEdition').value=d.edition;
+  document.getElementById('parseFormCode').value=d.code;
+  document.getElementById('parseFormYear').value=d.year;
+  document.getElementById('parseEditModal').classList.add('show')
+}
+function saveParseEdit(){
+  const d=D.parse.find(p=>p.id===editingId);
+  d.barcode=document.getElementById('parseFormBarcode').value.trim();
+  d.title=document.getElementById('parseFormTitle').value.trim();
+  d.author=document.getElementById('parseFormAuthor').value.trim();
+  d.publisher=document.getElementById('parseFormPublisher').value.trim();
+  d.edition=document.getElementById('parseFormEdition').value.trim();
+  d.code=document.getElementById('parseFormCode').value.trim();
+  d.year=document.getElementById('parseFormYear').value;
+  closeModal('parseEditModal');renderParseTable();showToast('修改成功')
+}
+
+// === Write Templates ===
+function renderWriteTemplateTable(){
+  const filterName=document.getElementById('wtFilterName').value.trim().toLowerCase();
+  const filterType=document.getElementById('wtFilterType').value;
+  const filterStatus=document.getElementById('wtFilterStatus').value;
+  let filtered=D.writeTemplates;
+  if(filterName)filtered=filtered.filter(d=>d.name.toLowerCase().includes(filterName));
+  if(filterType)filtered=filtered.filter(d=>d.type===filterType);
+  if(filterStatus)filtered=filtered.filter(d=>d.status===filterStatus);
+  const tb=document.getElementById('writeTemplateTableBody');tb.innerHTML=filtered.map((d,i)=>{const st=d.status==='启用'?'tag-success':'tag-error';const typeColors={'通知':'tag-blue','请示':'tag-purple','报告':'tag-cyan','通报':'tag-orange','函':'tag-warning','会议纪要':'tag-success','工作方案':'tag-blue','总结材料':'tag-purple','计划与规划':'tag-cyan','意见建议':'tag-orange'};const actionBtn=d.status==='启用'?'<button class="btn-link danger" onclick="toggleWriteTemplateStatus('+d.id+')">停用</button>':'<button class="btn-link" onclick="toggleWriteTemplateStatus('+d.id+')" style="color:#52c41a">启用</button>';return`<tr><td>${i+1}</td><td>${d.name}</td><td><span class="tag ${typeColors[d.type]||'tag-default'}">${d.type}</span></td><td>${d.uses}</td><td>${d.exports}</td><td style="color:${parseFloat(d.rate)>50?'#52c41a':'#faad14'};font-weight:600">${d.rate}</td><td><span class="tag ${st}">${d.status}</span></td><td>${d.created}</td><td><button class="btn-link" onclick="editWriteTemplate(${d.id})">编辑</button>${actionBtn}</td></tr>`}).join('');document.getElementById('writeTemplatePagination').innerHTML=`当前第1页,共${filtered.length}条数据`}
+function toggleWriteTemplateStatus(id){const d=D.writeTemplates.find(t=>t.id===id);d.status=d.status==='启用'?'停用':'启用';renderWriteTemplateTable();showToast(d.status==='启用'?'已启用':'已停用')}
+function openWriteTemplateModal(id){editingId=id||null;document.getElementById('wtModalTitle').textContent=id?'编辑写作模板':'新增写作模板';if(id){const d=D.writeTemplates.find(t=>t.id===id);document.getElementById('wtFormName').value=d.name;document.getElementById('wtFormType').value=d.type;document.getElementById('wtFormDesc').value=d.desc||'';document.getElementById('wtFormStatus').value=d.status}else{document.getElementById('wtFormName').value='';document.getElementById('wtFormType').selectedIndex=0;document.getElementById('wtFormDesc').value='';document.getElementById('wtFormStatus').selectedIndex=0}document.getElementById('writeTemplateModal').classList.add('show')}
+function editWriteTemplate(id){openWriteTemplateModal(id)}
+function saveWriteTemplate(){const n=document.getElementById('wtFormName').value.trim();if(!n){showToast('请输入模板名称');return}if(editingId){const d=D.writeTemplates.find(t=>t.id===editingId);d.name=n;d.type=document.getElementById('wtFormType').value;d.desc=document.getElementById('wtFormDesc').value;d.status=document.getElementById('wtFormStatus').value;showToast('修改成功')}else{D.writeTemplates.push({id:++nextId,name:n,type:document.getElementById('wtFormType').value,uses:0,exports:0,rate:'0%',status:document.getElementById('wtFormStatus').value,created:new Date().toISOString().slice(0,19).replace('T',' ')});showToast('新增成功')}closeModal('writeTemplateModal');renderWriteTemplateTable()}
+
+// === Prompt Management (merged) ===
+function switchPromptScope(scope,el){
+  currentPromptScope=scope;
+  document.querySelectorAll('.prompt-scope-tabs .scope-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderPromptList(scope);
+}
+function renderPromptList(scope){
+  const list=D.prompts[scope]||[];
+  const container=document.getElementById('promptListContainer');
+  container.innerHTML=list.map(p=>{
+    const st=p.status==='启用'?'tag-success':'tag-error';
+    return`<div class="prompt-card">
+      <div class="prompt-header">
+        <div class="prompt-name">${p.name}</div>
+        <div style="display:flex;gap:6px;align-items:center"><span class="tag tag-blue">${p.scene}</span><span class="tag ${st}">${p.status}</span></div>
+      </div>
+      <div class="prompt-desc">${p.desc}</div>
+      <div class="prompt-body">${p.content}</div>
+      <div class="prompt-actions">
+        <button class="btn" onclick="editPrompt('${scope}',${p.id})">编辑</button>
+        <button class="btn" onclick="togglePrompt('${scope}',${p.id})">${p.status==='启用'?'停用':'启用'}</button>
+        <button class="btn btn-danger" onclick="deletePrompt('${scope}',${p.id})">删除</button>
+        <span style="font-size:11px;color:#999;margin-left:auto">更新: ${p.updated}</span>
+      </div>
+    </div>`}).join('');
+}
+function openPromptModal(scope,id){
+  editingPromptScope=scope;editingId=id||null;
+  document.getElementById('promptModalTitle').textContent=id?'编辑Prompt':'新增Prompt';
+  if(id){
+    const p=D.prompts[scope].find(x=>x.id===id);
+    document.getElementById('promptFormName').value=p.name;
+    document.getElementById('promptFormScene').value=p.scene;
+    document.getElementById('promptFormDesc').value=p.desc;
+    document.getElementById('promptFormContent').value=p.content;
+    document.getElementById('promptFormStatus').value=p.status;
+  }else{
+    document.getElementById('promptFormName').value='';
+    document.getElementById('promptFormScene').selectedIndex=0;
+    document.getElementById('promptFormDesc').value='';
+    document.getElementById('promptFormContent').value='';
+    document.getElementById('promptFormStatus').selectedIndex=0;
+  }
+  document.getElementById('promptModal').classList.add('show');
+}
+function editPrompt(scope,id){openPromptModal(scope,id)}
+function savePrompt(){
+  const n=document.getElementById('promptFormName').value.trim();
+  const c=document.getElementById('promptFormContent').value.trim();
+  if(!n||!c){showToast('请填写名称和内容');return}
+  const scope=editingPromptScope;
+  if(editingId){
+    const p=D.prompts[scope].find(x=>x.id===editingId);
+    p.name=n;p.scene=document.getElementById('promptFormScene').value;
+    p.desc=document.getElementById('promptFormDesc').value;p.content=c;
+    p.status=document.getElementById('promptFormStatus').value;
+    p.updated=new Date().toISOString().slice(0,16).replace('T',' ');
+    showToast('修改成功');
+  }else{
+    D.prompts[scope].push({id:++nextId,name:n,scene:document.getElementById('promptFormScene').value,desc:document.getElementById('promptFormDesc').value,content:c,status:document.getElementById('promptFormStatus').value,updated:new Date().toISOString().slice(0,16).replace('T',' ')});
+    showToast('新增成功');
+  }
+  closeModal('promptModal');renderPromptList(scope);
+}
+function togglePrompt(scope,id){
+  const p=D.prompts[scope].find(x=>x.id===id);
+  p.status=p.status==='启用'?'停用':'启用';
+  renderPromptList(scope);showToast(p.status==='启用'?'已启用':'已停用');
+}
+function deletePrompt(scope,id){
+  if(!confirm('确认删除该Prompt？'))return;
+  D.prompts[scope]=D.prompts[scope].filter(x=>x.id!==id);
+  renderPromptList(scope);showToast('删除成功');
+}
+
+// === Users ===
+let selectedOrgFilter='';
+function renderOrgTreeList(){
+  const el=document.getElementById('orgTreeList');
+  el.innerHTML=D.orgs.map(o=>`<div class="org-item${selectedOrgFilter===o.name?' active':''}" onclick="selectOrgFilter('${o.name}',this)">${o.name}</div>`).join('')
+}
+function selectOrgFilter(name,el){
+  if(selectedOrgFilter===name){selectedOrgFilter='';el.classList.remove('active')}else{selectedOrgFilter=name;document.querySelectorAll('.org-item').forEach(e=>e.classList.remove('active'));el.classList.add('active')}
+  renderUserTable()
+}
+function renderUserTable(){
+  renderOrgTreeList();
+  const fAccount=document.getElementById('userFilterAccount').value.trim().toLowerCase();
+  const fPhone=document.getElementById('userFilterPhone').value.trim().toLowerCase();
+  const fStatus=document.getElementById('userFilterStatus').value;
+  const fStart=document.getElementById('userFilterStart').value;
+  const fEnd=document.getElementById('userFilterEnd').value;
+  let filtered=D.users;
+  if(fAccount)filtered=filtered.filter(d=>d.account.toLowerCase().includes(fAccount));
+  if(fPhone)filtered=filtered.filter(d=>d.phone.includes(fPhone));
+  if(fStatus)filtered=filtered.filter(d=>d.status===fStatus);
+  if(selectedOrgFilter)filtered=filtered.filter(d=>d.org===selectedOrgFilter);
+  if(fStart)filtered=filtered.filter(d=>d.created>=fStart);
+  if(fEnd)filtered=filtered.filter(d=>d.created<=fEnd+'z');
+  const tb=document.getElementById('userTableBody');
+  tb.innerHTML=filtered.map(d=>{
+    const checked=d.status==='正常'?'checked':'';
+    return`<tr><td>${d.id}</td><td>${d.account}</td><td>${d.name}</td><td>${d.org.length>6?d.org.slice(0,6)+'...':d.org}</td><td>${d.role.length>6?d.role.slice(0,6)+'...':d.role}</td><td>${d.phone||'-'}</td><td><label class="switch"><input type="checkbox" ${checked} onchange="toggleUserStatus(${d.id},this)"><span class="slider"></span></label></td><td>${d.created}</td><td><button class="btn-link" onclick="editUser(${d.id})">修改</button><button class="btn-link danger" onclick="deleteUser(${d.id})">删除</button><button class="btn-link" onclick="resetUserPwd(${d.id})">重设密码</button></td></tr>`
+  }).join('');
+  document.getElementById('userPagination').innerHTML=`当前第1页,共${filtered.length}条数据`
+}
+function toggleUserStatus(id,el){
+  const d=D.users.find(u=>u.id===id);
+  const newStatus=d.status==='正常'?'停用':'正常';
+  pendingUserStatusId=id;
+  document.getElementById('userStatusMsg').innerHTML=`确认要"${newStatus}""${d.account}"用户吗?`;
+  document.getElementById('userStatusModal').classList.add('show');
+  el.checked=!el.checked
+}
+function cancelUserStatusChange(){
+  closeModal('userStatusModal');pendingUserStatusId=null
+}
+function confirmUserStatusChange(){
+  const d=D.users.find(u=>u.id===pendingUserStatusId);
+  d.status=d.status==='正常'?'停用':'正常';
+  closeModal('userStatusModal');pendingUserStatusId=null;renderUserTable();showToast('状态已更新')
+}
+function openUserModal(id){
+  editingId=id||null;
+  document.getElementById('userModalTitle').textContent=id?'修改用户':'新增用户';
+  if(id){
+    const d=D.users.find(u=>u.id===id);
+    document.getElementById('userFormName').value=d.name;
+    document.getElementById('userFormOrg').value=d.org;
+    document.getElementById('userFormPhone').value=d.phone;
+    document.getElementById('userFormEmail').value=d.email||'';
+    document.getElementById('userFormGender').value=d.gender||'';
+    document.getElementById('userFormRole').value=d.role;
+    document.getElementById('userFormRemark').value=d.remark||'';
+    const radios=document.querySelectorAll('input[name="userFormStatus"]');
+    radios.forEach(r=>{r.checked=r.value===d.status})
+  }else{
+    document.getElementById('userFormName').value='';
+    document.getElementById('userFormOrg').selectedIndex=0;
+    document.getElementById('userFormPhone').value='';
+    document.getElementById('userFormEmail').value='';
+    document.getElementById('userFormGender').selectedIndex=0;
+    document.getElementById('userFormRole').selectedIndex=0;
+    document.getElementById('userFormRemark').value='';
+    document.querySelector('input[name="userFormStatus"][value="正常"]').checked=true
+  }
+  document.getElementById('userModal').classList.add('show')
+}
+function editUser(id){openUserModal(id)}
+function saveUser(){
+  const n=document.getElementById('userFormName').value.trim();
+  const org=document.getElementById('userFormOrg').value;
+  const role=document.getElementById('userFormRole').value;
+  if(!n){showToast('请输入姓名');return}
+  if(!org){showToast('请选择所属组织');return}
+  if(!role){showToast('请选择角色');return}
+  const status=document.querySelector('input[name="userFormStatus"]:checked').value;
+  if(editingId){
+    const d=D.users.find(u=>u.id===editingId);
+    d.name=n;d.org=org;d.phone=document.getElementById('userFormPhone').value;
+    d.email=document.getElementById('userFormEmail').value;
+    d.gender=document.getElementById('userFormGender').value;
+    d.role=role;d.status=status;
+    d.remark=document.getElementById('userFormRemark').value;
+    showToast('修改成功')
+  }else{
+    D.users.push({id:++nextId,account:'user'+nextId,name:n,org:org,role:role,phone:document.getElementById('userFormPhone').value,email:document.getElementById('userFormEmail').value,gender:document.getElementById('userFormGender').value,status:status,created:new Date().toISOString().slice(0,19).replace('T',' '),remark:document.getElementById('userFormRemark').value});
+    showToast('新增成功')
+  }
+  closeModal('userModal');renderUserTable()
+}
+function deleteUser(id){
+  pendingDeleteUserId=id;
+  document.getElementById('userDeleteMsg').innerHTML=`是否确认删除用户编号为"${id}"的数据项?`;
+  document.getElementById('userDeleteModal').classList.add('show')
+}
+function confirmDeleteUser(){
+  D.users=D.users.filter(u=>u.id!==pendingDeleteUserId);
+  closeModal('userDeleteModal');pendingDeleteUserId=null;renderUserTable();showToast('删除成功')
+}
+function resetUserPwd(id){
+  pendingResetPwdId=id;
+  const d=D.users.find(u=>u.id===id);
+  document.getElementById('resetPwdMsg').innerHTML=`请输入"${d.account}"的新密码`;
+  document.getElementById('resetPwdInput').value='';
+  document.getElementById('resetPwdModal').classList.add('show')
+}
+function confirmResetPwd(){
+  const pwd=document.getElementById('resetPwdInput').value.trim();
+  if(!pwd){showToast('请输入新密码');return}
+  closeModal('resetPwdModal');pendingResetPwdId=null;showToast('密码已重置')
+}
+
+// === Roles ===
+function renderRoleTable(){
+  const fn=document.getElementById('roleFilterName').value.trim().toLowerCase();
+  const fk=document.getElementById('roleFilterKey').value.trim().toLowerCase();
+  const fs=document.getElementById('roleFilterStatus').value;
+  const fstart=document.getElementById('roleFilterStart').value;
+  const fend=document.getElementById('roleFilterEnd').value;
+  let filtered=D.roles;
+  if(fn)filtered=filtered.filter(d=>d.name.toLowerCase().includes(fn));
+  if(fk)filtered=filtered.filter(d=>d.key.toLowerCase().includes(fk));
+  if(fs)filtered=filtered.filter(d=>d.status===fs);
+  if(fstart)filtered=filtered.filter(d=>d.created>=fstart);
+  if(fend)filtered=filtered.filter(d=>d.created<=fend+'z');
+  const tb=document.getElementById('roleTableBody');
+  tb.innerHTML=filtered.map(d=>{
+    const checked=d.status==='正常'?'checked':'';
+    return`<tr><td>${d.id}</td><td>${d.name}</td><td>${d.key}</td><td>${d.order}</td><td><label class="switch"><input type="checkbox" ${checked} onchange="toggleRoleStatus(${d.id},this)"><span class="slider"></span></label></td><td>${d.created}</td><td><button class="btn-link" onclick="editRole(${d.id})">修改</button><button class="btn-link" onclick="openDataPermModal(${d.id})">数据权限</button><button class="btn-link" onclick="openAssignUser(${d.id})">分配用户</button></td></tr>`}).join('');
+  document.getElementById('rolePagination').innerHTML=`当前第1页,共${filtered.length}条数据`}
+function toggleRoleStatus(id,el){
+  if(!el.checked){
+    pendingStatusRoleId=id;
+    const d=D.roles.find(r=>r.id===id);
+    document.getElementById('roleConfirmMsg').textContent=`确认要"停用""${d.name}"角色吗?`;
+    document.getElementById('roleConfirmModal').classList.add('show');
+  }else{
+    const d=D.roles.find(r=>r.id===id);d.status='正常';showToast('已开启')
+  }
+}
+function cancelRoleStatusChange(){
+  const d=D.roles.find(r=>r.id===pendingStatusRoleId);d.status='正常';
+  closeModal('roleConfirmModal');renderRoleTable()
+}
+function confirmRoleStatusChange(){
+  const d=D.roles.find(r=>r.id===pendingStatusRoleId);d.status='停用';
+  closeModal('roleConfirmModal');renderRoleTable();showToast('已停用')
+}
+function buildPermTreeHTML(nodes,prefix){
+  return nodes.map((n,i)=>{
+    const id=prefix+'_'+i;
+    if(n.children&&n.children.length>0){
+      return`<div class="perm-tree-node"><div class="node-row"><span class="arrow open" onclick="togglePermNode(this)">▸</span><label><input type="checkbox" class="perm-cb" data-id="${id}" onchange="handlePermCheck(this)"> ${n.name}</label></div><div class="perm-tree-children open">${buildPermTreeHTML(n.children,id)}</div></div>`
+    }else{
+      return`<div class="perm-tree-node"><div class="node-row"><span class="arrow" style="visibility:hidden">▸</span><label><input type="checkbox" class="perm-cb" data-id="${id}" onchange="handlePermCheck(this)"> ${n.name}</label></div></div>`
+    }
+  }).join('')
+}
+function togglePermNode(el){
+  const ch=el.closest('.perm-tree-node').querySelector('.perm-tree-children');
+  if(ch){ch.classList.toggle('open');el.classList.toggle('open')}
+}
+function togglePermTreeAll(){
+  document.querySelectorAll('#permTree .perm-tree-children').forEach(el=>el.classList.toggle('open'));
+  document.querySelectorAll('#permTree .arrow').forEach(el=>{if(el.style.visibility!=='hidden')el.classList.toggle('open')})
+}
+function toggleAllPermCheck(el){
+  document.querySelectorAll('#permTree .perm-cb').forEach(cb=>cb.checked=el.checked)
+}
+function handlePermCheck(el){
+  const node=el.closest('.perm-tree-node');
+  const children=node.querySelectorAll('.perm-tree-children .perm-cb');
+  if(el.checked){children.forEach(cb=>cb.checked=true)}
+  if(!el.checked){children.forEach(cb=>cb.checked=false)}
+  if(document.getElementById('permLinkParent').checked){
+    const parent=node.parentElement.closest('.perm-tree-node');
+    if(parent){const pCb=parent.querySelector(':scope>.node-row .perm-cb');const sibs=parent.querySelectorAll(':scope>.perm-tree-children>.perm-tree-node>.node-row .perm-cb');pCb.checked=Array.from(sibs).some(c=>c.checked)}
+  }
+}
+function openRoleModal(id){
+  editingId=id||null;
+  document.getElementById('roleModalTitle').textContent=id?'修改角色':'新增角色';
+  document.getElementById('permTree').innerHTML=buildPermTreeHTML(menuPermTree,'p');
+  if(id){
+    const d=D.roles.find(r=>r.id===id);
+    document.getElementById('roleFormName').value=d.name;
+    document.getElementById('roleFormKey').value=d.key;
+    document.getElementById('roleFormOrder').value=d.order;
+    document.getElementById('roleFormStatus').value=d.status==='正常'?'正常':'停用';
+    if(d.id===137){document.querySelectorAll('#permTree .perm-cb').forEach(cb=>cb.checked=true)}
+  }else{
+    document.getElementById('roleFormName').value='';
+    document.getElementById('roleFormKey').value='';
+    document.getElementById('roleFormOrder').value='0';
+    document.querySelectorAll('#permTree .perm-cb').forEach(cb=>cb.checked=false)
+  }
+  document.getElementById('roleModal').classList.add('show')
+}
+function editRole(id){openRoleModal(id)}
+function saveRole(){
+  const n=document.getElementById('roleFormName').value.trim(),k=document.getElementById('roleFormKey').value.trim();
+  if(!n||!k){showToast('请填写完整');return}
+  if(editingId){
+    const d=D.roles.find(r=>r.id===editingId);
+    d.name=n;d.key=k;d.order=+document.getElementById('roleFormOrder').value;
+    d.status=document.getElementById('roleFormStatus').value;
+    showToast('修改成功')
+  }else{
+    D.roles.push({id:++nextId,name:n,key:k,order:+document.getElementById('roleFormOrder').value,created:new Date().toISOString().slice(0,19).replace('T',' '),status:document.getElementById('roleFormStatus').value});
+    showToast('新增成功')
+  }
+  closeModal('roleModal');renderRoleTable()
+}
+function openDataPermModal(id){
+  editingId=id;
+  document.getElementById('dataPermTree').innerHTML=buildPermTreeHTML(dataPermTreeData,'dp');
+  if(id===137){document.querySelectorAll('#dataPermTree .perm-cb').forEach(cb=>cb.checked=true)}
+  document.getElementById('dataPermModal').classList.add('show')
+}
+function saveDataPerm(){closeModal('dataPermModal');showToast('数据权限已保存')}
+function openAssignUser(roleId){
+  currentAssignRoleId=roleId;
+  document.getElementById('roleListView').style.display='none';
+  document.getElementById('assignUserView').classList.add('show');
+  const d=D.roles.find(r=>r.id===roleId);
+  document.getElementById('breadcrumb').innerHTML='当前位置: <span>系统管理 / 角色管理 / 分配角色</span>';
+  renderAssignUserTable()
+}
+function closeAssignUser(){
+  document.getElementById('roleListView').style.display='';
+  document.getElementById('assignUserView').classList.remove('show');
+  document.getElementById('breadcrumb').innerHTML='当前位置: <span>系统管理 / 角色管理 / 角色列表</span>';
+  currentAssignRoleId=null
+}
+function renderAssignUserTable(){
+  let users=D.roleUsers[currentAssignRoleId]||[];
+  const fu=document.getElementById('assignFilterUser').value.trim().toLowerCase();
+  const fp=document.getElementById('assignFilterPhone').value.trim().toLowerCase();
+  if(fu)users=users.filter(u=>u.account.toLowerCase().includes(fu));
+  if(fp)users=users.filter(u=>u.phone.toLowerCase().includes(fp));
+  const tb=document.getElementById('assignUserTableBody');
+  tb.innerHTML=users.map(u=>{const st=u.status==='正常'?'tag-success':'tag-error';return`<tr><td><input type="checkbox" class="assign-check" value="${u.account}"></td><td>${u.account}</td><td>${u.name}</td><td>${u.email}</td><td>${u.phone}</td><td><span class="tag ${st}">${u.status}</span></td><td>${u.created}</td><td><button class="btn-link danger" onclick="cancelAuth('${u.account}')">取消授权</button></td></tr>`}).join('');
+  document.getElementById('assignUserPagination').innerHTML=`当前第1页,共${users.length}条数据`
+}
+function toggleAllAssign(el){document.querySelectorAll('.assign-check').forEach(c=>c.checked=el.checked)}
+function cancelAuth(account){
+  const users=D.roleUsers[currentAssignRoleId];
+  D.roleUsers[currentAssignRoleId]=users.filter(u=>u.account!==account);
+  renderAssignUserTable();showToast('已取消授权')
+}
+function batchCancelAuth(){
+  const ck=document.querySelectorAll('.assign-check:checked');
+  if(!ck.length){showToast('请先选择用户');return}
+  const accounts=Array.from(ck).map(c=>c.value);
+  D.roleUsers[currentAssignRoleId]=D.roleUsers[currentAssignRoleId].filter(u=>!accounts.includes(u.account));
+  renderAssignUserTable();showToast('批量取消授权成功')
+}
+function openSelectUserModal(){
+  document.getElementById('selectFilterUser').value='';
+  document.getElementById('selectFilterPhone').value='';
+  renderSelectUserTable();
+  document.getElementById('selectUserModal').classList.add('show')
+}
+function renderSelectUserTable(){
+  let users=D.availableUsers.slice();
+  const fu=document.getElementById('selectFilterUser').value.trim().toLowerCase();
+  const fp=document.getElementById('selectFilterPhone').value.trim().toLowerCase();
+  if(fu)users=users.filter(u=>u.account.toLowerCase().includes(fu));
+  if(fp)users=users.filter(u=>u.phone.toLowerCase().includes(fp));
+  const tb=document.getElementById('selectUserTableBody');
+  tb.innerHTML=users.map(u=>{const st=u.status==='正常'?'tag-success':'tag-error';return`<tr><td><input type="checkbox" class="select-user-check" value="${u.account}"></td><td>${u.account}</td><td>${u.name}</td><td>${u.email}</td><td>${u.phone}</td><td><span class="tag ${st}">${u.status}</span></td><td>${u.created}</td></tr>`}).join('');
+  document.getElementById('selectUserPagination').innerHTML=`当前第1页,共${users.length}条数据`
+}
+function confirmSelectUser(){
+  const ck=document.querySelectorAll('.select-user-check:checked');
+  if(!ck.length){showToast('请选择用户');return}
+  const accounts=Array.from(ck).map(c=>c.value);
+  const users=D.availableUsers.filter(u=>accounts.includes(u.account));
+  if(!D.roleUsers[currentAssignRoleId])D.roleUsers[currentAssignRoleId]=[];
+  users.forEach(u=>{if(!D.roleUsers[currentAssignRoleId].find(e=>e.account===u.account))D.roleUsers[currentAssignRoleId].push(u)});
+  closeModal('selectUserModal');renderAssignUserTable();showToast('添加用户成功')
+}
+
+// === Orgs ===
+function renderOrgTable(){
+  const fn=document.getElementById('orgFilterName').value.trim().toLowerCase();
+  let filtered=D.orgs;
+  if(fn)filtered=filtered.filter(d=>d.name.toLowerCase().includes(fn));
+  const tb=document.getElementById('orgTableBody');
+  tb.innerHTML=filtered.map((d,i)=>`<tr><td>${i+1}</td><td>${d.name}</td><td>${d.created}</td><td><button class="btn-link" onclick="editOrg(${d.id})">修改</button><button class="btn-link danger" onclick="deleteOrg(${d.id})">删除</button></td></tr>`).join('');
+  document.getElementById('orgPagination').innerHTML=`当前第1页,共${filtered.length}条数据`
+}
+function openOrgModal(id){
+  editingId=id||null;
+  document.getElementById('orgModalTitle').textContent=id?'修改部门':'新增部门';
+  if(id){
+    const d=D.orgs.find(o=>o.id===id);
+    document.getElementById('orgFormName').value=d.name;
+    document.getElementById('orgFormOrder').value=d.order||0;
+    document.getElementById('orgFormLeader').value=d.leader||'';
+    document.getElementById('orgFormPhone').value=d.phone||'';
+    document.getElementById('orgFormEmail').value=d.email||''
+  }else{
+    document.getElementById('orgFormName').value='';
+    document.getElementById('orgFormOrder').value='0';
+    document.getElementById('orgFormLeader').value='';
+    document.getElementById('orgFormPhone').value='';
+    document.getElementById('orgFormEmail').value=''
+  }
+  document.getElementById('orgModal').classList.add('show')
+}
+function editOrg(id){openOrgModal(id)}
+function deleteOrg(id){D.orgs=D.orgs.filter(o=>o.id!==id);renderOrgTable();showToast('删除成功')}
+function saveOrg(){
+  const n=document.getElementById('orgFormName').value.trim();
+  if(!n){showToast('请输入组织名称');return}
+  if(editingId){
+    const d=D.orgs.find(o=>o.id===editingId);
+    d.name=n;d.order=+document.getElementById('orgFormOrder').value;
+    d.leader=document.getElementById('orgFormLeader').value;
+    d.phone=document.getElementById('orgFormPhone').value;
+    d.email=document.getElementById('orgFormEmail').value;
+    showToast('修改成功')
+  }else{
+    D.orgs.push({id:++nextId,name:n,order:+document.getElementById('orgFormOrder').value,leader:document.getElementById('orgFormLeader').value,phone:document.getElementById('orgFormPhone').value,email:document.getElementById('orgFormEmail').value,created:new Date().toISOString().slice(0,19).replace('T',' ')});
+    showToast('新增成功')
+  }
+  closeModal('orgModal');renderOrgTable()
+}
+
+// === Charts ===
+let _chartsInit=false;
+function initDashCharts(){
+  if(_chartsInit)return;_chartsInit=true;
+  new Chart(document.getElementById('behaviorChart'),{type:'line',data:{labels:['1月','2月','3月','4月','5月','6月'],datasets:[{label:'国家安全知识库访问',data:[120,180,210,250,310,574],borderColor:'#1890ff',backgroundColor:'rgba(24,144,255,.1)',fill:true,tension:.4},{label:'智会通会议',data:[5,6,7,8,9,4],borderColor:'#52c41a',backgroundColor:'rgba(82,196,26,.1)',fill:true,tension:.4,yAxisID:'y1'},{label:'小文助手文稿',data:[30,45,55,60,67,67],borderColor:'#faad14',backgroundColor:'rgba(250,173,20,.1)',fill:true,tension:.4,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,title:{display:false}},y1:{position:'right',beginAtZero:true,title:{display:false},grid:{drawOnChartArea:false}}}}});
+  new Chart(document.getElementById('usageCompareChart'),{type:'bar',data:{labels:['1月','2月','3月','4月','5月','6月'],datasets:[{label:'国家安全知识库',data:[120,180,210,250,310,574],backgroundColor:'#1890ff'},{label:'智会通',data:[5,6,7,8,9,4],backgroundColor:'#52c41a'},{label:'小文助手',data:[30,45,55,60,67,67],backgroundColor:'#faad14'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,title:{display:true,text:'使用次数'}}},plugins:{legend:{position:'top'}}}});
+}
+
+let _kbChartsInit=false;
+function initKbDashCharts(){
+  if(_kbChartsInit)return;_kbChartsInit=true;
+  new Chart(document.getElementById('kbBehaviorChart'),{type:'line',data:{labels:['1月','2月','3月','4月','5月','6月'],datasets:[{label:'访问量',data:[120,180,210,250,310,574],borderColor:'#1890ff',backgroundColor:'rgba(24,144,255,.1)',fill:true,tension:.4},{label:'问答数',data:[80,120,150,180,220,400],borderColor:'#52c41a',backgroundColor:'rgba(82,196,26,.1)',fill:true,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+  new Chart(document.getElementById('kbDomainChart'),{type:'bar',data:{labels:['政治安全','经济安全','科技安全','军事安全','社会安全','网络安全','数据安全','文化安全','海外利益安全','AI安全'],datasets:[{label:'问答次数',data:[420,180,160,140,120,110,70,60,40,10],backgroundColor:['#f5222d','#fa541c','#fa8c16','#faad14','#fadb14','#a0d911','#52c41a','#13c2c2','#1890ff','#722ed1']}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  new Chart(document.getElementById('kbCountryChart'),{type:'bar',data:{labels:['中国','美国','俄罗斯','欧盟','日本','韩国','英国','法国','德国','东南亚'],datasets:[{label:'问答次数',data:[5.0,4.3,2.0,1.7,1.7,1.3,1.3,0.8,0.8,0.5],backgroundColor:'#1890ff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  new Chart(document.getElementById('kbBookChart'),{type:'doughnut',data:{labels:['思想与理论','国家安全史','国家安全战略','政策制度','治理','管理','教育','保障'],datasets:[{data:[25,15,12,12,10,10,8,8],backgroundColor:['#1890ff','#52c41a','#faad14','#f5222d','#722ed1','#13c2c2','#fa8c16','#a0d911']}]},options:{responsive:true,maintainAspectRatio:false}});
+}
+
+let _zhtChartsInit=false;
+function initZhtDashCharts(){
+  if(_zhtChartsInit)return;_zhtChartsInit=true;
+  new Chart(document.getElementById('zhtFuncChart1'),{type:'bar',data:{labels:['转写总时长(小时)','录音文件数','会议总数','AI摘要生成数','智能问答次数'],datasets:[{label:'使用量',data:[3.5,12,9,15,86],backgroundColor:['#1890ff','#40a9ff','#52c41a','#73d13d','#722ed1']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  new Chart(document.getElementById('zhtFuncChart2'),{type:'bar',data:{labels:['AI纪要','思维导图','隐性未决','智能待办'],datasets:[{label:'重新生成数',data:[8,5,3,6],backgroundColor:['#1890ff','#52c41a','#faad14','#722ed1']}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}});
+  new Chart(document.getElementById('zhtMonthlyChart'),{type:'bar',data:{labels:['1月','2月','3月','4月','5月'],datasets:[{label:'会议数量',data:[1,2,3,3,4],backgroundColor:'#1890ff'},{label:'参会人次',data:[2,4,7,9,12],backgroundColor:'#52c41a'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+}
+
+let _xwzChartsInit=false;
+let _xwzCharts={};
+const xwzAllTplLabels=['通知','请示','报告','通报','函','会议纪要','工作方案','总结材料','计划与规划','意见建议'];
+const xwzAllTplUses=[128,96,82,65,45,72,58,52,38,29];
+const xwzAllMaterialTotal=[180,142,120,98,78,96,85,72,55,42];
+const xwzAllMaterialUsed=[128,96,82,65,45,72,58,52,38,29];
+function initXwzDashCharts(){
+  if(_xwzChartsInit)return;_xwzChartsInit=true;
+  new Chart(document.getElementById('xwzMonthlyChart'),{type:'line',data:{labels:['1月','2月','3月','4月','5月','6月'],datasets:[{label:'公文生成数',data:[30,45,55,60,67,67],borderColor:'#1890ff',backgroundColor:'rgba(24,144,255,.1)',fill:true,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+  _xwzCharts.tplChart=new Chart(document.getElementById('xwzStatsTplChart'),{type:'bar',data:{labels:xwzAllTplLabels,datasets:[{label:'使用次数',data:xwzAllTplUses,backgroundColor:['#1890ff','#40a9ff','#597ef7','#722ed1','#9254de','#13c2c2','#36cfc9','#52c41a','#73d13d','#faad14']}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}});
+  new Chart(document.getElementById('xwzQaChart'),{type:'line',data:{labels:['1月','2月','3月','4月','5月','6月'],datasets:[{label:'知识采辑量',data:[12,18,22,25,28,28],borderColor:'#722ed1',backgroundColor:'rgba(114,46,209,.1)',fill:true,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+  _xwzCharts.materialChart=new Chart(document.getElementById('xwzMaterialChart'),{type:'bar',data:{labels:xwzAllTplLabels,datasets:[{label:'素材总数量',data:xwzAllMaterialTotal,backgroundColor:'#13c2c2'},{label:'素材使用量',data:xwzAllMaterialUsed,backgroundColor:'#52c41a'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+  _xwzCharts.pieChart=new Chart(document.getElementById('xwzTypePieChart'),{type:'doughnut',data:{labels:xwzAllTplLabels,datasets:[{data:xwzAllTplUses,backgroundColor:['#1890ff','#40a9ff','#597ef7','#722ed1','#9254de','#13c2c2','#36cfc9','#52c41a','#73d13d','#faad14']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11}}}}}});
+}
+function refreshXwzCharts(){
+  const type=document.getElementById('xwzAsType').value;
+  if(!_xwzChartsInit)return;
+  if(type){
+    const idx=xwzAllTplLabels.indexOf(type);
+    if(idx>=0){
+      _xwzCharts.tplChart.data.labels=[type];
+      _xwzCharts.tplChart.data.datasets[0].data=[xwzAllTplUses[idx]];
+      _xwzCharts.tplChart.data.datasets[0].backgroundColor=[['#1890ff','#40a9ff','#597ef7','#722ed1','#9254de','#13c2c2','#36cfc9','#52c41a','#73d13d','#faad14'][idx]];
+      _xwzCharts.materialChart.data.labels=[type];
+      _xwzCharts.materialChart.data.datasets[0].data=[xwzAllMaterialTotal[idx]];
+      _xwzCharts.materialChart.data.datasets[1].data=[xwzAllMaterialUsed[idx]];
+      _xwzCharts.pieChart.data.labels=[type];
+      _xwzCharts.pieChart.data.datasets[0].data=[xwzAllTplUses[idx]];
+      _xwzCharts.pieChart.data.datasets[0].backgroundColor=[['#1890ff','#40a9ff','#597ef7','#722ed1','#9254de','#13c2c2','#36cfc9','#52c41a','#73d13d','#faad14'][idx]];
+    }
+  }else{
+    _xwzCharts.tplChart.data.labels=xwzAllTplLabels;
+    _xwzCharts.tplChart.data.datasets[0].data=xwzAllTplUses;
+    _xwzCharts.tplChart.data.datasets[0].backgroundColor=['#1890ff','#40a9ff','#597ef7','#722ed1','#9254de','#13c2c2','#36cfc9','#52c41a','#73d13d','#faad14'];
+    _xwzCharts.materialChart.data.labels=xwzAllTplLabels;
+    _xwzCharts.materialChart.data.datasets[0].data=xwzAllMaterialTotal;
+    _xwzCharts.materialChart.data.datasets[1].data=xwzAllMaterialUsed;
+    _xwzCharts.pieChart.data.labels=xwzAllTplLabels;
+    _xwzCharts.pieChart.data.datasets[0].data=xwzAllTplUses;
+    _xwzCharts.pieChart.data.datasets[0].backgroundColor=['#1890ff','#40a9ff','#597ef7','#722ed1','#9254de','#13c2c2','#36cfc9','#52c41a','#73d13d','#faad14'];
+  }
+  _xwzCharts.tplChart.update();
+  _xwzCharts.materialChart.update();
+  _xwzCharts.pieChart.update();
+  showToast('已刷新数据');
+}
+
+// Initial render
+initDashCharts();
+</script>
+</body>
+</html>

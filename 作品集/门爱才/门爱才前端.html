@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>门爱才前端</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: #f5f5f5; height: 100%; overflow: hidden; color: #333; }
+.app-container { max-width: 430px; margin: 0 auto; height: 100%; position: relative; overflow: hidden; background: #f5f5f5; }
+.view { display: none; flex-direction: column; height: 100%; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #f5f5f5; z-index: 1; }
+.view.active { display: flex; z-index: 2; }
+.view.overlay { z-index: 10; }
+.tab-bar { display: flex; align-items: center; justify-content: space-around; height: 56px; background: #fff; border-top: 1px solid #eee; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom, 0); }
+.tab-item { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 2px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.tab-item svg { width: 24px; height: 24px; }
+.tab-item span { font-size: 11px; color: #999; }
+.tab-item.active svg { color: #2B6CB0; }
+.tab-item.active span { color: #2B6CB0; }
+
+/* 首页 */
+.home-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.home-header { background: linear-gradient(135deg, #5B9BD5 0%, #2B6CB0 60%, #1A4B8C 100%); padding: 0 16px 20px; position: relative; overflow: hidden; }
+.home-header::after { content: ''; position: absolute; right: -10px; top: 20px; width: 140px; height: 180px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 260' fill='rgba(255,255,255,0.1)'%3E%3Cpath d='M100 10 L80 50 L60 50 L50 120 L70 120 L60 180 L80 180 L80 250 L100 250 L100 180 L120 180 L110 120 L130 120 L120 50 L100 50Z'/%3E%3Crect x='40' y='250' width='120' height='10' rx='2'/%3E%3C/svg%3E") no-repeat center; background-size: contain; pointer-events: none; }
+.brand-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 0 16px; }
+.brand-logo { display: flex; align-items: center; gap: 8px; }
+.brand-logo svg { width: 28px; height: 28px; }
+.brand-name { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: 2px; }
+.header-actions { display: flex; gap: 16px; }
+.header-actions svg { width: 22px; height: 22px; color: rgba(255,255,255,0.8); }
+.search-bar { display: flex; align-items: center; background: rgba(255,255,255,0.95); border-radius: 20px; padding: 0 4px 0 14px; height: 38px; gap: 8px; }
+.search-bar svg { width: 18px; height: 18px; color: #999; flex-shrink: 0; }
+.search-bar input { flex: 1; border: none; outline: none; font-size: 14px; background: transparent; color: #333; }
+.search-bar input::placeholder { color: #aaa; }
+.search-btn { background: #2B6CB0; color: #fff; border: none; border-radius: 16px; padding: 6px 16px; font-size: 13px; cursor: pointer; flex-shrink: 0; }
+
+/* 轮播图 */
+.carousel-wrap { margin: 12px 16px 0; border-radius: 10px; overflow: hidden; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: relative; }
+.carousel-track { display: flex; transition: transform 0.4s ease; will-change: transform; }
+.carousel-slide { min-width: 100%; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.carousel-img { width: 100%; height: 160px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.carousel-img-text { color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.5); font-size: 13px; text-align: center; padding: 0 20px; }
+.carousel-title { padding: 10px 12px; font-size: 14px; color: #1a3a5c; font-weight: 500; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.carousel-dots { position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
+.carousel-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); transition: all 0.3s; }
+.carousel-dot.active { background: #fff; width: 16px; border-radius: 3px; }
+.carousel-tag { position: absolute; top: 10px; left: 10px; font-size: 11px; padding: 2px 8px; border-radius: 3px; color: #fff; z-index: 2; }
+
+.func-cards { display: flex; gap: 10px; padding: 16px 16px 0; }
+.func-card { flex: 1; border-radius: 12px; padding: 16px 10px; text-align: center; color: #fff; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.15s; position: relative; }
+.func-card:active { transform: scale(0.96); }
+.func-card svg { width: 32px; height: 32px; margin-bottom: 6px; }
+.func-card span { font-size: 13px; font-weight: 500; }
+.func-card.brand { background: linear-gradient(135deg, #5B9BD5, #3A7CC0); }
+.func-card.policy { background: linear-gradient(135deg, #F0A050, #E08830); }
+.func-card.ai { background: linear-gradient(135deg, #9B6BCD, #7B4DB0); }
+
+.section-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 16px 10px; }
+.section-left { display: flex; align-items: center; gap: 6px; }
+.section-left svg { width: 20px; height: 20px; }
+.section-left h3 { font-size: 16px; font-weight: 700; color: #1a3a5c; }
+.section-right { font-size: 13px; color: #999; cursor: pointer; display: flex; align-items: center; gap: 2px; }
+.section-right svg { width: 14px; height: 14px; }
+
+.map-tabs { display: flex; gap: 8px; padding: 0 16px; overflow-x: auto; }
+.map-tab { display: flex; align-items: center; gap: 4px; padding: 6px 14px; border-radius: 16px; font-size: 13px; background: #fff; color: #666; border: 1px solid #e0e0e0; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; transition: all 0.2s; }
+.map-tab.active { background: #2B6CB0; color: #fff; border-color: #2B6CB0; }
+.map-tab svg { width: 14px; height: 14px; }
+.map-container { margin: 10px 16px 0; border-radius: 10px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.map-view { width: 100%; height: 180px; position: relative; background: linear-gradient(180deg, #dceefb 0%, #c4e0f0 40%, #b8d8e8 70%, #a8ccd8 100%); overflow: hidden; }
+.map-bg { position: absolute; inset: 0; }
+.map-region { position: absolute; border-radius: 4px; opacity: 0.5; }
+.map-pin { position: absolute; display: flex; flex-direction: column; align-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; z-index: 2; }
+.map-pin-icon { width: 24px; height: 28px; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
+.map-pin:active .map-pin-icon { transform: scale(1.2); }
+.map-pin-icon svg { width: 24px; height: 28px; }
+.map-pin-label { font-size: 10px; color: #1a3a5c; background: rgba(255,255,255,0.9); padding: 1px 4px; border-radius: 3px; white-space: nowrap; margin-top: -2px; }
+.map-pin.highlighted .map-pin-icon { animation: pinBounce 0.6s ease 3; }
+.map-pin.highlighted .map-pin-label { background: #2B6CB0; color: #fff; font-weight: 600; }
+@keyframes pinBounce { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-8px); } }
+
+.news-list-home { padding: 0 16px 16px; }
+.news-card { display: flex; gap: 10px; background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.news-card-img { width: 100px; height: 72px; border-radius: 6px; overflow: hidden; flex-shrink: 0; background: #e0e0e0; }
+.news-card-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999; }
+.news-card-body { flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+.news-card-title { font-size: 14px; color: #1a3a5c; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.news-card-sub { font-size: 12px; color: #999; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.news-card-date { font-size: 11px; color: #bbb; text-align: right; }
+
+/* 搜索页面 */
+.search-view-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #eee; flex-shrink: 0; }
+.search-back { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.search-back svg { width: 24px; height: 24px; color: #333; }
+.search-input-wrap { flex: 1; display: flex; align-items: center; background: #f0f0f0; border-radius: 20px; padding: 0 14px; height: 36px; gap: 6px; }
+.search-input-wrap svg { width: 16px; height: 16px; color: #999; flex-shrink: 0; }
+.search-input-wrap input { flex: 1; border: none; outline: none; font-size: 14px; background: transparent; }
+.search-cancel { font-size: 14px; color: #2B6CB0; cursor: pointer; flex-shrink: 0; }
+.search-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.search-tabs { display: flex; background: #fff; border-bottom: 1px solid #eee; flex-shrink: 0; }
+.search-tab { flex: 1; text-align: center; padding: 12px 0; font-size: 14px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; -webkit-tap-highlight-color: transparent; transition: all 0.2s; }
+.search-tab.active { color: #2B6CB0; border-bottom-color: #2B6CB0; font-weight: 600; }
+.search-result-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: #fff; border-bottom: 1px solid #f0f0f0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.search-result-item svg { width: 20px; height: 20px; color: #2B6CB0; flex-shrink: 0; }
+.search-result-info { flex: 1; min-width: 0; }
+.search-result-title { font-size: 14px; color: #333; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.search-result-desc { font-size: 12px; color: #999; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.search-result-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
+.search-empty { text-align: center; padding: 60px 0; color: #999; }
+.hot-search { padding: 16px; }
+.hot-search h4 { font-size: 14px; color: #333; margin-bottom: 12px; font-weight: 600; }
+.hot-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.hot-tag { padding: 6px 14px; background: #fff; border-radius: 16px; font-size: 13px; color: #666; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+/* 地图全屏 */
+.map-full-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #eee; flex-shrink: 0; }
+.map-full-back { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.map-full-back svg { width: 24px; height: 24px; color: #333; }
+.map-full-title { display: flex; align-items: center; gap: 6px; }
+.map-full-title svg { width: 22px; height: 22px; color: #E8863A; }
+.map-full-title span { font-size: 17px; font-weight: 700; color: #1a3a5c; }
+.map-full-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.map-full-map { width: calc(100% - 32px); margin: 12px 16px; height: 0; padding-bottom: 80%; border-radius: 10px; background: linear-gradient(180deg, #dceefb 0%, #c4e0f0 40%, #b8d8e8 70%, #a8ccd8 100%); position: relative; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.map-full-tabs { display: flex; gap: 8px; padding: 12px 16px 0; }
+
+/* 地点信息条 */
+.map-loc-info { margin: 0 16px 12px; background: #fff; border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: none; }
+.map-loc-info.show { display: block; animation: fadeIn 0.2s ease; }
+
+/* 人才资讯列表 */
+.news-view-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #eee; flex-shrink: 0; }
+.news-view-back { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.news-view-back svg { width: 24px; height: 24px; color: #333; }
+.news-view-title { font-size: 17px; font-weight: 700; color: #1a3a5c; }
+.news-search-bar { display: flex; align-items: center; background: #f0f0f0; border-radius: 20px; margin: 10px 16px; padding: 0 14px; height: 36px; gap: 6px; }
+.news-search-bar svg { width: 16px; height: 16px; color: #999; flex-shrink: 0; }
+.news-search-bar input { flex: 1; border: none; outline: none; font-size: 14px; background: transparent; }
+.news-list-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 16px 16px; }
+
+/* 服务页 */
+.service-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #f5f5f5; }
+.service-header { background: linear-gradient(135deg, #5B9BD5 0%, #2B6CB0 60%, #1A4B8C 100%); padding: 0 16px 16px; position: relative; overflow: hidden; }
+.service-header::after { content: ''; position: absolute; right: -10px; top: 10px; width: 120px; height: 160px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 260' fill='rgba(255,255,255,0.1)'%3E%3Cpath d='M100 10 L80 50 L60 50 L50 120 L70 120 L60 180 L80 180 L80 250 L100 250 L100 180 L120 180 L110 120 L130 120 L120 50 L100 50Z'/%3E%3Crect x='40' y='250' width='120' height='10' rx='2'/%3E%3C/svg%3E") no-repeat center; background-size: contain; pointer-events: none; }
+.service-brand-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 0 14px; }
+.service-brand-logo { display: flex; align-items: center; gap: 8px; }
+.service-brand-logo svg { width: 26px; height: 26px; }
+.service-brand-name { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 2px; }
+.service-header-actions { display: flex; gap: 14px; }
+.service-header-actions svg { width: 20px; height: 20px; color: rgba(255,255,255,0.8); }
+.service-search-bar { display: flex; align-items: center; background: rgba(255,255,255,0.95); border-radius: 20px; padding: 0 4px 0 12px; height: 36px; gap: 6px; }
+.service-search-bar svg { width: 16px; height: 16px; color: #999; flex-shrink: 0; }
+.service-search-bar input { flex: 1; border: none; outline: none; font-size: 13px; background: transparent; color: #333; }
+.service-search-bar input::placeholder { color: #aaa; }
+.service-search-btn { background: #333; color: #fff; border: none; border-radius: 14px; padding: 5px 14px; font-size: 12px; cursor: pointer; flex-shrink: 0; }
+.service-search-icons { display: flex; gap: 8px; align-items: center; }
+.service-search-icon-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.service-card { background: #fff; border-radius: 12px; margin: 10px 12px; padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.service-card-title { font-size: 15px; font-weight: 700; color: #222; margin-bottom: 14px; }
+.service-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 0; }
+.service-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px 0; }
+.service-icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.service-icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.service-icon-box svg { width: 24px; height: 24px; color: #fff; }
+.service-icon-text { font-size: 12px; color: #333; text-align: center; }
+.activity-row { display: flex; gap: 10px; }
+.activity-card { flex: 1; border-radius: 10px; overflow: hidden; position: relative; cursor: pointer; -webkit-tap-highlight-color: transparent; height: 80px; display: flex; align-items: flex-start; padding: 10px 12px; }
+.activity-tag { position: absolute; top: 8px; left: 10px; font-size: 10px; padding: 1px 6px; border-radius: 3px; color: #fff; }
+.activity-text { margin-top: 20px; font-size: 13px; font-weight: 500; color: #fff; line-height: 1.4; }
+.activity-card.right-act .activity-text { color: #555; }
+.space-icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.space-icon-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #f0f4f8; }
+.space-icon-circle svg { width: 22px; height: 22px; color: #2B6CB0; }
+.space-icon-text { font-size: 12px; color: #333; text-align: center; }
+
+/* 我的页面 */
+.profile-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #f5f5f5; }
+.profile-header-card { background: linear-gradient(135deg, #6B5CE7, #4A90D9); padding: 30px 20px 24px; position: relative; overflow: hidden; }
+.profile-header-card::after { content: ''; position: absolute; bottom: -20px; right: -30px; width: 160px; height: 80px; background: rgba(0,0,0,0.08); border-radius: 50%; transform: rotate(-15deg); }
+.profile-header-content { display: flex; align-items: center; justify-content: space-between; }
+.profile-info-text { flex: 1; }
+.profile-phone { font-size: 17px; color: #fff; font-weight: 600; letter-spacing: 1px; }
+.profile-status { display: flex; align-items: center; gap: 4px; margin-top: 6px; cursor: pointer; }
+.profile-status svg { width: 14px; height: 14px; color: #FFD700; }
+.profile-status span { font-size: 12px; color: rgba(255,255,255,0.7); }
+.profile-status-arrow { width: 12px; height: 12px; color: rgba(255,255,255,0.5); margin-left: 2px; }
+.profile-avatar-wrap { position: relative; flex-shrink: 0; }
+.profile-avatar { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.profile-avatar svg { width: 32px; height: 32px; color: #fff; }
+.profile-avatar-camera { position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+.profile-avatar-camera svg { width: 12px; height: 12px; color: #4A90D9; }
+.profile-quick-actions { display: flex; gap: 10px; padding: 14px 16px; background: #fff; margin: -12px 12px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: relative; z-index: 1; }
+.profile-quick-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 4px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.profile-quick-btn svg { width: 28px; height: 28px; color: #4A90D9; }
+.profile-quick-btn span { font-size: 12px; color: #555; }
+.profile-menu { margin: 12px 12px 0; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.profile-menu-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid #f0f0f0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.profile-menu-item:last-child { border-bottom: none; }
+.profile-menu-left { display: flex; align-items: center; gap: 12px; }
+.profile-menu-left .menu-checkbox { width: 20px; height: 20px; border: 2px solid #333; border-radius: 3px; flex-shrink: 0; }
+.profile-menu-left span { font-size: 15px; color: #333; font-weight: 500; }
+.profile-menu-right svg { width: 18px; height: 18px; color: #333; stroke-width: 3; }
+.profile-logout { margin: 16px 12px 20px; background: #fff; border-radius: 12px; text-align: center; padding: 14px; font-size: 14px; color: #999; cursor: pointer; -webkit-tap-highlight-color: transparent; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+
+/* 子页面通用头部 */
+.sub-view-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #eee; flex-shrink: 0; }
+.sub-view-back { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.sub-view-back svg { width: 24px; height: 24px; color: #333; }
+.sub-view-title { font-size: 17px; font-weight: 700; color: #1a3a5c; }
+
+/* 已报名活动 */
+.activity-view-header { background: linear-gradient(135deg, #5B9BD5 0%, #2B6CB0 60%, #1A4B8C 100%); padding: 12px 16px 0; position: relative; overflow: hidden; }
+.activity-view-header::after { content: ''; position: absolute; right: -20px; top: -10px; width: 120px; height: 100px; background: rgba(255,255,255,0.06); border-radius: 50%; }
+.activity-view-nav { display: flex; align-items: center; gap: 8px; padding-bottom: 12px; }
+.activity-view-back { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.activity-view-back svg { width: 24px; height: 24px; color: #fff; }
+.activity-view-title { font-size: 17px; font-weight: 700; color: #fff; }
+.activity-view-tabs { display: flex; gap: 0; background: rgba(255,255,255,0.2); border-radius: 22px; padding: 3px; margin-bottom: 16px; }
+.activity-view-tab { flex: 1; text-align: center; padding: 8px 0; font-size: 13px; color: rgba(255,255,255,0.7); border-radius: 20px; cursor: pointer; transition: all 0.25s; -webkit-tap-highlight-color: transparent; }
+.activity-view-tab.active { background: #fff; color: #2B6CB0; font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+.activity-list-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 16px 16px; background: #f5f5f5; }
+.activity-empty { text-align: center; padding: 60px 0; }
+.activity-empty-text { font-size: 14px; color: #999; margin-top: 12px; }
+.activity-reg-card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.activity-reg-title { font-size: 15px; font-weight: 600; color: #1a3a5c; margin-bottom: 12px; line-height: 1.4; }
+.activity-reg-status { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-bottom: 10px; }
+.activity-reg-status.pending { background: #FFF3E0; color: #E8863A; }
+.activity-reg-status.approved { background: #E8F5E9; color: #4CAF50; }
+.activity-reg-status.rejected { background: #FFEBEE; color: #E53935; }
+.activity-reg-form { border-top: 1px dashed #e0e0e0; padding-top: 12px; }
+.activity-reg-field { display: flex; margin-bottom: 8px; font-size: 13px; }
+.activity-reg-label { color: #999; width: 70px; flex-shrink: 0; }
+.activity-reg-value { color: #333; flex: 1; }
+
+/* 技能模块列表页 */
+.skill-list-header { background: linear-gradient(135deg, #5B9BD5 0%, #2B6CB0 60%, #1A4B8C 100%); padding: 12px 16px 20px; position: relative; overflow: hidden; }
+.skill-list-header::after { content: ''; position: absolute; right: -20px; top: -10px; width: 120px; height: 100px; background: rgba(255,255,255,0.06); border-radius: 50%; }
+.skill-list-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.skill-list-nav .sub-view-back svg { color: #fff; }
+.skill-list-nav .skill-list-title { font-size: 17px; font-weight: 700; color: #fff; }
+.skill-list-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 16px 16px; background: linear-gradient(180deg, #e8f0fe 0%, #f5f5f5 30%); }
+.skill-module-card { display: flex; align-items: center; background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.15s; }
+.skill-module-card:active { transform: scale(0.98); }
+.skill-module-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; margin-right: 14px; }
+.skill-module-info { flex: 1; min-width: 0; }
+.skill-module-name { font-size: 15px; font-weight: 600; color: #1a3a5c; line-height: 1.4; }
+.skill-module-desc { font-size: 12px; color: #999; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.skill-module-arrow { width: 20px; height: 20px; color: #ccc; flex-shrink: 0; }
+
+/* 技能详情页 */
+.skill-detail-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #f5f5f5; }
+.skill-detail-banner { height: 160px; display: flex; align-items: center; justify-content: center; position: relative; }
+.skill-detail-banner-icon { font-size: 48px; opacity: 0.6; }
+.skill-detail-banner-title { position: absolute; bottom: 16px; left: 16px; right: 16px; font-size: 20px; font-weight: 700; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.3); display: flex; align-items: flex-start; justify-content: space-between; }
+.skill-detail-fav-star { width: 28px; height: 28px; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+.skill-detail-fav-star svg { width: 28px; height: 28px; }
+.skill-detail-body { background: #fff; margin: -16px 12px 12px; border-radius: 14px; padding: 20px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: relative; z-index: 1; }
+.skill-detail-section-title { font-size: 15px; font-weight: 700; color: #1a3a5c; margin-bottom: 12px; padding-left: 8px; border-left: 3px solid #2B6CB0; }
+.skill-detail-content { font-size: 14px; color: #555; line-height: 2; margin-bottom: 20px; text-align: justify; }
+.skill-detail-content p { margin-bottom: 12px; }
+.skill-form-group { margin-bottom: 14px; }
+.skill-form-label { font-size: 13px; color: #666; margin-bottom: 6px; display: block; font-weight: 500; }
+.skill-form-input { width: 100%; border: 1px solid #e0e0e0; border-radius: 10px; padding: 10px 12px; font-size: 14px; outline: none; background: #fafafa; transition: border-color 0.2s; }
+.skill-form-input:focus { border-color: #2B6CB0; background: #fff; }
+.skill-form-textarea { min-height: 80px; resize: none; }
+.skill-apply-btn { width: 100%; padding: 14px; background: #2B6CB0; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; -webkit-tap-highlight-color: transparent; }
+
+/* 申请确认页 */
+.apply-confirm-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 16px; background: #f5f5f5; }
+.apply-confirm-card { background: #fff; border-radius: 14px; padding: 20px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px; }
+.apply-confirm-title { font-size: 18px; font-weight: 700; color: #1a3a5c; margin-bottom: 16px; text-align: center; }
+.apply-confirm-icon { text-align: center; font-size: 48px; margin-bottom: 12px; }
+.apply-confirm-field { display: flex; margin-bottom: 10px; font-size: 14px; }
+.apply-confirm-label { color: #999; width: 80px; flex-shrink: 0; }
+.apply-confirm-value { color: #333; flex: 1; }
+.apply-confirm-back { width: 100%; padding: 14px; background: #2B6CB0; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+/* 文章详情页 */
+.article-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #fff; }
+.article-header-img { width: 100%; height: 200px; position: relative; overflow: hidden; }
+.article-header-img-bg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.article-header-img-icon { font-size: 48px; opacity: 0.4; }
+.article-body { padding: 20px 16px 30px; }
+.article-title-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
+.article-title { font-size: 20px; font-weight: 700; color: #1a3a5c; line-height: 1.5; flex: 1; }
+.article-star { width: 28px; height: 28px; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+.article-star svg { width: 28px; height: 28px; }
+.article-meta { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #999; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0; }
+.article-meta-tag { font-size: 12px; padding: 2px 10px; border-radius: 10px; font-weight: 600; }
+.article-content { font-size: 15px; color: #444; line-height: 2; text-align: justify; }
+.article-content p { margin-bottom: 16px; }
+
+/* 收藏页面 */
+.fav-tabs { display: flex; gap: 0; background: #fff; border-bottom: 1px solid #eee; flex-shrink: 0; }
+.fav-tab { flex: 1; text-align: center; padding: 12px 0; font-size: 13px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; -webkit-tap-highlight-color: transparent; transition: all 0.2s; }
+.fav-tab.active { color: #2B6CB0; border-bottom-color: #2B6CB0; font-weight: 600; }
+.fav-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 16px 16px; }
+.fav-card { display: flex; gap: 10px; background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); position: relative; cursor: pointer; }
+.fav-card-img { width: 60px; height: 60px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px; color: #fff; }
+.fav-card-body { flex: 1; min-width: 0; }
+.fav-card-title { font-size: 14px; color: #1a3a5c; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.fav-card-type { font-size: 11px; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-top: 6px; }
+.fav-card-remove { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.fav-card-remove svg { width: 16px; height: 16px; color: #ccc; }
+
+/* 服务咨询对话框 */
+.chat-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; background: #f5f5f5; }
+.chat-bubble-row { display: flex; margin-bottom: 12px; }
+.chat-bubble-row.left { justify-content: flex-start; }
+.chat-bubble-row.right { justify-content: flex-end; }
+.chat-bubble { max-width: 75%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.6; word-break: break-all; }
+.chat-bubble.left-bubble { background: #fff; color: #333; border-bottom-left-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.chat-bubble.right-bubble { background: #2B6CB0; color: #fff; border-bottom-right-radius: 4px; }
+.chat-preset-bubble { display: inline-block; padding: 10px 16px; background: #fff; border: 1px solid #2B6CB0; border-radius: 20px; font-size: 13px; color: #2B6CB0; cursor: pointer; margin: 0 6px 8px 0; -webkit-tap-highlight-color: transparent; transition: all 0.2s; }
+.chat-preset-bubble:active { background: #2B6CB0; color: #fff; }
+.chat-presets { margin-bottom: 16px; }
+.chat-bottom { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fff; border-top: 1px solid #eee; flex-shrink: 0; }
+.chat-bottom-btn { display: flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.chat-bottom-btn.feedback-btn { background: #f0f4f8; color: #555; }
+.chat-bottom-btn.contact-btn { background: #2B6CB0; color: #fff; }
+.chat-bottom-btn svg { width: 18px; height: 18px; }
+
+/* 反馈意见 */
+.feedback-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; }
+.feedback-form { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.feedback-label { font-size: 14px; color: #333; font-weight: 500; margin-bottom: 8px; display: block; }
+.feedback-input { width: 100%; border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px; font-size: 14px; outline: none; resize: none; transition: border-color 0.2s; background: #fafafa; }
+.feedback-input:focus { border-color: #2B6CB0; background: #fff; }
+.feedback-textarea { min-height: 120px; }
+.feedback-upload { display: flex; gap: 8px; margin-bottom: 16px; }
+.feedback-upload-item { width: 70px; height: 70px; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fafafa; }
+.feedback-submit { width: 100%; padding: 14px; background: #2B6CB0; color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 20px; -webkit-tap-highlight-color: transparent; }
+
+/* 人才认定进度页 */
+.cert-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; background: #f5f5f5; }
+.cert-card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.cert-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.cert-card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.cert-card-name { font-size: 15px; font-weight: 600; color: #1a3a5c; }
+.cert-card-status { font-size: 12px; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-left: auto; }
+.cert-card-status.none { background: #f0f0f0; color: #999; }
+.cert-card-status.pending { background: #FFF3E0; color: #E8863A; }
+.cert-card-status.reviewing { background: #E3F2FD; color: #2B6CB0; }
+.cert-card-status.approved { background: #E8F5E9; color: #4CAF50; }
+.cert-card-status.rejected { background: #FFEBEE; color: #E06060; }
+.cert-status-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.cert-status-text { font-size: 13px; }
+.cert-status-text.none { color: #999; }
+.cert-status-text.pending { color: #E8863A; }
+.cert-status-text.reviewing { color: #2B6CB0; }
+.cert-status-text.approved { color: #4CAF50; }
+.cert-status-text.rejected { color: #E06060; }
+.cert-view-btn { display: inline-block; padding: 5px 14px; background: #2B6CB0; color: #fff; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; }
+
+/* 申请查询页 */
+.query-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; background: #f5f5f5; }
+.query-card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.query-card-title { font-size: 15px; font-weight: 600; color: #1a3a5c; margin-bottom: 8px; }
+.query-card-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+.query-card-row .label { color: #999; }
+.query-card-row .value { color: #333; }
+.query-card-status { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-top: 8px; }
+
+/* 电话弹窗 */
+.phone-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+.phone-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+.phone-card { width: 100%; max-width: 320px; background: #fff; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.2); animation: popIn 0.25s ease; }
+.phone-card-title { font-size: 16px; font-weight: 700; color: #1a3a5c; margin-bottom: 12px; }
+.phone-card-number { font-size: 24px; font-weight: 700; color: #2B6CB0; margin-bottom: 16px; letter-spacing: 1px; }
+.phone-card-btns { display: flex; gap: 12px; }
+.phone-card-btn { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; -webkit-tap-highlight-color: transparent; }
+.phone-card-btn.call { background: #2B6CB0; color: #fff; }
+.phone-card-btn.cancel { background: #f0f0f0; color: #666; }
+
+/* 信息列表页（品牌工作/人才政策/计划公告） */
+.info-list-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #e8f0fe; }
+.info-list-container { padding: 12px 16px 16px; }
+.info-article-card { display: flex; gap: 12px; background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.15s; }
+.info-article-card:active { transform: scale(0.98); }
+.info-article-img { width: 90px; height: 90px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: 600; padding: 8px; text-align: center; line-height: 1.3; position: relative; overflow: hidden; }
+.info-article-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; }
+.info-article-title { font-size: 14px; color: #1a3a5c; font-weight: 500; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.info-article-sub { font-size: 12px; color: #999; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; margin-top: 4px; }
+.info-article-date { font-size: 11px; color: #bbb; text-align: right; margin-top: auto; padding-top: 4px; }
+
+/* 信息文章详情页（无表单） */
+.info-detail-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #fff; }
+.info-detail-header { padding: 20px 16px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.info-detail-title { font-size: 18px; font-weight: 700; color: #1a3a5c; line-height: 1.5; flex: 1; }
+.info-detail-star { width: 28px; height: 28px; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+.info-detail-star svg { width: 28px; height: 28px; }
+.info-detail-meta { padding: 8px 16px 12px; font-size: 13px; color: #999; border-bottom: 1px solid #f0f0f0; }
+.info-detail-content { padding: 16px; font-size: 15px; color: #444; line-height: 2; text-align: justify; }
+.info-detail-content p { margin-bottom: 16px; }
+
+/* 反馈记录标签 */
+.feedback-tabs { display: flex; background: #fff; border-bottom: 1px solid #eee; flex-shrink: 0; }
+.feedback-tab { flex: 1; text-align: center; padding: 12px 0; font-size: 14px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; -webkit-tap-highlight-color: transparent; transition: all 0.2s; }
+.feedback-tab.active { color: #2B6CB0; border-bottom-color: #2B6CB0; font-weight: 600; }
+.feedback-record-card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.feedback-record-status { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-bottom: 8px; }
+.feedback-record-status.submitted { background: #FFF3E0; color: #E8863A; }
+.feedback-record-status.processed { background: #E8F5E9; color: #4CAF50; }
+.feedback-record-field { display: flex; margin-bottom: 6px; font-size: 13px; }
+.feedback-record-label { color: #999; width: 80px; flex-shrink: 0; }
+.feedback-record-value { color: #333; flex: 1; }
+.feedback-tab-content { display: none; }
+.feedback-tab-content.active { display: block; }
+
+/* 人才证书页面 */
+.certificate-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 16px; background: #f5f5f5; }
+.certificate-card { background: linear-gradient(135deg, #2B6CB0, #4A90D9); border-radius: 16px; padding: 30px 20px; color: #fff; position: relative; overflow: hidden; box-shadow: 0 4px 16px rgba(43,108,176,0.3); }
+.certificate-card::before { content: ''; position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+.certificate-card::after { content: ''; position: absolute; bottom: -20px; left: -20px; width: 80px; height: 80px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+.certificate-title { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 24px; letter-spacing: 4px; position: relative; z-index: 1; }
+.certificate-type { font-size: 16px; text-align: center; margin-bottom: 24px; font-weight: 600; position: relative; z-index: 1; }
+.certificate-info { margin-bottom: 6px; font-size: 14px; line-height: 1.8; position: relative; z-index: 1; }
+.certificate-info span { display: inline-block; width: 70px; color: rgba(255,255,255,0.7); }
+.certificate-seal { text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.3); position: relative; z-index: 1; }
+.certificate-seal-text { font-size: 14px; color: rgba(255,255,255,0.8); }
+.certificate-date { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 8px; }
+.certificate-empty { text-align: center; padding: 60px 20px; }
+.certificate-empty-icon { font-size: 48px; margin-bottom: 12px; }
+.certificate-empty-text { font-size: 14px; color: #999; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.view.slide-in { animation: slideIn 0.3s ease forwards; }
+.view.slide-out { animation: slideOut 0.3s ease forwards; }
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes slideOut { from { transform: translateX(0); } to { transform: translateX(100%); } }
+.highlight { color: #E8863A; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="app-container" id="app">
+
+  <!-- ========== 首页 ========== -->
+  <div class="view active" id="view-home">
+    <div class="home-scroll" id="homeScroll">
+      <div class="home-header">
+        <div class="brand-bar">
+          <div class="brand-logo"><svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" fill="rgba(255,255,255,0.2)"/><path d="M20 8 L14 16 L17 16 L15 24 L22 16 L19 16 L22 8Z" fill="#FFD700"/></svg><span class="brand-name">门爱才</span></div>
+          <div class="header-actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        </div>
+        <div class="search-bar" id="homeSearchBar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="搜索功能、公告、活动..." id="homeSearchInput" readonly><button class="search-btn" id="homeSearchBtn">搜索</button></div>
+      </div>
+      <div class="carousel-wrap">
+        <div class="carousel-track" id="carouselTrack">
+          <div class="carousel-slide" data-type="consult" onclick="handleCarouselClick(0)"><div class="carousel-img" style="background:linear-gradient(135deg,#8B4513,#A0522D);"><div class="carousel-tag" style="background:#5B9BD5;">咨询</div><div class="carousel-img-text">2026年区委教育科技人才工作领导小组第二次会议</div></div><div class="carousel-title">2026年门头沟区委教育科技人才工作领导小组第二次会议召开</div></div>
+          <div class="carousel-slide" data-type="activity" onclick="handleCarouselClick(1)"><div class="carousel-img" style="background:linear-gradient(135deg,#3A4F8F,#5B7FCF);"><div class="carousel-tag" style="background:#9B6BCD;">活动</div><div class="carousel-img-text">人城产共融与共生 | 第四届北京人工智能产业创新发展人才论坛</div></div><div class="carousel-title">第四届北京人工智能产业创新发展人才论坛成功举办</div></div>
+          <div class="carousel-slide" data-type="activity" onclick="handleCarouselClick(2)"><div class="carousel-img" style="background:linear-gradient(135deg,#2B6CB0,#4A90D9);"><div class="carousel-tag" style="background:#9B6BCD;">活动</div><div class="carousel-img-text">2026京西创新创业大赛启动报名，总奖金池超200万元</div></div><div class="carousel-title">2026京西创新创业大赛启动报名</div></div>
+          <div class="carousel-slide" data-type="notice" onclick="handleCarouselClick(3)"><div class="carousel-img" style="background:linear-gradient(135deg,#6B8E23,#8FBC8F);"><div class="carousel-tag" style="background:#E8863A;">公告</div><div class="carousel-img-text">门头沟区发布"京西聚智"人才引进计划</div></div><div class="carousel-title">门头沟区发布"京西聚智"人才引进计划，面向全球招揽高层次人才</div></div>
+        </div>
+        <div class="carousel-dots" id="carouselDots"><div class="carousel-dot active"></div><div class="carousel-dot"></div><div class="carousel-dot"></div><div class="carousel-dot"></div></div>
+      </div>
+      <div class="func-cards">
+        <div class="func-card brand" onclick="openSkillList('brand')"><svg viewBox="0 0 40 40" fill="none"><rect x="8" y="4" width="24" height="32" rx="3" fill="rgba(255,255,255,0.3)"/><path d="M16 14 L24 14 M16 20 L24 20 M16 26 L22 26" stroke="#fff" stroke-width="1.5"/></svg><span>品牌工作</span></div>
+        <div class="func-card policy" onclick="openSkillList('policy')"><svg viewBox="0 0 40 40" fill="none"><path d="M20 6 L10 12 L10 22 C10 28 20 34 20 34 C20 34 30 28 30 22 L30 12 Z" fill="rgba(255,255,255,0.3)" stroke="#fff" stroke-width="1.5"/><path d="M16 20 L19 23 L25 17" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>人才政策</span></div>
+        <div class="func-card ai" onclick="showToast('AI问答')"><svg viewBox="0 0 40 40" fill="none"><rect x="8" y="8" width="24" height="20" rx="4" fill="rgba(255,255,255,0.3)" stroke="#fff" stroke-width="1.5"/><circle cx="16" cy="18" r="2" fill="#fff"/><circle cx="24" cy="18" r="2" fill="#fff"/></svg><span>AI问答</span></div>
+      </div>
+      <div class="section-header" id="mapSectionHeader"><div class="section-left"><svg viewBox="0 0 24 24" fill="#E8863A"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg><h3>人才资源地图</h3></div></div>
+      <div class="map-tabs" id="homeMapTabs">
+        <div class="map-tab active" data-tab="culture" onclick="switchMapTab(this,'home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>文旅资源</div>
+        <div class="map-tab" data-tab="business" onclick="switchMapTab(this,'home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>商业资源</div>
+        <div class="map-tab" data-tab="housing" onclick="switchMapTab(this,'home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>安居资源</div>
+        <div class="map-tab" data-tab="innovation" onclick="switchMapTab(this,'home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>双创空间</div>
+      </div>
+      <div class="map-container" onclick="openMapView()"><div class="map-view" id="homeMapArea"><div class="map-bg"><div class="map-region" style="left:5%;top:15%;width:35%;height:30%;background:#a8d8a8;border-radius:8px;"></div><div class="map-region" style="left:45%;top:10%;width:50%;height:25%;background:#b8d8c8;border-radius:6px;"></div><div class="map-region" style="left:10%;top:55%;width:40%;height:35%;background:#d8e8c8;border-radius:6px;"></div><div class="map-region" style="left:55%;top:45%;width:40%;height:45%;background:#c8d8b8;border-radius:8px;"></div></div></div></div>
+      <div class="section-header"><div class="section-left"><h3>人才资讯</h3></div><div class="section-right" onclick="openNewsView()">查看更多<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+      <div class="news-list-home" id="homeNewsList"></div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item active" onclick="switchTab('home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>首页</span></div>
+      <div class="tab-item" onclick="switchTab('service')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span>服务</span></div>
+      <div class="tab-item" onclick="switchTab('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>我的</span></div>
+    </div>
+  </div>
+
+  <!-- ========== 搜索页面 ========== -->
+  <div class="view" id="view-search">
+    <div class="search-view-header"><div class="search-back" onclick="closeSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><div class="search-input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="搜索功能、公告、活动..." id="searchInput" oninput="handleSearch(this.value)"></div><div class="search-cancel" onclick="closeSearch()">取消</div></div>
+    <div class="search-tabs"><div class="search-tab active" data-type="function" onclick="switchSearchTab(this)">功能</div><div class="search-tab" data-type="notice" onclick="switchSearchTab(this)">公告</div><div class="search-tab" data-type="activity" onclick="switchSearchTab(this)">活动</div></div>
+    <div class="search-scroll" id="searchScroll"><div id="searchHotArea"><div class="hot-search"><h4>热门搜索</h4><div class="hot-tags"><div class="hot-tag" onclick="doSearch('人才政策')">人才政策</div><div class="hot-tag" onclick="doSearch('AI问答')">AI问答</div><div class="hot-tag" onclick="doSearch('品牌工作')">品牌工作</div><div class="hot-tag" onclick="doSearch('人才引进')">人才引进</div><div class="hot-tag" onclick="doSearch('安居资源')">安居资源</div><div class="hot-tag" onclick="doSearch('创新创业大赛')">创新创业大赛</div><div class="hot-tag" onclick="doSearch('人才论坛')">人才论坛</div></div></div></div><div id="searchResults" style="display:none;"></div></div>
+  </div>
+
+  <!-- ========== 地图全屏 ========== -->
+  <div class="view" id="view-map">
+    <div class="map-full-header"><div class="map-full-back" onclick="closeMapView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><div class="map-full-title"><svg viewBox="0 0 24 24" fill="#E8863A"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg><span>人才资源地图</span></div></div>
+    <div class="map-full-tabs" id="fullMapTabs">
+      <div class="map-tab active" data-tab="culture" onclick="switchMapTab(this,'full')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>文旅资源</div>
+      <div class="map-tab" data-tab="business" onclick="switchMapTab(this,'full')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>商业资源</div>
+      <div class="map-tab" data-tab="housing" onclick="switchMapTab(this,'full')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>安居资源</div>
+      <div class="map-tab" data-tab="innovation" onclick="switchMapTab(this,'full')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>双创空间</div>
+    </div>
+    <div class="map-full-scroll">
+      <div class="map-full-map" id="fullMapArea"><div class="map-bg"><div class="map-region" style="left:5%;top:15%;width:35%;height:30%;background:#a8d8a8;border-radius:8px;"></div><div class="map-region" style="left:45%;top:10%;width:50%;height:25%;background:#b8d8c8;border-radius:6px;"></div><div class="map-region" style="left:10%;top:55%;width:40%;height:35%;background:#d8e8c8;border-radius:6px;"></div><div class="map-region" style="left:55%;top:45%;width:40%;height:45%;background:#c8d8b8;border-radius:8px;"></div></div></div>
+      <div class="map-loc-info" id="mapLocInfoBar"></div>
+    </div>
+  </div>
+
+  <!-- ========== 人才资讯列表 ========== -->
+  <div class="view" id="view-news">
+    <div class="news-view-header"><div class="news-view-back" onclick="closeNewsView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="news-view-title">人才资讯</span></div>
+    <div class="news-search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="搜索资讯标题..." id="newsSearchInput" oninput="filterNews(this.value)"></div>
+    <div class="news-list-scroll" id="newsListScroll"></div>
+  </div>
+
+  <!-- ========== 服务页 ========== -->
+  <div class="view" id="view-service">
+    <div class="service-scroll">
+      <div class="service-header">
+        <div class="service-brand-bar"><div class="service-brand-logo"><svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" fill="rgba(255,255,255,0.2)"/><path d="M20 8 L14 16 L17 16 L15 24 L22 16 L19 16 L22 8Z" fill="#FFD700"/></svg><span class="service-brand-name">门爱才</span></div><div class="service-header-actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div></div>
+        <div class="service-search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="请输入"><button class="service-search-btn">搜索</button><div class="service-search-icons"><div class="service-search-icon-btn" onclick="showToast('切换用户')"><svg viewBox="0 0 24 24" fill="#2B6CB0" stroke="none" width="20" height="20"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" fill="#2B6CB0"/></svg></div><div class="service-search-icon-btn" onclick="showToast('下拉筛选')"><svg viewBox="0 0 24 24" fill="none" stroke="#2B6CB0" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div></div></div>
+      </div>
+      <div class="service-card">
+        <div class="service-card-title">人才业务</div>
+        <div class="service-grid-3">
+          <div class="service-icon-item" onclick="openSkillList('talent_intro')"><div class="service-icon-box" style="background:#5B9BD5;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div><span class="service-icon-text">人才引进</span></div>
+          <div class="service-icon-item" onclick="openSkillList('work_residence')"><div class="service-icon-box" style="background:#F0A050;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="8" cy="16" r="1.5"/></svg></div><span class="service-icon-text">工作居住证</span></div>
+          <div class="service-icon-item" onclick="openSkillList('policy_match')"><div class="service-icon-box" style="background:#6BBF8A;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><polyline points="9 10 11 12 15 8"/></svg></div><span class="service-icon-text">政策匹配</span></div>
+          <div class="service-icon-item" onclick="openSkillList('talent_cert')"><div class="service-icon-box" style="background:#E06060;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg></div><span class="service-icon-text">人才认定</span></div>
+          <div class="service-icon-item" onclick="openSkillList('plan_notice')"><div class="service-icon-box" style="background:#5CC0B0;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span class="service-icon-text">计划公告</span></div>
+          <div class="service-icon-item" onclick="openSkillList('other')"><div class="service-icon-box" style="background:#4A90D9;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><span class="service-icon-text">其他业务</span></div>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-card-title">活动报名</div>
+        <div class="activity-row">
+          <div class="activity-card" style="background:linear-gradient(135deg,#3A4F8F,#2B3E72);" onclick="openActivityReg('门头沟区2026年暑期活动')"><span class="activity-tag" style="background:#4A90D9;">活动</span><div class="activity-text">门头沟区2026年暑…</div></div>
+          <div class="activity-card right-act" style="background:linear-gradient(135deg,#F5E6C8,#E8D5A8);" onclick="openActivityReg('京西创新创业大赛')"><span class="activity-tag" style="background:#E8863A;">活动</span><div class="activity-text">更多活动…</div></div>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-card-title">安居服务</div>
+        <div class="service-grid-3">
+          <div class="service-icon-item" onclick="showToast('人才驿站')"><div class="service-icon-box" style="background:#7EB8E0;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg></div><span class="service-icon-text">人才驿站</span></div>
+          <div class="service-icon-item" onclick="showToast('人才住房')"><div class="service-icon-box" style="background:#6BBF8A;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg></div><span class="service-icon-text">人才住房</span></div>
+          <div class="service-icon-item" onclick="showToast('申请条件')"><div class="service-icon-box" style="background:#7EB8E0;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div><span class="service-icon-text">申请条件</span></div>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-card-title">预约空间</div>
+        <div class="service-grid-4">
+          <div class="space-icon-item" onclick="showToast('AI Work')"><div class="space-icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></div><span class="space-icon-text">AI Work</span></div>
+          <div class="space-icon-item" onclick="showToast('人才之家')"><div class="space-icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><span class="space-icon-text">人才之家</span></div>
+          <div class="space-icon-item" onclick="showToast('会议室')"><div class="space-icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="12" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="15" x2="12" y2="21"/></svg></div><span class="space-icon-text">会议室</span></div>
+          <div class="space-icon-item" onclick="showToast('图书馆')"><div class="space-icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div><span class="space-icon-text">图书馆</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item" onclick="switchTab('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>首页</span></div>
+      <div class="tab-item active" onclick="switchTab('service')"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9" stroke="#fff" stroke-width="1"/><line x1="9" y1="21" x2="9" y2="9" stroke="#fff" stroke-width="1"/></svg><span>服务</span></div>
+      <div class="tab-item" onclick="switchTab('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>我的</span></div>
+    </div>
+  </div>
+
+  <!-- ========== 我的页面 ========== -->
+  <div class="view" id="view-profile">
+    <div class="profile-scroll">
+      <div class="profile-header-card"><div class="profile-header-content"><div class="profile-info-text"><div class="profile-phone">153****9179</div><div class="profile-status" onclick="showToast('前往认证')"><svg viewBox="0 0 24 24" fill="#FFD700" stroke="none"><path d="M12 1L8.5 6.5l-6 .9 4.3 4.2-1 6L12 14.5l6.2 3.1-1-6L21.5 7.4l-6-.9L12 1z"/></svg><span>个人待认证</span><svg class="profile-status-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></div><div class="profile-avatar-wrap"><div class="profile-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg></div><div class="profile-avatar-camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div></div></div></div>
+      <div class="profile-quick-actions">
+        <div class="profile-quick-btn" onclick="showToast('人才二维码')"><svg viewBox="0 0 24 24" fill="none" stroke="#4A90D9" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg><span>人才二维码</span></div>
+        <div class="profile-quick-btn" onclick="openCertificateView()"><svg viewBox="0 0 24 24" fill="none" stroke="#4A90D9" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span>人才证书</span></div>
+        <div class="profile-quick-btn" onclick="openFavView()"><svg viewBox="0 0 24 24" fill="none" stroke="#4A90D9" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span>我的收藏</span></div>
+      </div>
+      <div class="profile-menu">
+        <div class="profile-menu-item" onclick="openActivityView()"><div class="profile-menu-left"><div class="menu-checkbox"></div><span>已报名活动</span></div><div class="profile-menu-right"><svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="profile-menu-item" onclick="openFeedbackView()"><div class="profile-menu-left"><div class="menu-checkbox"></div><span>反馈意见</span></div><div class="profile-menu-right"><svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="profile-menu-item" onclick="openAppQueryView()"><div class="profile-menu-left"><div class="menu-checkbox"></div><span>申请查询</span></div><div class="profile-menu-right"><svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="profile-menu-item" onclick="openConsultView()"><div class="profile-menu-left"><div class="menu-checkbox"></div><span>服务咨询</span></div><div class="profile-menu-right"><svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+      </div>
+      <div class="profile-logout" onclick="showToast('退出登录')">退出登录</div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item" onclick="switchTab('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>首页</span></div>
+      <div class="tab-item" onclick="switchTab('service')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span>服务</span></div>
+      <div class="tab-item active" onclick="switchTab('profile')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>我的</span></div>
+    </div>
+  </div>
+
+  <!-- ========== 已报名活动页面 ========== -->
+  <div class="view" id="view-activity">
+    <div class="activity-view-header"><div class="activity-view-nav"><div class="activity-view-back" onclick="closeActivityView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="activity-view-title">已报名活动</span></div><div class="activity-view-tabs" id="activityTabs"><div class="activity-view-tab active" data-tab="all" onclick="switchActivityTab(this)">全部</div><div class="activity-view-tab" data-tab="pending" onclick="switchActivityTab(this)">审批中</div><div class="activity-view-tab" data-tab="approved" onclick="switchActivityTab(this)">已报名成功</div><div class="activity-view-tab" data-tab="rejected" onclick="switchActivityTab(this)">已驳回</div></div></div>
+    <div class="activity-list-scroll" id="activityListScroll"></div>
+  </div>
+
+  <!-- ========== 技能模块列表页 ========== -->
+  <div class="view" id="view-skill-list">
+    <div class="skill-list-header"><div class="skill-list-nav"><div class="sub-view-back" onclick="closeSkillListView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="skill-list-title" id="skillListTitle">技能模块</span></div></div>
+    <div class="skill-list-scroll" id="skillListScroll"></div>
+  </div>
+
+  <!-- ========== 技能详情页 ========== -->
+  <div class="view" id="view-skill-detail">
+    <div class="sub-view-header"><div class="sub-view-back" onclick="closeSkillDetailView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="sub-view-title" id="skillDetailTitle">技能详情</span></div>
+    <div class="skill-detail-scroll" id="skillDetailScroll"></div>
+  </div>
+
+  <!-- ========== 申请确认页 ========== -->
+  <div class="view" id="view-apply-confirm">
+    <div class="sub-view-header"><div class="sub-view-back" onclick="closeApplyConfirm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="sub-view-title">申请确认</span></div>
+    <div class="apply-confirm-scroll" id="applyConfirmScroll"></div>
+  </div>
+
+  <!-- ========== 文章详情页 ========== -->
+  <div class="view" id="view-article">
+    <div class="sub-view-header"><div class="sub-view-back" onclick="closeArticleView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="sub-view-title" id="articleViewTitle">文章详情</span></div>
+    <div class="article-scroll" id="articleScroll">
+      <div class="article-header-img" id="articleHeaderImg"><div class="article-header-img-bg" id="articleHeaderBg"></div></div>
+      <div class="article-body">
+        <div class="article-title-row"><h1 class="article-title" id="articleTitle"></h1><div class="article-star" id="articleStar" onclick="toggleArticleFav()"><svg viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div></div>
+        <div class="article-meta" id="articleMeta"></div>
+        <div class="article-content" id="articleContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 我的收藏页面 ========== -->
+  <div class="view" id="view-fav">
+    <div class="sub-view-header"><div class="sub-view-back" onclick="closeFavView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="sub-view-title">我的收藏</span></div>
+    <div class="fav-tabs"><div class="fav-tab active" data-cat="brand" onclick="switchFavTab(this)">品牌工作</div><div class="fav-tab" data-cat="policy" onclick="switchFavTab(this)">人才政策</div><div class="fav-tab" data-cat="plan_notice" onclick="switchFavTab(this)">计划公告</div><div class="fav-tab" data-cat="news" onclick="switchFavTab(this)">资讯活动</div></div>
+    <div class="fav-scroll" id="favListScroll"></div>
+  </div>
+
+  <!-- ========== 服务咨询对话框 ========== -->
+  <div class="view" id="view-consult">
+    <div class="sub-view-header"><div class="sub-view-back" onclick="closeConsultView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="sub-view-title">服务咨询</span></div>
+    <div class="chat-scroll" id="chatScroll">
+      <div class="chat-bubble-row left"><div class="chat-bubble left-bubble">您好！我是门爱才智能助手，请问有什么可以帮您？</div></div>
+      <div class="chat-presets" id="chatPresets"></div>
+      <div id="chatMessages"></div>
+    </div>
+    <div class="chat-bottom">
+      <div class="chat-bottom-btn feedback-btn" onclick="closeConsultAndFeedback()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>人工反馈</div>
+      <div class="chat-bottom-btn contact-btn" onclick="showPhoneCard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>联系人工</div>
+    </div>
+  </div>
+
+  <!-- ========== 反馈意见页面 ========== -->
+  <div class="view" id="view-feedback">
+    <div class="sub-view-header"><div class="sub-view-back" onclick="closeFeedbackView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="sub-view-title">反馈意见</span></div>
+    <div class="feedback-tabs">
+      <div class="feedback-tab active" data-tab="new" onclick="switchFeedbackTab(this)">新建反馈</div>
+      <div class="feedback-tab" data-tab="submitted" onclick="switchFeedbackTab(this)">已提交</div>
+      <div class="feedback-tab" data-tab="processed" onclick="switchFeedbackTab(this)">已处理</div>
+    </div>
+    <div class="feedback-scroll">
+      <div class="feedback-tab-content active" id="feedbackTabNew">
+        <div class="feedback-form">
+          <label class="feedback-label">问题描述</label>
+          <textarea class="feedback-input feedback-textarea" id="feedbackContent" placeholder="请详细描述您遇到的问题或建议"></textarea>
+          <label class="feedback-label" style="margin-top:12px;">上传附件</label>
+          <div class="feedback-upload"><div class="feedback-upload-item" onclick="showToast('附件上传功能开发中')"><svg viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" width="24" height="24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></div>
+          <label class="feedback-label">联系方式</label>
+          <input type="text" class="feedback-input" id="feedbackContact" placeholder="请输入手机号或邮箱" style="margin-bottom:0;">
+          <button class="feedback-submit" onclick="submitFeedback()">提交</button>
+        </div>
+      </div>
+      <div class="feedback-tab-content" id="feedbackTabSubmitted">
+        <div id="feedbackSubmittedList"></div>
+      </div>
+      <div class="feedback-tab-content" id="feedbackTabProcessed">
+        <div id="feedbackProcessedList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 人才认定进度页 ========== -->
+  <div class="view" id="view-cert">
+    <div class="sub-view-header"><div class="sub-view-back" onclick="closeCertView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="sub-view-title">人才认定</span></div>
+    <div class="cert-scroll" id="certScroll"></div>
+  </div>
+
+  <!-- ========== 申请查询页 ========== -->
+  <div class="view" id="view-app-query">
+    <div class="sub-view-header"><div class="sub-view-back" onclick="closeAppQueryView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="sub-view-title">申请查询</span></div>
+    <div class="query-scroll" id="queryScroll"></div>
+  </div>
+
+  <!-- ========== 信息列表页（品牌工作/人才政策/计划公告文章列表） ========== -->
+  <div class="view" id="view-info-list">
+    <div class="skill-list-header"><div class="skill-list-nav"><div class="sub-view-back" onclick="closeInfoListView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="skill-list-title" id="infoListTitle">信息列表</span></div></div>
+    <div class="info-list-scroll"><div class="info-list-container" id="infoListContainer"></div></div>
+  </div>
+
+  <!-- ========== 信息文章详情页（无表单） ========== -->
+  <div class="view" id="view-info-detail">
+    <div class="sub-view-header"><div class="sub-view-back" onclick="closeInfoDetailView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="sub-view-title" id="infoDetailTitle">详情</span></div>
+    <div class="info-detail-scroll" id="infoDetailScroll"></div>
+  </div>
+
+  <!-- ========== 人才证书页面 ========== -->
+  <div class="view" id="view-certificate">
+    <div class="sub-view-header"><div class="sub-view-back" onclick="closeCertificateView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div><span class="sub-view-title">人才证书</span></div>
+    <div class="certificate-scroll" id="certificateScroll"></div>
+  </div>
+
+  <!-- ========== 电话弹窗 ========== -->
+  <div class="phone-overlay" id="phoneOverlay" onclick="closePhoneCard()">
+    <div class="phone-card" onclick="event.stopPropagation()">
+      <div class="phone-card-title">联系人工客服</div>
+      <div class="phone-card-number">010-69803333</div>
+      <div class="phone-card-btns">
+        <button class="phone-card-btn cancel" onclick="closePhoneCard()">取消</button>
+        <button class="phone-card-btn call" onclick="showToast('正在拨号...');closePhoneCard()">拨打</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.7);color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:999;display:none;pointer-events:none;"></div>
+</div>
+<script>
+// ========== 数据 ==========
+const newsData = [
+  {id:1,title:'人城产共融与共生 | 第四届北京人工智能产业创新发展人才论坛成功举办',sub:'第四届北京人工智能产业创新发展人才论坛成功举办',date:'2026-06-18',type:'activity',imgColor:'#8B4513'},
+  {id:2,title:'2026年门头沟区委教育科技人才工作领导小组第二次会议召开',sub:'2026年门头沟区委教育科技人才工作领导小组第二次会议召开',date:'2026-06-10',type:'notice',imgColor:'#2B6CB0'},
+  {id:3,title:'门头沟区发布"京西聚智"人才引进计划，面向全球招揽高层次人才',sub:'京西聚智计划正式发布',date:'2026-06-08',type:'notice',imgColor:'#6B8E23'},
+  {id:4,title:'2026京西创新创业大赛启动报名，总奖金池超200万元',sub:'大赛聚焦三大赛道',date:'2026-06-05',type:'activity',imgColor:'#DAA520'},
+  {id:5,title:'门头沟区人才安居工程二期项目开工，预计提供人才公寓500套',sub:'安居工程二期选址永定镇',date:'2026-06-02',type:'notice',imgColor:'#CD853F'},
+  {id:6,title:'京西AI大讲堂第七期：大模型技术前沿与产业应用分享会',sub:'邀请知名学者与企业技术负责人深度分享',date:'2026-05-28',type:'activity',imgColor:'#4682B4'},
+  {id:7,title:'门头沟区与中关村发展集团签署人才战略合作框架协议',sub:'双方将在人才引进等领域开展深度合作',date:'2026-05-25',type:'notice',imgColor:'#556B2F'},
+  {id:8,title:'2026年门头沟区"最美科技工作者"评选活动启动',sub:'面向全区科技工作者',date:'2026-05-20',type:'activity',imgColor:'#B8860B'},
+  {id:9,title:'门头沟区发布人才服务清单2.0版，新增12项便利化服务',sub:'涵盖医疗健康等多个领域',date:'2026-05-15',type:'notice',imgColor:'#8FBC8F'},
+  {id:10,title:'中关村门头沟园企业博士后工作站新增3个设站单位',sub:'涉及人工智能等前沿领域',date:'2026-05-10',type:'notice',imgColor:'#B0C4DE'},
+  {id:11,title:'京西人才驿站正式启用，提供一站式人才综合服务',sub:'驿站位于永定镇党群服务中心',date:'2026-05-05',type:'notice',imgColor:'#D2B48C'},
+  {id:12,title:'门头沟区举办首届人才文化交流节',sub:'文化节包含非遗体验、人才沙龙等',date:'2026-04-28',type:'activity',imgColor:'#9370DB'},
+  {id:13,title:'门头沟区与北京理工大学共建产学研合作基地正式揭牌',sub:'基地将聚焦人工智能与智能制造领域',date:'2026-04-20',type:'notice',imgColor:'#3CB371'},
+  {id:14,title:'2026年门头沟区高层次人才国情研修班开班',sub:'研修班为期5天',date:'2026-04-15',type:'activity',imgColor:'#DB7093'},
+  {id:15,title:'门头沟区"人才贷"金融产品正式发布',sub:'单笔最高500万元',date:'2026-04-10',type:'notice',imgColor:'#FF8C00'},
+];
+
+const newsDetailContent = {
+  1:'2026年6月18日，第四届北京人工智能产业创新发展人才论坛在门头沟区成功举办。本届论坛以"人城产共融与共生"为主题，汇聚了来自全国各地的500余位人工智能领域专家学者、企业家和人才代表。论坛围绕大模型技术前沿、AI产业应用、人才培养等议题展开深入探讨，并发布了门头沟区人工智能产业发展白皮书。多位嘉宾分享了人工智能在医疗、教育、制造等领域的最新应用实践。',
+  2:'2026年6月10日，门头沟区委教育科技人才工作领导小组第二次会议召开。会议审议通过了《门头沟区"十四五"人才发展规划》修订方案，明确了2026年人才工作重点任务：一是深化"京西聚智"人才引进计划；二是推进人才安居工程二期建设；三是优化人才服务清单2.0版；四是加强产教融合人才培养。',
+  3:'门头沟区正式发布"京西聚智"人才引进计划，面向全球招揽高层次人才。计划涵盖五大重点领域：人工智能、绿色低碳、文旅融合、生物医药和智能制造。引进人才可享受最高200万元购房补贴、子女优先入学、绿色就医通道等系列政策红利。首批计划引进100名高层次人才。',
+  4:'2026京西创新创业大赛正式启动报名，大赛聚焦人工智能、绿色低碳、文旅融合三大赛道，总奖金池超200万元。大赛分为初赛、复赛和决赛三个阶段，优胜项目可获得创业启动资金、入驻孵化器免租期、一对一创业导师等扶持。报名截止日期为2026年7月31日。',
+  5:'门头沟区人才安居工程二期项目正式开工，选址永定镇，预计提供人才公寓500套。项目配套商业、教育、医疗等公共设施，预计2027年底建成交付。一期项目已入住人才300余户，满意度达98%。',
+  6:'京西AI大讲堂第七期邀请知名学者与企业技术负责人，围绕大模型技术前沿与产业应用展开深度分享。本期大讲堂重点讨论了多模态大模型、AI Agent、具身智能等热点方向，并展示了一批本地企业的AI落地实践案例。',
+  7:'门头沟区与中关村发展集团签署人才战略合作框架协议，双方将在人才引进、培养、服务等领域开展深度合作。协议明确了联合举办人才活动、共建人才培养基地、共享人才数据等合作内容。',
+  8:'2026年门头沟区"最美科技工作者"评选活动正式启动，面向全区科技工作者，弘扬科学家精神，激发创新活力。评选将综合考虑科研贡献、社会影响、创新精神等维度，最终评选出10位"最美科技工作者"。',
+  9:'门头沟区发布人才服务清单2.0版，新增12项便利化服务，涵盖医疗健康、子女入学、出入境便利、文体休闲、法律咨询等多个领域。清单1.0版推出以来已服务各类人才超过5000人次。',
+  10:'中关村门头沟园企业博士后工作站新增3个设站单位，涉及人工智能、新材料、生物医药等前沿领域。目前园区博士后工作站总数已达8个，在站博士后32人，累计培养出站博士后56人。',
+  11:'京西人才驿站正式启用，位于永定镇党群服务中心，提供一站式人才综合服务。驿站设有接待区、商务洽谈区、阅读休闲区等功能空间，为来区求职、考察的人才提供短期住宿、政策咨询、岗位推荐等服务。',
+  12:'门头沟区举办首届人才文化交流节，活动包含非遗体验、人才沙龙、文艺汇演等丰富内容，吸引了300余位人才及家属参与。文化节旨在促进人才之间的交流互动，增强人才归属感和幸福感。',
+  13:'门头沟区与北京理工大学共建产学研合作基地正式揭牌，基地将聚焦人工智能与智能制造领域。双方将联合开展技术研发、人才培养和成果转化，首批3个合作项目已启动。',
+  14:'2026年门头沟区高层次人才国情研修班开班，研修班为期5天，组织学员赴红色教育基地参观学习，开展专题讲座和交流研讨，进一步增强人才的政治认同和使命担当。',
+  15:'门头沟区"人才贷"金融产品正式发布，单笔最高500万元，利率低于市场1-2个百分点。产品面向经认定的各类人才，可用于创业经营、技术研发等用途，最快3个工作日完成审批放款。',
+};
+
+const locationData = {
+  tanze:{name:'潭柘寺',img:'linear-gradient(135deg,#8B7355,#A0896C)',imgLabel:'🏯 文旅资源',phone:'010-60861644',address:'北京市门头沟区潭柘寺镇潭柘寺景区',desc:'潭柘寺始建于西晋永嘉元年，距今已有1700多年历史，是门头沟区重要的文旅资源。'},
+  miaofeng:{name:'妙峰山',img:'linear-gradient(135deg,#6B8E23,#8FBC8F)',imgLabel:'🏔️ 文旅资源',phone:'010-61882936',address:'北京市门头沟区妙峰山镇妙峰山风景区',desc:'妙峰山主峰海拔1291米，以"古刹、奇松、怪石"闻名。'},
+  longquan:{name:'龙泉镇',img:'linear-gradient(135deg,#4682B4,#5F9EA0)',imgLabel:'🏘️ 商业资源',phone:'010-69842110',address:'北京市门头沟区龙泉镇',desc:'龙泉镇是门头沟区政府所在地，是全区政治、经济、文化中心。'},
+  yongding:{name:'永定镇',img:'linear-gradient(135deg,#5B9BD5,#7EC8E3)',imgLabel:'🏠 安居资源',phone:'010-69803217',address:'北京市门头沟区永定镇',desc:'永定镇是门头沟区人才安居工程重点区域。'},
+  junzhuang:{name:'军庄镇',img:'linear-gradient(135deg,#9B6BCD,#B088D4)',imgLabel:'💡 双创空间',phone:'010-60812004',address:'北京市门头沟区军庄镇',desc:'军庄镇设有京西创客空间，为创新创业人才提供办公场地和创业指导。'},
+  yanchi:{name:'雁翅镇',img:'linear-gradient(135deg,#2B6CB0,#4A90D9)',imgLabel:'🏔️ 文旅资源',phone:'010-61830064',address:'北京市门头沟区雁翅镇',desc:'雁翅镇拥有丰富的自然山水资源和传统古村落。'},
+  zhongguancun:{name:'中关村门头沟园',img:'linear-gradient(135deg,#E8863A,#F0A050)',imgLabel:'💡 双创空间',phone:'010-60806688',address:'北京市门头沟区石龙工业区',desc:'中关村门头沟园重点发展人工智能、智能制造等高精尖产业。'},
+  jingxi:{name:'京西科创中心',img:'linear-gradient(135deg,#3CB371,#5D9E7F)',imgLabel:'💡 双创空间',phone:'010-69805678',address:'北京市门头沟区新城大街',desc:'京西科创中心集企业孵化、成果转化、人才服务于一体。'},
+  shilong:{name:'石龙商务区',img:'linear-gradient(135deg,#DAA520,#E8C34A)',imgLabel:'💼 商业资源',phone:'010-69808888',address:'北京市门头沟区石龙经济开发区',desc:'石龙商务区汇集众多企业总部和商务服务机构。'},
+  xincheng:{name:'门头沟新城',img:'linear-gradient(135deg,#CD853F,#DEB887)',imgLabel:'💼 商业资源',phone:'010-69806666',address:'北京市门头沟区新城地区',desc:'门头沟新城集行政办公、商业服务、文化休闲、生态宜居于一体。'},
+  wenhua:{name:'文化创意园',img:'linear-gradient(135deg,#DB7093,#E899AE)',imgLabel:'💼 商业资源',phone:'010-69807777',address:'北京市门头沟区永定镇文化园路',desc:'文化创意园汇聚了影视制作、创意设计等企业。'},
+  yongding_apt:{name:'永定人才公寓',img:'linear-gradient(135deg,#5B9BD5,#7DB8E0)',imgLabel:'🏠 安居资源',phone:'010-69803333',address:'北京市门头沟区永定镇人才社区',desc:'永定人才公寓户型多样，配套完善，拎包入住。'},
+  longquan_anju:{name:'龙泉安居小区',img:'linear-gradient(135deg,#4682B4,#6CA6CD)',imgLabel:'🏠 安居资源',phone:'010-69804444',address:'北京市门头沟区龙泉镇安居路',desc:'龙泉安居小区毗邻区政府和商业中心。'},
+  xincheng_baozhang:{name:'新城保障房',img:'linear-gradient(135deg,#8FBC8F,#A8D8A8)',imgLabel:'🏠 安居资源',phone:'010-69805555',address:'北京市门头沟区新城保障房小区',desc:'新城保障房租金优惠，申请便捷。'},
+  shilong_shequ:{name:'石龙人才社区',img:'linear-gradient(135deg,#B0C4DE,#C8D8E8)',imgLabel:'🏠 安居资源',phone:'010-69809999',address:'北京市门头沟区石龙经济开发区人才社区',desc:'石龙人才社区专为园区企业人才打造。'},
+  jingxi_chuangke:{name:'京西创客空间',img:'linear-gradient(135deg,#9B6BCD,#B088D4)',imgLabel:'💡 双创空间',phone:'010-60811111',address:'北京市门头沟区军庄镇创客路',desc:'京西创客空间提供共享办公、创业辅导、投融资对接等服务。'},
+  ai_incubator:{name:'AI产业孵化器',img:'linear-gradient(135deg,#E8863A,#F0A050)',imgLabel:'💡 双创空间',phone:'010-60812222',address:'北京市门头沟区中关村门头沟园',desc:'AI产业孵化器聚焦人工智能领域。'},
+  wenlv_base:{name:'文旅融合创新基地',img:'linear-gradient(135deg,#3CB371,#5D9E7F)',imgLabel:'💡 双创空间',phone:'010-60813333',address:'北京市门头沟区斋堂镇',desc:'文旅融合创新基地探索"文化+科技+旅游"融合创新模式。'},
+  green_tech:{name:'绿色科技加速器',img:'linear-gradient(135deg,#6B8E23,#8FBC8F)',imgLabel:'💡 双创空间',phone:'010-60814444',address:'北京市门头沟区雁翅镇',desc:'绿色科技加速器聚焦绿色低碳技术领域。'},
+  malanshanka:{name:'马栏山咖',img:'linear-gradient(135deg,#8B7355,#A0896C)',imgLabel:'🏡 文旅资源',phone:'18600918736',address:'北京市门头沟区斋堂镇马栏村138号',desc:'马栏山咖民宿集住宿、餐饮、咖啡于一体的文旅小院。'}
+};
+
+const pinDataSets = {
+  culture:{pins:[{x:25,y:22,name:'潭柘寺',key:'tanze'},{x:60,y:18,name:'妙峰山',key:'miaofeng'},{x:35,y:62,name:'龙泉镇',key:'longquan'},{x:72,y:58,name:'永定镇',key:'yongding'},{x:15,y:42,name:'军庄镇',key:'junzhuang'},{x:82,y:32,name:'雁翅镇',key:'yanchi'},{x:45,y:78,name:'马栏山咖',key:'malanshanka'}],color:'#2B6CB0'},
+  business:{pins:[{x:50,y:28,name:'中关村门头沟园',key:'zhongguancun'},{x:38,y:52,name:'京西科创中心',key:'jingxi'},{x:63,y:42,name:'石龙商务区',key:'shilong'},{x:28,y:68,name:'门头沟新城',key:'xincheng'},{x:73,y:22,name:'文化创意园',key:'wenhua'}],color:'#E8863A'},
+  housing:{pins:[{x:44,y:38,name:'永定人才公寓',key:'yongding_apt'},{x:55,y:58,name:'龙泉安居小区',key:'longquan_anju'},{x:28,y:48,name:'新城保障房',key:'xincheng_baozhang'},{x:68,y:32,name:'石龙人才社区',key:'shilong_shequ'}],color:'#5B9BD5'},
+  innovation:{pins:[{x:50,y:32,name:'中关村门头沟园',key:'zhongguancun'},{x:33,y:22,name:'京西创客空间',key:'jingxi_chuangke'},{x:63,y:52,name:'AI产业孵化器',key:'ai_incubator'},{x:23,y:62,name:'文旅融合创新基地',key:'wenlv_base'},{x:73,y:38,name:'绿色科技加速器',key:'green_tech'}],color:'#9B6BCD'}
+};
+
+const searchData = [
+  {title:'人才引进办理流程',desc:'了解人才引进申请条件及办理步骤',type:'function'},
+  {title:'工作居住证如何申请',desc:'北京市工作居住证申请条件与流程',type:'function'},
+  {title:'人才认定标准及流程',desc:'门头沟区人才认定分类与申请指南',type:'function'},
+  {title:'安居保障申请条件',desc:'人才公寓、住房补贴等安居服务',type:'function'},
+  {title:'政策匹配怎么用',desc:'智能匹配您可享受的人才政策',type:'function'},
+  {title:'创业扶持有哪些',desc:'创业政策、孵化器、资金支持',type:'function'},
+  {title:'人才驿站服务',desc:'提供短期住宿、求职指导等',type:'function'},
+  {title:'预约空间使用指南',desc:'AI Work、会议室等预约方法',type:'function'},
+  {title:'人才二维码申领',desc:'申领专属人才二维码',type:'function'},
+  {title:'关于发布"京西聚智"人才引进计划的公告',desc:'面向全球招揽高层次人才',type:'notice'},
+  {title:'门头沟区人才安居工程二期项目开工公告',desc:'预计提供人才公寓500套',type:'notice'},
+  {title:'门头沟区发布人才服务清单2.0版公告',desc:'新增12项便利化服务',type:'notice'},
+  {title:'第四届北京人工智能产业创新发展人才论坛',desc:'人城产共融与共生',type:'activity'},
+  {title:'2026京西创新创业大赛',desc:'总奖金池超200万元',type:'activity'},
+  {title:'京西AI大讲堂第七期',desc:'大模型技术前沿与产业应用',type:'activity'},
+  {title:'2026年门头沟区"最美科技工作者"评选',desc:'弘扬科学家精神',type:'activity'},
+];
+
+const typeLabels={function:'功能',notice:'公告',activity:'活动',consult:'功能'};
+const typeColors={function:'#5B9BD5',notice:'#E8863A',activity:'#9B6BCD',consult:'#5B9BD5'};
+
+// ========== 技能模块数据 ==========
+const skillModules = {
+  brand:{title:'品牌工作',modules:[
+    {id:'brand_1',name:'大学生政务见习',icon:'📋',color:'#5B9BD5',desc:'为在校大学生提供政务岗位见习机会',content:'<p>大学生政务见习项目是门头沟区"门爱才"品牌工作的重要组成部分，旨在为在校大学生提供深入了解政府运作、参与公共事务管理的实践机会。</p><p>见习岗位覆盖区政府各职能部门，包括科技创新、人才服务、城市规划、文化旅游等领域。见习期一般为2-3个月，暑假集中安排。</p><p>参与见习的学生将获得见习补贴、导师一对一指导、见习证书等，表现优异者可获得推荐就业机会。</p>'},
+    {id:'brand_2',name:'万名学子游京西',icon:'🏔️',color:'#6BBF8A',desc:'组织高校学子走进门头沟考察体验',content:'<p>"万名学子游京西"是门头沟区面向全国高校学子推出的人才体验品牌活动，通过深度游览、文化体验、产业考察等方式，让学子们亲身感受门头沟的发展活力和人才环境。</p><p>活动覆盖潭柘寺、妙峰山、中关村门头沟园等代表性地点，结合人才政策宣讲、企业参访、文化交流等环节。</p><p>参与学子可享受交通补贴、免费住宿、特色美食等待遇，优秀参与者将获得"京西体验官"荣誉称号。</p>'},
+    {id:'brand_3',name:'北京人才山地徒步大会',icon:'🥾',color:'#E8863A',desc:'以户外运动促进人才交流互动',content:'<p>北京人才山地徒步大会是门头沟区打造的特色人才交流品牌活动，将户外运动与人才社交深度融合，以"行走京西、智汇门头沟"为主题。</p><p>大会设置多条徒步路线，难度从休闲到挑战不等，适合各类人才参与。沿途设置知识打卡点、人才交流站、摄影点等互动环节。</p><p>活动每年举办一届，已成为京津冀地区最具影响力的人才户外交流活动之一，累计参与人才超过5000人次。</p>'},
+    {id:'brand_4',name:'北京人工智能产业创新发展人才论坛',icon:'🎤',color:'#9B6BCD',desc:'汇聚AI领域顶尖人才共话发展',content:'<p>北京人工智能产业创新发展人才论坛是门头沟区最具影响力的人才品牌活动，聚焦人工智能产业与人才发展前沿话题。</p><p>论坛汇聚国内外AI领域顶尖学者、企业家和人才代表，围绕大模型技术前沿、AI产业应用、人才培养等议题展开深入探讨。</p><p>第四届论坛以"人城产共融与共生"为主题，发布了门头沟区人工智能产业发展白皮书，签约了12个人才合作项目。</p>'},
+    {id:'brand_5',name:'校园门头沟日',icon:'🎓',color:'#4A90D9',desc:'走进高校宣传门头沟人才政策',content:'<p>"校园门头沟日"是门头沟区人才宣传进校园的品牌活动，定期走进全国重点高校，通过政策宣讲、校友分享、互动体验等方式，让在校师生深入了解门头沟的人才政策和就业机会。</p><p>活动内容涵盖人才引进政策解读、岗位发布、创业项目路演、门头沟文旅推介等。每场活动吸引数百名师生参与。</p><p>已先后走进北京大学、清华大学、北京理工大学、北京航空航天大学等20余所高校，累计触达师生超过3万人次。</p>'},
+    {id:'brand_6',name:'高校学子Men To Go',icon:'🎒',color:'#5CC0B0',desc:'高校学子门头沟探索计划',content:'<p>"高校学子Men To Go"是门头沟区面向高校在读学生和应届毕业生推出的人才吸引计划，名称取"门"字的谐音，寓意"来门头沟，向未来"。</p><p>计划为参与学子提供免费周末体验之旅、暑期实习岗位、就业绿色通道等系列福利。学子可通过线上报名，选择感兴趣的主题路线进行深度体验。</p><p>目前已与50余所高校建立合作关系，累计参与学子超过8000人，其中超过15%的参与者在毕业后选择来门头沟发展。</p>'},
+  ]},
+  policy:{title:'人才政策',modules:[
+    {id:'policy_1',name:'京西聚智计划',icon:'🌟',color:'#E8863A',desc:'面向全球招揽高层次人才',content:'<p>"京西聚智计划"是门头沟区核心人才引进政策，面向全球招揽战略科学家、领军人才等高层次人才。计划涵盖人工智能、绿色低碳、文旅融合、生物医药和智能制造五大重点领域。</p><p>引进人才可享受最高200万元购房补贴、子女优先入学、绿色就医通道等系列政策红利。同时提供科研启动经费最高500万元、办公场地免租期等创业扶持。</p><p>首批计划引进100名高层次人才，目前已有47人通过认定，涵盖院士2人、国家级人才12人、市级人才33人。</p>'},
+    {id:'policy_2',name:'人才认定标准',icon:'🏅',color:'#5B9BD5',desc:'五大类别梯度化人才认定体系',content:'<p>门头沟区建立了战略科学家、领军人才、骨干人才、青年英才、实用人才五大类别的梯度化人才认定体系，每类人才对应不同的政策支持和福利待遇。</p><p>战略科学家：在国内外具有重大影响力的顶尖科学家；领军人才：在重点领域取得突出成就的高层次人才；骨干人才：在各行业领域发挥骨干作用的中坚力量；青年英才：年龄在35岁以下、具有突出发展潜力的青年人才；实用人才：在技能型岗位具有丰富实践经验的技术能手。</p><p>认定流程为在线申报→材料审核→专家评审→公示→发证，全程约20个工作日。</p>'},
+    {id:'policy_3',name:'安居补贴政策',icon:'🏠',color:'#6BBF8A',desc:'最高200万元购房补贴',content:'<p>门头沟区为经认定的高层次人才提供多层次的安居保障政策。战略科学家和领军人才可享受最高200万元购房补贴或免租入住高端人才公寓；骨干人才可享受最高100万元购房补贴或优惠租赁人才公寓；青年英才可享受最高50万元购房补贴或优先安排保障性租赁住房。</p><p>同时，人才安居工程二期项目正在建设中，预计提供人才公寓500套，配套商业、教育、医疗等公共设施。</p><p>申请流程简单便捷，通过"门爱才"平台在线提交即可，审核通过后补贴直接发放至个人账户。</p>'},
+    {id:'policy_4',name:'子女教育政策',icon:'📚',color:'#9B6BCD',desc:'优先安排优质教育资源',content:'<p>门头沟区为高层次人才子女提供全方位的教育保障。战略科学家和领军人才子女可自主选择区内任何一所公办学校就读；骨干人才子女享受优先安排至区级优质学校；青年英才子女享受绿色入学通道。</p><p>此外，还提供课后托管及寒暑假托管服务、跨区入学手续协助办理、国际学校入学推荐等增值服务。</p><p>目前已累计为200余名人才子女解决入学问题，满意度达99%。</p>'},
+    {id:'policy_5',name:'创业扶持政策',icon:'🚀',color:'#F0A050',desc:'创业启动资金最高100万元',content:'<p>门头沟区为人才创业提供全方位扶持。创业启动资金最高100万元；入驻指定孵化器享受最长3年免租期；"人才贷"单笔最高500万元，利率低于市场1-2个百分点。</p><p>同时提供一对一创业导师帮扶、项目推介参加创新创业大赛、知识产权申请绿色通道、成果转化对接等增值服务。</p><p>目前已扶持创业项目86个，其中27个项目获得融资，累计融资额超过3亿元。</p>'},
+    {id:'policy_6',name:'人才服务清单',icon:'📑',color:'#4A90D9',desc:'2.0版新增12项便利化服务',content:'<p>门头沟区人才服务清单2.0版在1.0版基础上新增12项便利化服务，涵盖医疗健康、子女入学、出入境便利、文体休闲、法律咨询等多个领域。</p><p>核心服务包括：每年一次免费高端体检（三甲医院VIP通道）、专属家庭医生签约服务、绿色就医通道、心理健康咨询、中医养生指导、出入境证件办理绿色通道、文体活动免费参与、法律援助服务等。</p><p>清单1.0版推出以来已服务各类人才超过5000人次，2.0版预计年度服务量将突破8000人次。</p>'},
+  ]},
+  talent_intro:{title:'人才引进',modules:[
+    {id:'ti_1',name:'高层次人才引进',icon:'🌟',color:'#5B9BD5',desc:'面向战略科学家和领军人才',content:'<p>高层次人才引进是门头沟区"京西聚智计划"的核心内容，重点面向战略科学家、领军人才等高层次人才，提供最高200万元购房补贴、科研启动经费最高500万元等系列政策支持。</p><p>引进流程：在线申报→材料审核→专家评审→签约引进→政策兑现。全程有专人对接服务，确保人才"来得了、留得住、发展好"。</p>'},
+    {id:'ti_2',name:'急需紧缺人才引进',icon:'⚡',color:'#E8863A',desc:'面向重点产业急需紧缺岗位',content:'<p>急需紧缺人才引进针对门头沟区人工智能、绿色低碳、文旅融合等重点产业的急需紧缺岗位，实行"一岗一策"的灵活引进机制。</p><p>引进人才可享受安居保障、子女入学、医疗健康等一站式服务，审批流程缩短至15个工作日。</p>'},
+    {id:'ti_3',name:'柔性引才',icon:'🔄',color:'#6BBF8A',desc:'不改变户籍和人事关系',content:'<p>柔性引才政策允许人才不改变户籍和人事关系，通过项目合作、技术顾问、兼职服务等方式为门头沟区贡献力量。</p><p>柔性引进人才同样可享受部分政策待遇，包括项目资助、差旅补贴、临时住宿等。</p>'},
+  ]},
+  work_residence:{title:'工作居住证',modules:[
+    {id:'wr_1',name:'工作居住证新办',icon:'📋',color:'#F0A050',desc:'首次申请北京市工作居住证',content:'<p>北京市工作居住证是外地户籍人才在京工作生活的重要凭证，持证人可享受在京购房、子女入学、社保等多项市民待遇。</p><p>申请条件：本科学历以上、在京连续缴纳社保6个月以上、有合法稳定住所。门头沟区为人才开设绿色通道，审批时间缩短50%。</p>'},
+    {id:'wr_2',name:'工作居住证续签',icon:'🔄',color:'#5B9BD5',desc:'到期前申请续签',content:'<p>工作居住证有效期为3年，到期前30日内需申请续签。续签条件：在京持续工作并缴纳社保、无违法违规记录。</p><p>门头沟区人才续签实行"秒批"机制，线上提交材料后最快1个工作日完成审批。</p>'},
+    {id:'wr_3',name:'工作居住证变更',icon:'✏️',color:'#6BBF8A',desc:'信息变更申请',content:'<p>持证人如遇工作单位变更、居住地址变更等情况，需在30日内申请信息变更。门头沟区提供线上变更服务，操作便捷。</p><p>变更流程：在线提交变更申请→上传新单位合同或新住所证明→审核通过→证件更新。</p>'},
+  ]},
+  policy_match:{title:'政策匹配',modules:[
+    {id:'pm_1',name:'住房政策匹配',icon:'🏠',color:'#5B9BD5',desc:'匹配您可享受的住房政策',content:'<p>住房政策匹配服务根据您的人才认定级别、工作年限、家庭状况等条件，智能匹配您可享受的住房政策，包括购房补贴、人才公寓、保障性租赁住房等。</p><p>系统将自动计算您可享受的最高补贴额度和最优住房方案。</p>'},
+    {id:'pm_2',name:'创业政策匹配',icon:'🚀',color:'#E8863A',desc:'匹配您可享受的创业政策',content:'<p>创业政策匹配服务根据您的创业领域、项目阶段、融资需求等条件，智能匹配您可享受的创业扶持政策，包括创业启动资金、办公场地补贴、人才贷等。</p><p>还可为您推荐匹配的孵化器和创业导师资源。</p>'},
+    {id:'pm_3',name:'教育政策匹配',icon:'📚',color:'#9B6BCD',desc:'匹配子女可享受的教育政策',content:'<p>教育政策匹配服务根据您的人才认定级别、子女年龄等信息，智能匹配子女可享受的教育保障政策，包括优先入学、绿色通道、托管服务等。</p><p>系统将为您推荐最适合的学校和入学方案。</p>'},
+  ]},
+  talent_cert:{title:'人才认定',modules:[
+    {id:'cert_1',name:'战略科学家',icon:'🔬',color:'#8B4513',desc:'在国内外具有重大影响力的顶尖科学家',content:'<p>战略科学家是门头沟区人才认定的最高级别，面向在国内外具有重大影响力的顶尖科学家。认定标准包括：获得国家级科技奖励、主持国家重大科技项目、在国际顶级期刊发表重要论文等。</p><p>战略科学家可享受最高200万元购房补贴、科研启动经费最高500万元、免租入住高端人才公寓、子女自主择校、专属医疗团队等顶级待遇。</p>'},
+    {id:'cert_2',name:'领军人才',icon:'🏆',color:'#DAA520',desc:'在重点领域取得突出成就的高层次人才',content:'<p>领军人才是门头沟区人才认定的第二级别，面向在重点领域取得突出成就的高层次人才。认定标准包括：获得省部级以上科技奖励、主持省部级重大项目、在行业领域具有广泛影响力等。</p><p>领军人才可享受最高150万元购房补贴、科研启动经费最高200万元、优先安排人才公寓、子女优先入学等优厚待遇。</p>'},
+    {id:'cert_3',name:'骨干人才',icon:'💼',color:'#5B9BD5',desc:'在各行业领域发挥骨干作用的中坚力量',content:'<p>骨干人才是门头沟区人才认定的第三级别，面向在各行业领域发挥骨干作用的中坚力量。认定标准包括：具有高级职称或博士学位、在企事业单位担任中层以上管理岗位、取得显著业绩成果等。</p><p>骨干人才可享受最高100万元购房补贴、优惠租赁人才公寓、子女绿色入学通道、每年免费高端体检等待遇。</p>'},
+    {id:'cert_4',name:'青年英才',icon:'🌱',color:'#6BBF8A',desc:'35岁以下具有突出发展潜力的青年人才',content:'<p>青年英才是门头沟区人才认定的第四级别，面向35岁以下、具有突出发展潜力的青年人才。认定标准包括：获得博士学位、在创新创业大赛中获奖、取得重要创新成果等。</p><p>青年英才可享受最高50万元购房补贴、优先安排保障性租赁住房、创业扶持资金、导师辅导等待遇。</p>'},
+    {id:'cert_5',name:'实用人才',icon:'🔧',color:'#E8863A',desc:'在技能型岗位具有丰富实践经验的技术能手',content:'<p>实用人才是门头沟区人才认定的第五级别，面向在技能型岗位具有丰富实践经验的技术能手。认定标准包括：获得高级技师职业资格、在技能竞赛中获奖、拥有独特技艺或绝活等。</p><p>实用人才可享受技能提升补贴、优先安排保障性住房、子女入学便利、技能大师工作室资助等待遇。</p>'},
+    {id:'cert_6',name:'柔性引进人才',icon:'🔄',color:'#9B6BCD',desc:'通过柔性方式引进的各类人才',content:'<p>柔性引进人才是门头沟区人才认定的特殊类别，面向通过项目合作、技术顾问、兼职服务等方式为门头沟区贡献力量的各类人才。不要求改变户籍和人事关系。</p><p>柔性引进人才可享受项目资助、差旅补贴、临时住宿、部分市民待遇等待遇。</p>'},
+  ]},
+  plan_notice:{title:'计划公告',modules:[
+    {id:'pn_1',name:'京西聚智计划公告',icon:'📢',color:'#E8863A',desc:'门头沟区"京西聚智"人才引进计划公告',content:'<p>门头沟区正式发布"京西聚智"人才引进计划，面向全球招揽高层次人才。计划涵盖人工智能、绿色低碳、文旅融合、生物医药和智能制造五大重点领域。</p><p>引进人才可享受最高200万元购房补贴、子女优先入学、绿色就医通道等系列政策红利。报名截止日期为2026年12月31日。</p>'},
+    {id:'pn_2',name:'人才安居工程公告',icon:'🏠',color:'#5B9BD5',desc:'人才安居工程二期项目开工公告',content:'<p>门头沟区人才安居工程二期项目正式开工，选址永定镇，预计提供人才公寓500套。项目配套商业、教育、医疗等公共设施，预计2027年底建成交付。</p><p>一期项目已入住人才300余户，满意度达98%。二期项目接受预登记。</p>'},
+    {id:'pn_3',name:'人才服务清单公告',icon:'📑',color:'#6BBF8A',desc:'人才服务清单2.0版发布公告',content:'<p>门头沟区发布人才服务清单2.0版，新增12项便利化服务，涵盖医疗健康、子女入学、出入境便利、文体休闲、法律咨询等多个领域。</p><p>清单1.0版推出以来已服务各类人才超过5000人次，2.0版预计年度服务量将突破8000人次。</p>'},
+  ]},
+  other:{title:'其他业务',modules:[
+    {id:'ot_1',name:'人才驿站',icon:'🏨',color:'#7EB8E0',desc:'短期免费住宿与综合服务',content:'<p>京西人才驿站位于永定镇党群服务中心，为来区求职、考察的高层次人才提供短期免费住宿（最长7天）、求职指导与岗位推荐、人才政策咨询与解读、社交活动与行业交流、办公场地临时使用等服务。</p><p>驿站设有接待区、商务洽谈区、阅读休闲区等功能空间，可通过"门爱才"平台在线预约。</p>'},
+    {id:'ot_2',name:'预约空间',icon:'🏢',color:'#6BBF8A',desc:'AI Work/会议室/图书馆预约',content:'<p>门头沟区人才专属空间提供AI Work、人才之家、会议室、图书馆等多样化空间预约服务。每人每周最多预约3次，单次最长4小时。</p><p>预约方式：进入"服务-预约空间"模块，选择空间类型和时间段，提交预约申请。</p>'},
+    {id:'ot_3',name:'人才二维码',icon:'📱',color:'#9B6BCD',desc:'专属电子凭证一码通办',content:'<p>人才二维码是门头沟区人才的专属电子凭证，可用于快速身份验证、享受人才服务绿色通道、合作商家消费优惠、入园入馆通行等场景。</p><p>申领方式：进入"我的-人才二维码"，完成实名认证后自动生成，支持截图保存和动态刷新。</p>'},
+  ]},
+};
+
+// ========== 服务咨询预设问答 ==========
+const consultQAData = [
+  {q:'如何申请人才引进？',a:'人才引进申请流程：1.登录"门爱才"平台进入"人才业务-人才引进"；2.填写个人信息并上传材料；3.提交申请后等待审核，一般15个工作日内反馈；4.审核通过后按通知办理落户手续。'},
+  {q:'工作居住证申请需要哪些材料？',a:'工作居住证申请材料：1.有效身份证件；2.学历学位证书；3.劳动合同；4.社保缴纳证明（连续6个月以上）；5.合法稳定住所证明；6.近期免冠照片。'},
+  {q:'人才公寓如何申请？',a:'人才公寓申请流程：1.确认符合申请条件；2.在"门爱才"平台"安居服务"模块提交申请；3.上传相关材料；4.等待审核及房源分配通知；5.签订租赁合同，办理入住。'},
+  {q:'人才认定有哪些类别？',a:'门头沟区人才认定分为六大类别：战略科学家、领军人才、骨干人才、青年英才、实用人才、柔性引进人才。每个类别对应不同的政策支持。'},
+  {q:'创新创业有哪些扶持政策？',a:'创业扶持政策包括：1.创业启动资金最高100万元；2.办公场地免租期最长3年；3."人才贷"单笔最高500万元；4.一对一创业导师帮扶；5.优先推荐参加创新创业大赛。'},
+  {q:'子女教育有哪些保障？',a:'人才子女教育保障：1.高层次人才子女可优先安排至优质学校；2.人才子女入学享受绿色通道；3.提供课后托管及寒暑假托管服务；4.协助办理跨区入学手续。'},
+];
+
+// ========== 模块文章数据（品牌工作/人才政策/计划公告用） ==========
+const moduleArticles = {
+  brand_1:[
+    {id:'ba1_1',title:'2026年大学生政务见习项目正式启动',date:'2026-06-18',imgColor:'#2B6CB0',imgText:'政务见习',content:'<p>2026年大学生政务见习项目正式启动，面向全国高校招收200名见习生。见习岗位覆盖区政府各职能部门，包括科技创新、人才服务、城市规划、文化旅游等领域。</p><p>见习期为2-3个月，暑假集中安排。参与见习的学生将获得见习补贴、导师一对一指导、见习证书等，表现优异者可获得推荐就业机会。</p>'},
+    {id:'ba1_2',title:'2025年大学生政务见习圆满结束 优秀见习生获表彰',date:'2026-03-10',imgColor:'#5B9BD5',imgText:'政务见习',content:'<p>2025年大学生政务见习项目圆满结束，共180名大学生完成见习，其中30名优秀见习生获得表彰。见习生在科技创新、人才服务、城市规划等领域贡献了青春力量。</p><p>优秀见习生代表张同学表示："通过见习，我深入了解了政府运作机制，也坚定了毕业后服务基层的决心。"</p>'},
+    {id:'ba1_3',title:'门头沟区与5所高校签署政务见习合作协议',date:'2025-12-20',imgColor:'#7B4DB0',imgText:'政务见习',content:'<p>门头沟区与北京大学、清华大学、北京理工大学、北京航空航天大学、首都师范大学5所高校签署政务见习合作协议，建立常态化见习机制。</p><p>协议明确每年提供不少于150个见习岗位，优先面向门头沟区重点发展产业相关专业学生。</p>'},
+  ],
+  brand_2:[
+    {id:'ba2_1',title:'2026年"万名学子游京西"春季活动圆满举办',date:'2026-05-15',imgColor:'#6BBF8A',imgText:'游京西',content:'<p>2026年"万名学子游京西"春季活动圆满举办，来自全国30余所高校的500名学子走进门头沟，深度体验文旅资源、考察产业发展、了解人才政策。</p><p>活动覆盖潭柘寺、妙峰山、中关村门头沟园等代表性地点，结合人才政策宣讲、企业参访、文化交流等环节。</p>'},
+    {id:'ba2_2',title:'"万名学子游京西"秋季活动报名开启',date:'2026-09-01',imgColor:'#5B9BD5',imgText:'游京西',content:'<p>2026年"万名学子游京西"秋季活动报名正式开启，本期主题为"秋韵京西·智汇未来"。活动设置3条主题路线：文旅融合线、科技创新线、生态宜居线。</p><p>参与学子可享受交通补贴、免费住宿、特色美食等待遇，优秀参与者将获得"京西体验官"荣誉称号。</p>'},
+  ],
+  brand_3:[
+    {id:'ba3_1',title:'2026北京人才山地徒步大会成功举办',date:'2026-05-20',imgColor:'#E8863A',imgText:'徒步大会',content:'<p>2026北京人才山地徒步大会在妙峰山成功举办，吸引800余位人才及家属参与。大会设置休闲、挑战两条路线，沿途设置知识打卡点和人才交流站。</p><p>活动已成为京津冀地区最具影响力的人才户外交流活动之一，累计参与人才超过5000人次。</p>'},
+    {id:'ba3_2',title:'2025北京人才山地徒步大会精彩回顾',date:'2025-10-15',imgColor:'#DAA520',imgText:'徒步大会',content:'<p>2025北京人才山地徒步大会精彩回顾：600余位人才在门头沟妙峰山共享户外运动与社交乐趣，沿途打卡点趣味十足，人才交流站促成多个合作意向。</p>'},
+  ],
+  brand_4:[
+    {id:'ba4_1',title:'第四届北京人工智能产业创新发展人才论坛成功举办',date:'2026-06-18',imgColor:'#9B6BCD',imgText:'AI论坛',content:'<p>第四届北京人工智能产业创新发展人才论坛在门头沟区成功举办，以"人城产共融与共生"为主题，汇聚500余位AI领域专家学者和人才代表。</p><p>论坛发布了门头沟区人工智能产业发展白皮书，签约12个人才合作项目。</p>'},
+    {id:'ba4_2',title:'第三届北京AI人才论坛回顾：产才融合开新局',date:'2025-11-20',imgColor:'#7B4DB0',imgText:'AI论坛',content:'<p>第三届北京人工智能产业创新发展人才论坛以"智汇京西·创享未来"为主题，聚焦AI产业应用和人才培养，发布了一批AI产业合作项目。</p>'},
+  ],
+  brand_5:[
+    {id:'ba5_1',title:'"校园门头沟日"走进北京大学',date:'2026-04-10',imgColor:'#4A90D9',imgText:'校园日',content:'<p>"校园门头沟日"走进北京大学，通过政策宣讲、校友分享、互动体验等方式，让在校师生深入了解门头沟的人才政策和就业机会，吸引300余名师生参与。</p>'},
+    {id:'ba5_2',title:'"校园门头沟日"清华大学站活动回顾',date:'2026-03-25',imgColor:'#5B9BD5',imgText:'校园日',content:'<p>"校园门头沟日"清华大学站活动成功举办，门头沟区委领导带队宣讲人才政策，发布50余个优质岗位，现场收到简历120余份。</p>'},
+  ],
+  brand_6:[
+    {id:'ba6_1',title:'"高校学子Men To Go"2026暑期体验之旅启动',date:'2026-06-01',imgColor:'#5CC0B0',imgText:'Men To Go',content:'<p>"高校学子Men To Go"2026暑期体验之旅正式启动，提供3条主题路线：AI产业探秘之旅、绿色生态体验之旅、文旅融合发现之旅。</p><p>学子可通过线上报名，选择感兴趣的主题路线进行深度体验。目前已与50余所高校建立合作关系。</p>'},
+    {id:'ba6_2',title:'"高校学子Men To Go"2025年度成果发布',date:'2026-01-15',imgColor:'#3CB371',imgText:'Men To Go',content:'<p>2025年度"高校学子Men To Go"成果发布：全年参与学子超过3000人，其中超过15%的参与者在毕业后选择来门头沟发展。</p>'},
+  ],
+  policy_1:[
+    {id:'pa1_1',title:'重磅利好！门头沟区修订办理《北京市工作居住证》实施细则',date:'2026-06-03',imgColor:'#2B6CB0',imgText:'工作居住证',content:'<p>门头沟区修订办理《北京市工作居住证》实施细则，进一步放宽申请条件、简化审批流程。新细则将社保缴纳要求从12个月缩短至6个月，审批时限从20个工作日缩短至10个工作日。</p><p>同时，门头沟区为高层次人才开设工作居住证绿色通道，最快3个工作日完成审批。</p>'},
+    {id:'pa1_2',title:'门头沟区"才聚京西 福地安居"若干措施实施方案',date:'2026-04-21',imgColor:'#7B4DB0',imgText:'人才政策',content:'<p>门头沟区发布"才聚京西 福地安居"若干措施实施方案，从住房保障、子女教育、医疗保障、创业扶持等方面为人才提供全方位支持。</p><p>方案明确：高层次人才最高可享受200万元购房补贴，创业启动资金最高100万元，人才贷单笔最高500万元。</p>'},
+    {id:'pa1_3',title:'门头沟区高新产业青年人才"三个一"支持计划',date:'2026-04-21',imgColor:'#7B4DB0',imgText:'人才政策',content:'<p>门头沟区发布高新产业青年人才"三个一"支持计划：一笔创业启动金（最高50万元）、一个创业导师、一个孵化工位。计划面向35岁以下在人工智能、绿色低碳等领域创业的青年人才。</p>'},
+    {id:'pa1_4',title:'北京市引进毕业生管理办法',date:'2026-04-21',imgColor:'#7B4DB0',imgText:'人才政策',content:'<p>北京市引进毕业生管理办法更新，进一步优化毕业生引进流程。门头沟区结合区域产业特色，重点引进人工智能、绿色低碳、文旅融合等领域的应届毕业生和归国留学生。</p>'},
+    {id:'pa1_5',title:'关于汇聚算法人才 打造"京西智谷"的若干支持措施（概要）',date:'2026-04-21',imgColor:'#7B4DB0',imgText:'人才政策',content:'<p>门头沟区发布"京西智谷"算法人才支持措施，面向算法领域高层次人才提供专项购房补贴、科研启动资金、算力资源支持等系列政策。措施涵盖算法研究、大模型开发、智能应用等方向。</p>'},
+  ],
+  policy_2:[
+    {id:'pa2_1',title:'门头沟区人才认定标准（2026版）正式发布',date:'2026-05-10',imgColor:'#5B9BD5',imgText:'认定标准',content:'<p>门头沟区人才认定标准（2026版）正式发布，建立战略科学家、领军人才、骨干人才、青年英才、实用人才五大类别的梯度化认定体系，新增"柔性引进人才"类别。</p><p>认定流程为在线申报→材料审核→专家评审→公示→发证，全程约20个工作日。</p>'},
+    {id:'pa2_2',title:'人才认定在线申报系统升级上线',date:'2026-03-15',imgColor:'#4A90D9',imgText:'认定标准',content:'<p>人才认定在线申报系统全面升级，新增智能材料预审、进度实时查询、电子证书下载等功能，申报体验大幅提升。系统支持手机端和电脑端同步操作。</p>'},
+  ],
+  policy_3:[
+    {id:'pa3_1',title:'门头沟区安居补贴政策详解：最高200万元购房补贴',date:'2026-05-20',imgColor:'#6BBF8A',imgText:'安居补贴',content:'<p>门头沟区安居补贴政策详解：战略科学家和领军人才最高200万元购房补贴；骨干人才最高100万元；青年英才最高50万元。同时提供人才公寓、保障性租赁住房等多层次安居保障。</p>'},
+    {id:'pa3_2',title:'人才安居工程二期项目预登记公告',date:'2026-04-10',imgColor:'#3CB371',imgText:'安居补贴',content:'<p>门头沟区人才安居工程二期项目接受预登记，选址永定镇，预计提供人才公寓500套，配套商业、教育、医疗等公共设施。一期项目入住满意度达98%。</p>'},
+  ],
+  policy_4:[
+    {id:'pa4_1',title:'高层次人才子女入学绿色通道开通',date:'2026-06-01',imgColor:'#9B6BCD',imgText:'子女教育',content:'<p>门头沟区高层次人才子女入学绿色通道正式开通，战略科学家和领军人才子女可自主选择区内任何一所公办学校就读，骨干人才子女享受优先安排至区级优质学校。</p><p>目前已累计为200余名人才子女解决入学问题，满意度达99%。</p>'},
+  ],
+  policy_5:[
+    {id:'pa5_1',title:'门头沟区创业扶持政策最新解读',date:'2026-05-25',imgColor:'#F0A050',imgText:'创业扶持',content:'<p>门头沟区创业扶持政策最新解读：创业启动资金最高100万元，入驻孵化器最长3年免租期，人才贷单笔最高500万元。同时提供一对一创业导师、知识产权申请绿色通道等增值服务。</p>'},
+    {id:'pa5_2',title:'"人才贷"金融产品利率再降0.5个百分点',date:'2026-03-20',imgColor:'#E8863A',imgText:'创业扶持',content:'<p>门头沟区"人才贷"金融产品利率再降0.5个百分点，目前利率低于市场1.5-2.5个百分点，单笔最高500万元，最快3个工作日完成审批放款。目前已扶持创业项目86个。</p>'},
+  ],
+  policy_6:[
+    {id:'pa6_1',title:'门头沟区人才服务清单2.0版正式发布',date:'2026-04-15',imgColor:'#4A90D9',imgText:'服务清单',content:'<p>门头沟区人才服务清单2.0版正式发布，在1.0版基础上新增12项便利化服务，涵盖医疗健康、子女入学、出入境便利、文体休闲、法律咨询等领域。</p><p>核心服务包括：每年一次免费高端体检、专属家庭医生、绿色就医通道、出入境证件办理绿色通道等。</p>'},
+  ],
+  pn_1:[
+    {id:'pn1_1',title:'门头沟区"京西聚智"人才引进计划公告',date:'2026-06-08',imgColor:'#E8863A',imgText:'聚智计划',content:'<p>门头沟区正式发布"京西聚智"人才引进计划，面向全球招揽高层次人才。计划涵盖人工智能、绿色低碳、文旅融合、生物医药和智能制造五大重点领域。</p><p>引进人才可享受最高200万元购房补贴、子女优先入学、绿色就医通道等系列政策红利。报名截止日期为2026年12月31日。</p>'},
+    {id:'pn1_2',title:'"京西聚智"计划首批47名高层次人才通过认定',date:'2026-05-28',imgColor:'#DAA520',imgText:'聚智计划',content:'<p>"京西聚智"计划首批47名高层次人才通过认定，涵盖院士2人、国家级人才12人、市级人才33人。人才引进工作取得阶段性成果。</p>'},
+  ],
+  pn_2:[
+    {id:'pn2_1',title:'人才安居工程二期项目开工公告',date:'2026-06-02',imgColor:'#5B9BD5',imgText:'安居工程',content:'<p>门头沟区人才安居工程二期项目正式开工，选址永定镇，预计提供人才公寓500套。项目配套商业、教育、医疗等公共设施，预计2027年底建成交付。</p><p>一期项目已入住人才300余户，满意度达98%。二期项目接受预登记。</p>'},
+  ],
+  pn_3:[
+    {id:'pn3_1',title:'门头沟区人才服务清单2.0版发布公告',date:'2026-05-15',imgColor:'#6BBF8A',imgText:'服务清单',content:'<p>门头沟区发布人才服务清单2.0版，新增12项便利化服务，涵盖医疗健康、子女入学、出入境便利、文体休闲、法律咨询等领域。清单1.0版推出以来已服务各类人才超过5000人次。</p>'},
+    {id:'pn3_2',title:'人才服务清单1.0版年度服务报告',date:'2026-01-20',imgColor:'#3CB371',imgText:'服务清单',content:'<p>人才服务清单1.0版年度服务报告：全年服务各类人才超过5000人次，服务满意度97.5%。最受欢迎的服务项目为免费高端体检、绿色就医通道和子女入学绿色通道。</p>'},
+  ],
+};
+
+let registeredActivities = [
+  {id:1,title:'门头沟区2026年暑期活动',status:'approved',regDate:'2026-06-20',form:{name:'张三',phone:'153****9179',idCard:'1101**********1234',company:'京西科技有限公司',position:'技术总监',email:'zhangsan@example.com',activityName:'门头沟区2026年暑期活动',activityTime:'2026-07-15 09:00-17:00',activityLocation:'门头沟区永定镇党群服务中心'}},
+  {id:2,title:'京西创新创业大赛',status:'pending',regDate:'2026-06-22',form:{name:'张三',phone:'153****9179',idCard:'1101**********1234',company:'京西科技有限公司',position:'技术总监',email:'zhangsan@example.com',activityName:'2026京西创新创业大赛',activityTime:'2026-08-01 09:00-18:00',activityLocation:'中关村门头沟园展示中心',projectName:'AI智能辅助办公平台',projectTrack:'人工智能赛道'}},
+];
+
+let applicationRecords = [
+  {id:1001,moduleName:'战略科学家',category:'talent_cert',applyDate:'2026-06-24',status:'reviewing',form:{name:'张三',phone:'153****9179',idCard:'1101**********1234',company:'京西科技有限公司',position:'技术总监',email:'zhangsan@example.com'}},
+  {id:1002,moduleName:'领军人才',category:'talent_cert',applyDate:'2026-06-18',status:'approved',form:{name:'张三',phone:'153****9179',idCard:'1101**********1234',company:'京西科技有限公司',position:'技术总监',email:'zhangsan@example.com'}},
+];
+let feedbackRecords = [
+  {id:1,content:'希望增加更多人才政策的解读内容',contact:'153****9179',date:'2026-06-15',status:'processed',reply:'感谢您的建议，我们已增加政策解读专栏，欢迎查看。'},
+  {id:2,content:'工作居住证申请流程不太清楚，能否提供更详细的指南',contact:'153****9179',date:'2026-06-20',status:'submitted'},
+];
+let favorites = [];
+let homeScrollPos = 0, currentSearchType = 'function', currentMapTab = 'culture';
+let carouselIndex = 0, carouselTimer = null;
+let currentArticleCategory = '', currentArticleName = '';
+let currentFavTab = 'brand';
+
+// ========== 初始化 ==========
+function init() {
+  renderHomeNews();
+  renderMapPins('homeMapArea','culture');
+  renderMapPins('fullMapArea','culture');
+  renderNewsList();
+  renderChatPresets();
+  startCarousel();
+  document.getElementById('homeSearchBar').addEventListener('click', function(e){ if(e.target.tagName!=='BUTTON') openSearch(); });
+  document.getElementById('homeSearchInput').addEventListener('focus', function(){ this.blur(); openSearch(); });
+  document.getElementById('homeSearchBtn').addEventListener('click', function(){ openSearch(); });
+}
+
+// ========== Toast ==========
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(t._timer); t._timer=setTimeout(()=>{t.style.display='none';},1500); }
+
+// ========== 视图管理 ==========
+function showView(id,ov){ const v=document.getElementById(id); v.classList.add('active','slide-in'); if(ov) v.classList.add('overlay'); v.addEventListener('animationend',function(){v.classList.remove('slide-in');},{once:true}); }
+function hideView(id,cb){ const v=document.getElementById(id); v.classList.add('slide-out'); v.addEventListener('animationend',function(){v.classList.remove('active','slide-out','overlay'); if(cb) cb(); },{once:true}); }
+function switchTab(tab){ ['view-home','view-service','view-profile'].forEach(id=>document.getElementById(id).classList.remove('active')); document.getElementById('view-'+tab).classList.add('active'); document.querySelectorAll('.tab-bar').forEach(b=>{ const items=b.querySelectorAll('.tab-item'); const idx={home:0,service:1,profile:2}[tab]; items.forEach((it,i)=>it.classList.toggle('active',i===idx)); }); }
+
+// ========== 轮播图 ==========
+function startCarousel(){ const track=document.getElementById('carouselTrack'); const dots=document.getElementById('carouselDots').children; const total=track.children.length; function goTo(idx){ carouselIndex=idx; track.style.transform='translateX(-'+(idx*100)+'%)'; for(let i=0;i<dots.length;i++) dots[i].classList.toggle('active',i===idx); } function next(){ goTo((carouselIndex+1)%total); } clearInterval(carouselTimer); carouselTimer=setInterval(next,3500); let startX=0,moving=false; track.addEventListener('touchstart',function(e){startX=e.touches[0].clientX;moving=true;clearInterval(carouselTimer);},{passive:true}); track.addEventListener('touchend',function(e){if(!moving)return;moving=false;const diff=startX-e.changedTouches[0].clientX;if(Math.abs(diff)>50){if(diff>0)goTo(Math.min(carouselIndex+1,total-1));else goTo(Math.max(carouselIndex-1,0));}carouselTimer=setInterval(next,3500);},{passive:true}); }
+function handleCarouselClick(idx){ showToast('已跳转到对应的页面'); }
+
+// ========== 新闻 ==========
+function renderNewsCard(item){ const c=document.createElement('div');c.className='news-card';c.dataset.id=item.id;c.innerHTML=`<div class="news-card-img"><div class="news-card-img-placeholder" style="background:${item.imgColor};color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;">${item.type==='activity'?'🎯 活动':item.type==='notice'?'📢 公告':'📰 资讯'}</div></div><div class="news-card-body"><div class="news-card-title">${item.title}</div><div class="news-card-sub">${item.sub}</div><div class="news-card-date">${item.date}</div></div>`;c.addEventListener('click',function(){openNewsDetail(item);});return c; }
+function renderHomeNews(){const c=document.getElementById('homeNewsList');c.innerHTML='';newsData.slice(0,10).forEach(i=>c.appendChild(renderNewsCard(i)));}
+function renderNewsList(kw){const c=document.getElementById('newsListScroll');c.innerHTML='';let f=newsData;if(kw&&kw.trim()){const k=kw.trim().toLowerCase();f=newsData.filter(n=>n.title.toLowerCase().includes(k));}if(!f.length){c.innerHTML='<div class="search-empty" style="padding:40px 0"><p>暂无相关资讯</p></div>';return;}f.forEach(i=>c.appendChild(renderNewsCard(i)));}
+function openNewsView(){showView('view-news',true);renderNewsList();}
+function closeNewsView(){hideView('view-news');document.getElementById('newsSearchInput').value='';renderNewsList();}
+function filterNews(kw){renderNewsList(kw);}
+
+// ========== 资讯详情 ==========
+function openNewsDetail(item){ const typeLabel=item.type==='activity'?'活动':item.type==='notice'?'公告':'资讯';const typeColor=item.type==='activity'?'#9B6BCD':item.type==='notice'?'#E8863A':'#2B6CB0';const iconEmoji=item.type==='activity'?'🎯':item.type==='notice'?'📢':'📰';document.getElementById('articleHeaderBg').style.background=item.imgColor;document.getElementById('articleHeaderBg').innerHTML=`<span class="article-header-img-icon" style="color:#fff;">${iconEmoji}</span>`;document.getElementById('articleTitle').textContent=item.title;document.getElementById('articleViewTitle').textContent=typeLabel+'详情';document.getElementById('articleMeta').innerHTML=`<span class="article-meta-tag" style="background:${typeColor}20;color:${typeColor};">${typeLabel}</span><span>${item.date}</span>`;const rawContent=newsDetailContent[item.id]||item.sub;const paragraphs=rawContent.split(/(?<=[。！？；])\s*/);document.getElementById('articleContent').innerHTML=paragraphs.map(p=>`<p>${p}</p>`).join('');currentArticleCategory='news';currentArticleName=item.title;updateArticleStar();showView('view-article',true);document.getElementById('articleScroll').scrollTop=0; }
+function closeArticleView(){hideView('view-article');}
+
+// ========== 收藏功能 ==========
+function toggleFav(category,name){const idx=favorites.findIndex(f=>f.category===category&&f.name===name);if(idx>=0){favorites.splice(idx,1);showToast('已取消收藏');}else{const colorMap={brand:'#5B9BD5',policy:'#E8863A',service:'#6BBF8A',plan_notice:'#5CC0B0',news:'#9B6BCD'};const labelMap={brand:'品牌工作',policy:'人才政策',service:'服务业务',plan_notice:'计划公告',news:'资讯活动'};favorites.push({category,name,color:colorMap[category]||'#2B6CB0',label:labelMap[category]||category,time:new Date().toLocaleDateString()});showToast('已收藏');}updateArticleStar();updateSkillDetailStar();}
+
+function toggleArticleFav(){if(!currentArticleName)return;toggleFav(currentArticleCategory,currentArticleName);}
+
+function updateArticleStar(){const star=document.getElementById('articleStar');if(!star||!currentArticleName)return;const isFav=favorites.some(f=>f.category===currentArticleCategory&&f.name===currentArticleName);const svg=star.querySelector('svg');if(isFav){svg.setAttribute('fill','#F0A050');svg.setAttribute('stroke','#F0A050');}else{svg.setAttribute('fill','none');svg.setAttribute('stroke','#ccc');}}
+
+function removeFav(idx){favorites.splice(idx,1);renderFavList();showToast('已取消收藏');}
+
+function renderFavList(){const c=document.getElementById('favListScroll');const filtered=favorites.filter(f=>f.category===currentFavTab);if(!filtered.length){c.innerHTML='<div class="search-empty" style="padding:60px 0;"><p style="font-size:14px;color:#999;">暂无收藏内容</p></div>';return;}c.innerHTML=filtered.map((fav,i)=>{const realIdx=favorites.indexOf(fav);return `<div class="fav-card" onclick="openFavDetail(${realIdx})"><div class="fav-card-img" style="background:${fav.color};">${fav.label}</div><div class="fav-card-body"><div class="fav-card-title">${fav.name}</div><span class="fav-card-type" style="background:${fav.color}20;color:${fav.color};">${fav.label}</span></div><div class="fav-card-remove" onclick="event.stopPropagation();removeFav(${realIdx})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>`;}).join('');}
+
+function openFavDetail(idx){const fav=favorites[idx];if(!fav)return;if(fav.category==='news'){const newsItem=newsData.find(n=>n.title===fav.name);if(newsItem){openNewsDetail(newsItem);return;}}const catMap={brand:'brand',policy:'policy',service:'talent_cert',plan_notice:'plan_notice',news:'brand'};const mod=Object.values(skillModules).flatMap(m=>m.modules).find(m=>m.name===fav.name);if(mod){openSkillDetail(mod);return;}showToast(fav.name);}
+
+function openFavView(){showView('view-fav',true);currentFavTab='brand';document.querySelectorAll('.fav-tab').forEach(t=>t.classList.toggle('active',t.dataset.cat==='brand'));renderFavList();}
+function closeFavView(){hideView('view-fav');}
+function switchFavTab(el){document.querySelectorAll('.fav-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');currentFavTab=el.dataset.cat;renderFavList();}
+
+// ========== 搜索 ==========
+function openSearch(){showView('view-search',true);setTimeout(()=>document.getElementById('searchInput').focus(),300);}
+function closeSearch(){hideView('view-search');document.getElementById('searchInput').value='';document.getElementById('searchHotArea').style.display='';document.getElementById('searchResults').style.display='none';}
+function switchSearchTab(el){document.querySelectorAll('.search-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');currentSearchType=el.dataset.type;const kw=document.getElementById('searchInput').value;if(kw.trim())doSearch(kw);}
+function handleSearch(kw){if(!kw.trim()){document.getElementById('searchHotArea').style.display='';document.getElementById('searchResults').style.display='none';return;}document.getElementById('searchHotArea').style.display='none';document.getElementById('searchResults').style.display='';doSearch(kw);}
+function doSearch(kw){document.getElementById('searchInput').value=kw;document.getElementById('searchHotArea').style.display='none';document.getElementById('searchResults').style.display='';const k=kw.trim().toLowerCase();let results=searchData.filter(i=>i.type===currentSearchType&&(i.title.toLowerCase().includes(k)||i.desc.toLowerCase().includes(k)));if(currentSearchType==='notice'||currentSearchType==='activity'){newsData.filter(n=>n.type===currentSearchType&&(n.title.toLowerCase().includes(k)||n.sub.toLowerCase().includes(k))).forEach(nr=>{if(!results.find(r=>r.title===nr.title))results.push({title:nr.title,desc:nr.sub,type:nr.type});});}const c=document.getElementById('searchResults');if(!results.length){c.innerHTML='<div class="search-empty"><p>未找到相关结果</p></div>';return;}c.innerHTML=results.map(i=>`<div class="search-result-item" onclick="showToast('${i.title.substring(0,10)}...')"><svg viewBox="0 0 24 24" fill="none" stroke="${typeColors[i.type]||'#2B6CB0'}" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div class="search-result-info"><div class="search-result-title">${i.title}</div><div class="search-result-desc">${i.desc}</div></div><span class="search-result-tag" style="background:${typeColors[i.type]||'#2B6CB0'}20;color:${typeColors[i.type]||'#2B6CB0'}">${typeLabels[i.type]||'功能'}</span></div>`).join('');}
+
+// ========== 地图 ==========
+function renderMapPins(id,tab){const m=document.getElementById(id);m.querySelectorAll('.map-pin').forEach(p=>p.remove());const d=pinDataSets[tab]||pinDataSets.culture;d.pins.forEach(pin=>{const el=document.createElement('div');el.className='map-pin';el.dataset.key=pin.key;el.style.left=pin.x+'%';el.style.top=pin.y+'%';el.onclick=function(e){e.stopPropagation();const isHomeMap=id==='homeMapArea';if(isHomeMap){openMapViewAndLocate(pin.key,tab);}else{highlightPin(pin.key);}};el.innerHTML=`<div class="map-pin-icon"><svg viewBox="0 0 24 32" fill="${d.color}"><path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 20 12 20s12-11 12-20C24 5.37 18.63 0 12 0z"/><circle cx="12" cy="12" r="5" fill="#fff"/></svg></div><span class="map-pin-label">${pin.name}</span>`;m.appendChild(el);});}
+function highlightPin(key){const fullMap=document.getElementById('fullMapArea');fullMap.querySelectorAll('.map-pin').forEach(p=>{p.classList.remove('highlighted');});const targetPin=fullMap.querySelector(`.map-pin[data-key="${key}"]`);if(targetPin){targetPin.classList.add('highlighted');}showMapLocationInfo(key);}
+function showMapLocationInfo(key){const loc=locationData[key];if(!loc)return;let infoBar=document.getElementById('mapLocInfoBar');infoBar.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:15px;font-weight:700;color:#1a3a5c;">${loc.name}</span></div><div style="font-size:12px;color:#666;line-height:1.6;"><div style="margin-bottom:4px;">📞 ${loc.phone}</div><div>📍 ${loc.address}</div></div><button onclick="showToast('正在打开导航...')" style="width:100%;margin-top:10px;padding:10px;background:#2B6CB0;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">一键导航</button>`;infoBar.classList.add('show');}
+function openMapViewAndLocate(pinKey,tab){homeScrollPos=document.getElementById('homeScroll').scrollTop;showView('view-map',true);document.getElementById('fullMapTabs').querySelectorAll('.map-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));renderMapPins('fullMapArea',tab);setTimeout(()=>{highlightPin(pinKey);},400);}
+function openMapView(){homeScrollPos=document.getElementById('homeScroll').scrollTop;showView('view-map',true);}
+function closeMapView(){hideView('view-map',function(){setTimeout(function(){const hs=document.getElementById('homeScroll');hs.scrollTop=homeScrollPos;},50);});}
+function switchMapTab(el,ctx){const tabs=ctx==='home'?document.getElementById('homeMapTabs'):document.getElementById('fullMapTabs');tabs.querySelectorAll('.map-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');const tab=el.dataset.tab;currentMapTab=tab;if(ctx==='home'){renderMapPins('homeMapArea',tab);document.getElementById('fullMapTabs').querySelectorAll('.map-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));renderMapPins('fullMapArea',tab);}else{renderMapPins('fullMapArea',tab);document.getElementById('homeMapTabs').querySelectorAll('.map-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));renderMapPins('homeMapArea',tab);}}
+
+// ========== 活动报名 ==========
+function openActivityReg(name){const newAct={id:Date.now(),title:name,status:'pending',regDate:new Date().toISOString().slice(0,10),form:{name:'张三',phone:'153****9179',idCard:'1101**********1234',company:'京西科技有限公司',position:'技术总监',email:'zhangsan@example.com',activityName:name,activityTime:'2026-08-15 09:00-17:00',activityLocation:'门头沟区永定镇党群服务中心'}};registeredActivities.push(newAct);showToast('报名成功，可在"我的-已报名活动"中查看');}
+function openActivityView(tab){showView('view-activity',true);if(tab)document.querySelectorAll('.activity-view-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));renderActivityList(tab||'all');}
+function closeActivityView(){hideView('view-activity');}
+function switchActivityTab(el){document.querySelectorAll('.activity-view-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderActivityList(el.dataset.tab);}
+function renderActivityList(tab){const c=document.getElementById('activityListScroll');let filtered=registeredActivities;if(tab==='pending')filtered=registeredActivities.filter(a=>a.status==='pending');else if(tab==='approved')filtered=registeredActivities.filter(a=>a.status==='approved');else if(tab==='rejected')filtered=registeredActivities.filter(a=>a.status==='rejected');if(!filtered.length){c.innerHTML='<div class="activity-empty"><svg viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" width="48" height="48"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div class="activity-empty-text">暂无相关活动</div></div>';return;}c.innerHTML=filtered.map(act=>{const statusMap={pending:{text:'审批中',cls:'pending'},approved:{text:'已报名成功',cls:'approved'},rejected:{text:'已驳回',cls:'rejected'}};const s=statusMap[act.status]||statusMap.pending;const f=act.form;let formHtml='';const fields=[['姓名',f.name],['手机号',f.phone],['身份证号',f.idCard],['工作单位',f.company],['职务',f.position],['邮箱',f.email],['活动名称',f.activityName],['活动时间',f.activityTime],['活动地点',f.activityLocation]];if(f.projectName)fields.push(['项目名称',f.projectName]);if(f.projectTrack)fields.push(['参赛赛道',f.projectTrack]);fields.forEach(([label,value])=>{formHtml+=`<div class="activity-reg-field"><span class="activity-reg-label">${label}</span><span class="activity-reg-value">${value}</span></div>`;});return `<div class="activity-reg-card"><div class="activity-reg-title">${act.title}</div><span class="activity-reg-status ${s.cls}">${s.text}</span><div class="activity-reg-form">${formHtml}</div></div>`;}).join('');}
+
+// ========== 技能模块列表 ==========
+const infoCategories = ['brand','policy','plan_notice'];
+function openSkillList(catKey){const cat=skillModules[catKey];if(!cat){showToast('功能开发中');return;}if(catKey==='policy'){openInfoList('policy_1','人才政策','policy');return;}document.getElementById('skillListTitle').textContent=cat.title;const c=document.getElementById('skillListScroll');c.innerHTML=cat.modules.map(mod=>{const isInfoCat=infoCategories.includes(catKey);const clickAction=isInfoCat?`openInfoList('${mod.id}','${mod.name}','${catKey}')`:`openSkillDetail(skillModules['${catKey}'].modules.find(m=>m.id==='${mod.id}'))`;return `<div class="skill-module-card" onclick="${clickAction}"><div class="skill-module-icon" style="background:${mod.color}20;font-size:24px;">${mod.icon}</div><div class="skill-module-info"><div class="skill-module-name">${mod.name}</div><div class="skill-module-desc">${mod.desc||''}</div></div><svg class="skill-module-arrow" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>`;}).join('');showView('view-skill-list',true);}
+function closeSkillListView(){hideView('view-skill-list');}
+
+// ========== 技能详情 ==========
+let currentSkillModule = null;
+function openSkillDetail(mod){currentSkillModule=mod;document.getElementById('skillDetailTitle').textContent=mod.name;const catLabel={brand:'品牌工作',policy:'人才政策',service:'服务业务',plan_notice:'计划公告',news:'资讯活动'}[mod.category||'service']||'服务业务';const isFav=favorites.some(f=>f.category===(mod.category||'service')&&f.name===mod.name);const starFill=isFav?'#F0A050':'none';const starStroke=isFav?'#F0A050':'#ccc';document.getElementById('skillDetailScroll').innerHTML=`<div class="skill-detail-banner" style="background:${mod.color};"><span class="skill-detail-banner-icon" style="color:rgba(255,255,255,0.6);">${mod.icon}</span><div class="skill-detail-banner-title">${mod.name}<div class="skill-detail-fav-star" onclick="toggleFav('${mod.category||"service"}','${mod.name.replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24" fill="${starFill}" stroke="${starStroke}" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div></div></div><div class="skill-detail-body"><div class="skill-detail-section-title">详细介绍</div><div class="skill-detail-content">${mod.content}</div><div class="skill-detail-section-title">申请表单</div><div class="skill-form-group"><label class="skill-form-label">姓名</label><input type="text" class="skill-form-input" id="skillFormName" value="张三"></div><div class="skill-form-group"><label class="skill-form-label">手机号</label><input type="text" class="skill-form-input" id="skillFormPhone" value="153****9179"></div><div class="skill-form-group"><label class="skill-form-label">身份证号</label><input type="text" class="skill-form-input" id="skillFormIdCard" value="1101**********1234"></div><div class="skill-form-group"><label class="skill-form-label">工作单位</label><input type="text" class="skill-form-input" id="skillFormCompany" value="京西科技有限公司"></div><div class="skill-form-group"><label class="skill-form-label">职务</label><input type="text" class="skill-form-input" id="skillFormPosition" value="技术总监"></div><div class="skill-form-group"><label class="skill-form-label">邮箱</label><input type="text" class="skill-form-input" id="skillFormEmail" value="zhangsan@example.com"></div><button class="skill-apply-btn" onclick="submitSkillApply()">申请</button></div>`;showView('view-skill-detail',true);}
+function closeSkillDetailView(){hideView('view-skill-detail');}
+function updateSkillDetailStar(){if(!currentSkillModule)return;const mod=currentSkillModule;const isFav=favorites.some(f=>f.category===(mod.category||'service')&&f.name===mod.name);const stars=document.querySelectorAll('.skill-detail-fav-star svg');stars.forEach(svg=>{svg.setAttribute('fill',isFav?'#F0A050':'none');svg.setAttribute('stroke',isFav?'#F0A050':'#ccc');});}
+
+function submitSkillApply(){const mod=currentSkillModule;if(!mod)return;const form={name:document.getElementById('skillFormName').value,phone:document.getElementById('skillFormPhone').value,idCard:document.getElementById('skillFormIdCard').value,company:document.getElementById('skillFormCompany').value,position:document.getElementById('skillFormPosition').value,email:document.getElementById('skillFormEmail').value};if(!form.name||!form.phone){showToast('请填写必填信息');return;}const record={id:Date.now(),moduleName:mod.name,category:mod.category||'service',applyDate:new Date().toISOString().slice(0,10),status:'pending',form:form};applicationRecords.push(record);showApplyConfirm(record);}
+function showApplyConfirm(record){const c=document.getElementById('applyConfirmScroll');let fieldsHtml='';Object.entries(record.form).forEach(([k,v])=>{const labelMap={name:'姓名',phone:'手机号',idCard:'身份证号',company:'工作单位',position:'职务',email:'邮箱'};fieldsHtml+=`<div class="apply-confirm-field"><span class="apply-confirm-label">${labelMap[k]||k}</span><span class="apply-confirm-value">${v}</span></div>`;});c.innerHTML=`<div class="apply-confirm-card"><div class="apply-confirm-icon">✅</div><div class="apply-confirm-title">申请提交成功</div><div style="font-size:13px;color:#999;text-align:center;margin-bottom:16px;">${record.moduleName}</div>${fieldsHtml}<div class="apply-confirm-field"><span class="apply-confirm-label">申请时间</span><span class="apply-confirm-value">${record.applyDate}</span></div><div class="apply-confirm-field"><span class="apply-confirm-label">当前状态</span><span class="apply-confirm-value" style="color:#E8863A;">审核中</span></div></div><button class="apply-confirm-back" onclick="closeApplyConfirmAndGoProfile()">返回</button>`;showView('view-apply-confirm',true);}
+function closeApplyConfirm(){hideView('view-apply-confirm');}
+function closeApplyConfirmAndGoProfile(){hideView('view-apply-confirm',function(){hideView('view-skill-detail');});}
+
+// ========== 信息列表页（品牌工作/人才政策/计划公告） ==========
+let currentInfoCategory = '';
+let currentInfoArticleName = '';
+function openInfoList(moduleId, title, category){currentInfoCategory=category;document.getElementById('infoListTitle').textContent=title;const articles=moduleArticles[moduleId]||[];const c=document.getElementById('infoListContainer');if(!articles.length){c.innerHTML='<div class="search-empty" style="padding:60px 0;"><p style="font-size:14px;color:#999;">暂无相关信息</p></div>';showView('view-info-list',true);return;}c.innerHTML=articles.map(art=>`<div class="info-article-card" onclick="openInfoArticle('${art.id}','${moduleId}','${category}')"><div class="info-article-img" style="background:${art.imgColor};"><span>${art.imgText}</span></div><div class="info-article-body"><div class="info-article-title">${art.title}</div><div class="info-article-sub">${art.title}</div><div class="info-article-date">${art.date}</div></div></div>`).join('');showView('view-info-list',true);}
+function closeInfoListView(){hideView('view-info-list');}
+function openInfoArticle(articleId, moduleId, category){const articles=moduleArticles[moduleId]||[];const art=articles.find(a=>a.id===articleId);if(!art){showToast('文章不存在');return;}currentInfoArticleName=art.title;currentInfoCategory=category;const isFav=favorites.some(f=>f.category===category&&f.name===art.title);const starFill=isFav?'#F0A050':'none';const starStroke=isFav?'#F0A050':'#ccc';document.getElementById('infoDetailTitle').textContent='详情';document.getElementById('infoDetailScroll').innerHTML=`<div class="info-detail-header"><h1 class="info-detail-title">${art.title}</h1><div class="info-detail-star" onclick="toggleInfoFav('${category}','${art.title.replace(/'/g,"\\'")}')"><svg viewBox="0 0 24 24" fill="${starFill}" stroke="${starStroke}" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div></div><div class="info-detail-meta">${art.date}</div><div class="info-detail-content">${art.content}</div>`;showView('view-info-detail',true);}
+function closeInfoDetailView(){hideView('view-info-detail');}
+function toggleInfoFav(category, name){toggleFav(category, name);const isFav=favorites.some(f=>f.category===category&&f.name===name);const starSvg=document.querySelector('.info-detail-star svg');if(starSvg){starSvg.setAttribute('fill',isFav?'#F0A050':'none');starSvg.setAttribute('stroke',isFav?'#F0A050':'#ccc');}}
+
+// ========== 人才证书 ==========
+function openCertificateView(){showView('view-certificate',true);renderCertificate();}
+function closeCertificateView(){hideView('view-certificate');}
+function renderCertificate(){const c=document.getElementById('certificateScroll');const talentTypes=['战略科学家','领军人才','骨干人才','青年英才','实用人才','柔性引进人才'];const records=applicationRecords.filter(r=>r.moduleName&&talentTypes.includes(r.moduleName)).sort((a,b)=>b.id-a.id);if(!records.length){c.innerHTML='<div class="certificate-empty"><div class="certificate-empty-icon">📜</div><div class="certificate-empty-text">暂无人才认定记录</div><div style="font-size:12px;color:#bbb;margin-top:8px;">在“服务-人才认定”提交申请后，状态会显示在这里</div></div>';return;}const statusMap={pending:{text:'已提交',cls:'pending',desc:'申请已提交，请等待组织部审核。'},reviewing:{text:'审核中',cls:'reviewing',desc:'材料正在审核中，请留意后续通知。'},approved:{text:'审核通过',cls:'approved',desc:'后台已审核通过，可查看电子证书。'},rejected:{text:'审核不通过',cls:'rejected',desc:'申请未通过，请根据反馈修改后重新提交。'}};c.innerHTML=records.map((record,index)=>{const s=statusMap[record.status]||statusMap.pending;const viewBtn=record.status==='approved'?`<button class="cert-view-btn" onclick="showTalentCertificateDetail(${index})">查看证书</button>`:'';return `<div class="cert-card"><div class="cert-card-header"><div class="cert-card-icon" style="background:#4A90D920;">🏅</div><span class="cert-card-status ${s.cls}">${s.text}</span></div><div class="query-card-row"><span class="label">认定类别</span><span class="value">${record.moduleName}</span></div><div class="query-card-row"><span class="label">申请人</span><span class="value">${record.form.name||'-'}</span></div><div class="query-card-row"><span class="label">工作单位</span><span class="value">${record.form.company||'-'}</span></div><div class="query-card-row"><span class="label">申请时间</span><span class="value">${record.applyDate}</span></div><div class="cert-status-row"><span class="cert-status-text ${s.cls}">${s.desc}</span>${viewBtn}</div></div>`;}).join('');}
+function showTalentCertificateDetail(index){const talentTypes=['战略科学家','领军人才','骨干人才','青年英才','实用人才','柔性引进人才'];const records=applicationRecords.filter(r=>r.moduleName&&talentTypes.includes(r.moduleName)).sort((a,b)=>b.id-a.id);const record=records[index];if(!record)return;if(record.status!=='approved'){showToast('后台审核通过后才可查看证书');return;}const c=document.getElementById('certificateScroll');const certNo='MTG-'+new Date().getFullYear()+'-'+String(record.id).slice(-6).padStart(6,'0');c.innerHTML=`<button class="cert-view-btn" style="margin-bottom:12px;background:#fff;color:#2B6CB0;border:1px solid #d7e4f6;" onclick="renderCertificate()">返回列表</button><div class="certificate-card"><div class="certificate-title">人才认定证书</div><div class="certificate-type">${record.moduleName}</div><div class="certificate-info"><span>姓　名</span>${record.form.name||'-'}</div><div class="certificate-info"><span>证书编号</span>${certNo}</div><div class="certificate-info"><span>认定类别</span>${record.moduleName}</div><div class="certificate-info"><span>工作单位</span>${record.form.company||'-'}</div><div class="certificate-info"><span>证书状态</span>已生效</div><div class="certificate-seal"><div class="certificate-seal-text">门头沟区人才工作局</div><div class="certificate-date">${record.applyDate}</div></div></div>`;}
+
+// ========== 人才认定进度 ==========
+function openCertView(){showView('view-cert',true);renderCertList();}
+function closeCertView(){hideView('view-cert');}
+function renderCertList(){const c=document.getElementById('certScroll');const certTypes=[{name:'战略科学家',icon:'🔬',color:'#8B4513'},{name:'领军人才',icon:'🏆',color:'#DAA520'},{name:'骨干人才',icon:'💼',color:'#5B9BD5'},{name:'青年英才',icon:'🌱',color:'#6BBF8A'},{name:'实用人才',icon:'🔧',color:'#E8863A'},{name:'柔性引进人才',icon:'🔄',color:'#9B6BCD'}];c.innerHTML=certTypes.map(ct=>{const record=applicationRecords.find(r=>r.moduleName===ct.name);let status='none',statusText='未申请',statusCls='none';if(record){status=record.status;if(status==='approved'){statusText='已审核';statusCls='approved';}else if(status==='rejected'){statusText='已驳回';statusCls='rejected';}else if(status==='reviewing'){statusText='审核中';statusCls='reviewing';}else{statusText='已提交';statusCls='pending';}}const viewBtn=record&&status==='approved'?`<button class="cert-view-btn" onclick="openCertificateView()">查看人才证书</button>`:'';return `<div class="cert-card"><div class="cert-card-header"><div class="cert-card-icon" style="background:${ct.color}20;">${ct.icon}</div><div class="cert-card-name">${ct.name}</div><span class="cert-card-status ${statusCls}">${statusText}</span></div><div class="cert-status-row"><span class="cert-status-text ${statusCls}">${status==='none'?'暂未申请':statusText}</span>${viewBtn}</div></div>`;}).join('');}
+
+// ========== 申请查询 ==========
+function openAppQueryView(){showView('view-app-query',true);renderAppQueryList();}
+function closeAppQueryView(){hideView('view-app-query');}
+function renderAppQueryList(){const c=document.getElementById('queryScroll');if(!applicationRecords.length){c.innerHTML='<div class="search-empty" style="padding:60px 0;"><p style="font-size:14px;color:#999;">暂无申请记录</p></div>';return;}c.innerHTML=applicationRecords.map(r=>{const statusMap={pending:{text:'审核中',cls:'pending'},reviewing:{text:'审批中',cls:'pending'},approved:{text:'已通过',cls:'approved'},rejected:{text:'已驳回',cls:'rejected'}};const s=statusMap[r.status]||statusMap.pending;return `<div class="query-card"><div class="query-card-title">${r.moduleName}</div><div class="query-card-row"><span class="label">申请时间</span><span class="value">${r.applyDate}</span></div><div class="query-card-row"><span class="label">申请人</span><span class="value">${r.form.name}</span></div><span class="query-card-status activity-reg-status ${s.cls}">${s.text}</span></div>`;}).join('');}
+
+// ========== 服务咨询对话框 ==========
+function openConsultView(){showView('view-consult',true);document.getElementById('chatScroll').scrollTop=0;}
+function closeConsultView(){hideView('view-consult');}
+function closeConsultAndFeedback(){hideView('view-consult');setTimeout(()=>openFeedbackView(),350);}
+function renderChatPresets(){const c=document.getElementById('chatPresets');c.innerHTML=consultQAData.map((item,i)=>`<span class="chat-preset-bubble" onclick="sendPresetQuestion(${i})">${item.q}</span>`).join('');}
+function sendPresetQuestion(idx){const item=consultQAData[idx];if(!item)return;const msgArea=document.getElementById('chatMessages');msgArea.innerHTML+=`<div class="chat-bubble-row right"><div class="chat-bubble right-bubble">${item.q}</div></div>`;setTimeout(()=>{msgArea.innerHTML+=`<div class="chat-bubble-row left"><div class="chat-bubble left-bubble">${item.a}</div></div>`;const scroll=document.getElementById('chatScroll');scroll.scrollTop=scroll.scrollHeight;},500);const scroll=document.getElementById('chatScroll');scroll.scrollTop=scroll.scrollHeight;}
+
+// ========== 电话卡片 ==========
+function showPhoneCard(){document.getElementById('phoneOverlay').classList.add('show');}
+function closePhoneCard(){document.getElementById('phoneOverlay').classList.remove('show');}
+
+// ========== 反馈意见 ==========
+function openFeedbackView(){showView('view-feedback',true);renderFeedbackLists();}
+function closeFeedbackView(){hideView('view-feedback');}
+function switchFeedbackTab(el){document.querySelectorAll('.feedback-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');const tab=el.dataset.tab;document.querySelectorAll('.feedback-tab-content').forEach(c=>c.classList.remove('active'));document.getElementById('feedbackTab'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');if(tab==='submitted'||tab==='processed')renderFeedbackLists();}
+function renderFeedbackLists(){const submittedList=document.getElementById('feedbackSubmittedList');const processedList=document.getElementById('feedbackProcessedList');const submitted=feedbackRecords.filter(r=>r.status==='submitted');const processed=feedbackRecords.filter(r=>r.status==='processed');submittedList.innerHTML=submitted.length?submitted.map(r=>`<div class="feedback-record-card"><span class="feedback-record-status submitted">已提交</span><div class="feedback-record-field"><span class="feedback-record-label">问题描述</span><span class="feedback-record-value">${r.content}</span></div><div class="feedback-record-field"><span class="feedback-record-label">联系方式</span><span class="feedback-record-value">${r.contact}</span></div><div class="feedback-record-field"><span class="feedback-record-label">提交时间</span><span class="feedback-record-value">${r.date}</span></div></div>`).join(''):'<div class="search-empty" style="padding:40px 0;"><p style="font-size:14px;color:#999;">暂无已提交反馈</p></div>';processedList.innerHTML=processed.length?processed.map(r=>`<div class="feedback-record-card"><span class="feedback-record-status processed">已处理</span><div class="feedback-record-field"><span class="feedback-record-label">问题描述</span><span class="feedback-record-value">${r.content}</span></div><div class="feedback-record-field"><span class="feedback-record-label">联系方式</span><span class="feedback-record-value">${r.contact}</span></div><div class="feedback-record-field"><span class="feedback-record-label">提交时间</span><span class="feedback-record-value">${r.date}</span></div>${r.reply?`<div class="feedback-record-field" style="margin-top:8px;padding-top:8px;border-top:1px dashed #e0e0e0;"><span class="feedback-record-label" style="color:#4CAF50;">处理回复</span><span class="feedback-record-value" style="color:#4CAF50;">${r.reply}</span></div>`:''}</div>`).join(''):'<div class="search-empty" style="padding:40px 0;"><p style="font-size:14px;color:#999;">暂无已处理反馈</p></div>';}
+function submitFeedback(){const content=document.getElementById('feedbackContent').value.trim();const contact=document.getElementById('feedbackContact').value.trim();if(!content){showToast('请填写问题描述');return;}if(!contact){showToast('请填写联系方式');return;}feedbackRecords.push({id:Date.now(),content:content,contact:contact,date:new Date().toISOString().slice(0,10),status:'submitted'});showToast('反馈提交成功，感谢您的宝贵意见');document.getElementById('feedbackContent').value='';document.getElementById('feedbackContact').value='';renderFeedbackLists();}
+
+init();
+</script>
+<script>
+(function(){
+  const talentCertNames = ['战略科学家','领军人才','骨干人才','青年英才','实用人才','柔性引进人才'];
+  const originalOpenSkillDetail = window.openSkillDetail;
+  window.openSkillDetail = function(mod){
+    originalOpenSkillDetail(mod);
+    if (mod && talentCertNames.includes(mod.name)) {
+      document.querySelector('.skill-detail-fav-star')?.remove();
+    }
+  };
+})();
+</script>
+</body>
+</html>

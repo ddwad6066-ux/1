@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>超级管理员页面</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --blue: #4169f5;
+      --text: #172033;
+      --muted: #7a8699;
+      --line: #e7ecf5;
+      --soft: #f4f7fd;
+      --green: #25b35d;
+      --red: #f05252;
+      --orange: #f39b24;
+      --gray: #7c8798;
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: #f3f6fc;
+      font-size: 18px;
+      overflow: hidden;
+    }
+    .app {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      background: linear-gradient(90deg, #fff 0 300px, #f2f5fb 300px 100%);
+    }
+    .sidebar {
+      background: #fff;
+      border-right: 1px solid #e3e8f2;
+      box-shadow: inset 0 1px 0 #edf1f7;
+      z-index: 2;
+    }
+    .brand {
+      height: 106px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 28px;
+      border-bottom: 1px solid #e5eaf3;
+    }
+    .logo {
+      width: 55px;
+      height: 55px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #4771ff, #7189f6);
+      color: #fff;
+      font-size: 25px;
+      font-weight: 800;
+    }
+    .brand strong { display: block; font-size: 24px; line-height: 1.25; color: #0d1628; }
+    .brand span { display: block; margin-top: 6px; color: #5f6f86; font-size: 16px; }
+    .nav { padding: 22px 15px 0; }
+    .nav-item {
+      height: 56px;
+      margin-bottom: 9px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      border-radius: 12px;
+      color: #3d485a;
+      background: #fff;
+      font-size: 20px;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+    }
+    .nav-item.active {
+      color: var(--blue);
+      background: #f2f5fd;
+      font-weight: 800;
+    }
+    .nav-item.active::before {
+      content: "";
+      width: 4px;
+      height: 33px;
+      border-radius: 4px;
+      background: var(--blue);
+      position: absolute;
+      left: 0;
+    }
+    .nav-icon { width: 20px; height: 20px; color: currentColor; flex: 0 0 auto; }
+    .chevron { margin-left: auto; color: #6e7a8c; font-size: 20px; }
+    .main {
+      min-width: 0;
+      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-color: #8a8a8a #f5f5f5;
+    }
+    .main::-webkit-scrollbar, .modal-scroll::-webkit-scrollbar { width: 16px; }
+    .main::-webkit-scrollbar-track, .modal-scroll::-webkit-scrollbar-track { background: #f5f5f5; }
+    .main::-webkit-scrollbar-thumb, .modal-scroll::-webkit-scrollbar-thumb {
+      background: #8b8b8b;
+      border-radius: 10px;
+      border: 4px solid #f5f5f5;
+    }
+    .topbar {
+      height: 86px;
+      background: rgba(255,255,255,.96);
+      border-bottom: 1px solid #e4e9f2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 58px 0 34px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    h1 { margin: 0; font-size: 31px; letter-spacing: 0; line-height: 1.15; color: #0d1628; }
+    .crumb { margin-top: 8px; color: #8793a6; font-size: 16px; }
+    .account { display: flex; align-items: center; gap: 38px; font-size: 17px; }
+    .user-pill {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 18px;
+      border: 1px solid #e4e9f2;
+      border-radius: 17px;
+      box-shadow: 0 10px 28px rgba(34,57,102,.06);
+      background: #fff;
+    }
+    .online { padding: 7px 15px; border-radius: 18px; color: var(--green); background: #eaf9f1; font-weight: 700; }
+    .admin-photo {
+      width: 50px;
+      height: 50px;
+      border-radius: 13px;
+      background:
+        radial-gradient(circle at 65% 28%, #f7d0b4 0 10px, transparent 11px),
+        radial-gradient(circle at 45% 28%, #f4c7a9 0 10px, transparent 11px),
+        linear-gradient(135deg, #2f4f80, #f1d6b8 55%, #e4c38e);
+    }
+    .role strong { display: block; color: #121a2a; font-size: 18px; }
+    .role span { display: block; margin-top: 5px; color: #69778d; font-size: 15px; }
+    .logout { color: #2f61ff; text-decoration: none; white-space: nowrap; }
+    .content {
+      min-height: calc(100vh - 86px);
+      padding: 30px 48px 80px 30px;
+      background: linear-gradient(90deg, #edf2fb 0, #f7f9fe 14%, #f7f9fe 100%);
+    }
+    .panel {
+      background: #fff;
+      border: 1px solid #e8edf5;
+      border-radius: 24px;
+      box-shadow: 0 18px 36px rgba(50,72,112,.07);
+    }
+    .filter { min-height: 152px; padding: 26px 27px 25px; margin-bottom: 22px; }
+    .filter h2, .table-card h2 { margin: 0 0 24px; font-size: 29px; line-height: 1.1; color: #0d1628; }
+    .form-row {
+      display: grid;
+      grid-template-columns: auto minmax(250px, 1fr) auto minmax(250px, 1fr) auto minmax(250px, 1fr) auto auto;
+      align-items: center;
+      gap: 20px;
+    }
+    label { font-weight: 700; color: #222b3d; white-space: nowrap; }
+    input, select {
+      height: 42px;
+      padding: 0 16px;
+      border: 1px solid #cbd8f5;
+      border-radius: 12px;
+      font-size: 17px;
+      color: #334158;
+      outline: none;
+      background: #fff;
+      min-width: 0;
+    }
+    input::placeholder { color: #9aa6b8; }
+    .consult-filter-row {
+      display: grid;
+      grid-template-columns: auto minmax(320px, 1fr) auto minmax(260px, 380px) auto auto;
+      align-items: center;
+      gap: 20px;
+      max-width: 1460px;
+    }
+    .consult-filter-row .btn { min-width: 80px; padding: 0 24px; }
+    .consult-filter-row .filter-reset { width: auto; min-width: 80px; }
+    button { border: 0; font-family: inherit; cursor: pointer; font-size: 18px; white-space: nowrap; }
+    .btn { height: 40px; padding: 0 22px; border-radius: 12px; }
+    .btn-primary { background: var(--blue); color: #fff; box-shadow: 0 6px 14px rgba(65,105,245,.18); }
+    .btn-ghost { border: 1px solid #d5dce8; background: #fff; color: #333b4d; }
+    .table-card { min-height: 648px; padding: 26px 27px 35px; overflow: hidden; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; min-width: 1240px; border-collapse: collapse; table-layout: fixed; color: #334158; }
+    thead th { height: 50px; background: #f6f8fc; color: #253449; font-weight: 800; text-align: left; border-bottom: 1px solid var(--line); }
+    th:first-child { border-radius: 12px 0 0 0; }
+    th:last-child { border-radius: 0 12px 0 0; }
+    th, td { padding: 0 16px; }
+    tbody td { height: 52px; border-bottom: 1px solid var(--line); line-height: 1.35; vertical-align: middle; word-break: break-all; }
+    .applicant { width: 180px; }
+    .phone { width: 170px; }
+    .unit { width: 320px; }
+    .type { width: 180px; }
+    .result { width: 150px; }
+    .time { width: 230px; }
+    .action { width: 150px; }
+    .desc { width: 430px; }
+    .link { color: #1e5cff; background: transparent; padding: 0; height: auto; }
+    .tag { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 6px; font-size: 15px; }
+    .tag.green { color: #20a53a; background: #f0ffeb; border: 1px solid #bfe9b8; }
+    .tag.red { color: #f04d4d; background: #fff0f0; border: 1px solid #ffd8d8; }
+    .tag.orange { color: #f08a18; background: #fff7ec; border: 1px solid #ffe2bf; }
+    .tag.blue { color: #3162f2; background: #eef4ff; border: 1px solid #c7d8ff; }
+    .tag.gray { color: #6f7a8b; background: #f4f6f9; border: 1px solid #dfe5ee; }
+    .float-ai {
+      position: fixed;
+      right: 8px;
+      top: 90px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #f69abd;
+      color: #fff;
+      z-index: 7;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 18px;
+      box-shadow: 0 3px 10px rgba(210,80,130,.28);
+    }
+    .float-ai::before { content: ""; width: 26px; height: 26px; border: 2px solid #fff; border-radius: 50%; position: absolute; opacity: .9; }
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      background: rgba(0,0,0,.48);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-mask.show { display: flex; }
+    .modal {
+      width: min(1100px, calc(100vw - 80px));
+      height: min(770px, calc(100vh - 54px));
+      background: #fff;
+      border-radius: 22px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0,0,0,.22);
+      overflow: hidden;
+    }
+    .modal-head {
+      height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      font-size: 24px;
+      border-bottom: 1px solid #edf1f7;
+    }
+    .close { color: #9199a8; font-size: 30px; line-height: 1; background: transparent; }
+    .modal-scroll { flex: 1; overflow-y: auto; padding: 30px 20px 10px; background: #fff; }
+    .section-title { margin: 0 0 22px; padding-left: 16px; border-left: 5px solid var(--blue); font-size: 21px; line-height: 1.25; font-weight: 900; color: #121a2b; }
+    .info-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px 20px; margin-bottom: 30px; }
+    .info-card { min-height: 98px; padding: 18px 17px; border: 1px solid #e6ebf5; border-radius: 15px; background: #f9fbff; color: #111a2b; }
+    .info-card .label { margin-bottom: 16px; color: #748197; font-size: 15px; }
+    .info-card .value { font-size: 20px; line-height: 1.35; word-break: break-all; }
+    .id-link { display: inline-block; margin-top: 14px; color: #1e5cff; text-decoration: none; font-size: 17px; }
+    .file-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px 16px; margin-bottom: 30px; }
+    .file-card { min-height: 148px; padding: 18px; border: 1px solid #e3eaf7; border-radius: 15px; background: #fbfcff; }
+    .file-title { color: #69778d; font-size: 15px; margin-bottom: 10px; }
+    .file-box { height: 82px; border: 1px solid #dce6f7; border-radius: 13px; display: flex; align-items: center; gap: 16px; padding: 0 16px; background: #f7faff; }
+    .pdf { width: 50px; height: 50px; border-radius: 12px; display: grid; place-items: center; color: #4169f5; background: #edf3ff; font-weight: 900; font-size: 15px; }
+    .file-name { font-weight: 800; color: #132033; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-size { margin-top: 7px; color: #8490a5; font-size: 14px; }
+    .qa-reply { max-width: 560px; line-height: 1.55; color: #344052; }
+    .photo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .photo-card { min-height: 118px; border: 1px solid #e6ebf5; border-radius: 15px; background: #f9fbff; padding: 16px 18px; }
+    .photo-link { display: block; margin-top: 18px; text-align: center; color: #1e5cff; text-decoration: none; }
+    .history { width: 100%; min-width: 0; margin-bottom: 10px; }
+    .history th, .history td { height: 52px; }
+    .history th { background: #f6f8fc; }
+    .modal-foot { height: 82px; display: flex; justify-content: flex-end; align-items: center; padding: 0 20px; border-top: 1px solid #edf1f7; background: #fff; }
+    .modal-btn { min-width: 75px; height: 40px; border-radius: 11px; color: #fff; background: var(--blue); }
+    .hidden { display: none; }
+    @media (max-width: 1280px) {
+      .form-row { grid-template-columns: auto 1fr auto 1fr; }
+      .info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">MA</div>
+        <div><strong>门爱才服务后台</strong><span>管理端</span></div>
+      </div>
+      <nav class="nav">
+        <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v10H4z"/><path d="M8 21h8M12 15v6"/></svg>工作台</div>
+        <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="m7 14 3-3 3 3 4-5"/></svg>首页内容</div>
+        <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4v16h14V4"/><path d="M8 2v4M16 2v4M5 9h14"/></svg>品牌活动</div>
+        <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6"/></svg>政策管理</div>
+        <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4h10v16H7z"/><path d="M4 7h3M4 17h3M17 7h3M17 17h3"/></svg>活动报名管理</div>
+        <div class="nav-item active" data-page="station"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4h12v16H6z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>人才驿站申请管理</div>
+        <div class="nav-item" data-page="identify"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 5 6v5c0 4.5 3 8.5 7 10 4-1.5 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg>人才认定申请审批</div>
+        <div class="nav-item" data-page="feedback"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5h14v10H8l-3 3z"/><path d="M8 9h8M8 12h5"/></svg>反馈意见</div>
+        <div class="nav-item" data-page="consultation"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5h14v10H8l-3 3z"/><path d="M8 9h8M8 12h7M8 15h4"/></svg>服务咨询查看</div>
+        <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a2.6 2.6 0 0 0 2.5-2h-5A2.6 2.6 0 0 0 12 22Zm7-6v-5a7 7 0 1 0-14 0v5l-2 2v1h18v-1l-2-2Z"/></svg>计划公告管理</div>
+        <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-4V4H8v2H4v14h16V6ZM10 6h4v2h-4V6Z"/></svg>申请条件管理</div>
+        <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.8-4 14.2-4 16 0"/></svg>小程序用户</div>
+        <div class="nav-item"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a8 8 0 0 0 .1-6l2-1.5-2-3.4-2.4 1a8 8 0 0 0-5.2-3l-.4-2.6h-4l-.4 2.6a8 8 0 0 0-5.2 3l-2.4-1-2 3.4 2 1.5a8 8 0 0 0 .1 6l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 5.2 3l.4 2.6h4l.4-2.6a8 8 0 0 0 5.2-3l2.4 1 2-3.4z"/></svg>系统管理<span class="chevron">⌄</span></div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div><h1 id="pageTitle">人才驿站申请管理</h1><div class="crumb" id="breadcrumb">门爱才服务后台 / 人才驿站申请管理</div></div>
+        <div class="account">
+          <div class="user-pill"><span class="online">在线</span><span class="admin-photo"></span><span class="role"><strong>系统管理员</strong><span>超级管理员</span></span></div>
+          <a class="logout" href="#">退出登录</a>
+        </div>
+      </header>
+
+      <section class="content page-content" id="stationPage">
+        <div class="panel filter">
+          <h2>筛选</h2>
+          <div class="form-row">
+            <label>申请人</label><input placeholder="请输入申请人姓名">
+            <label>手机号</label><input placeholder="请输入手机号">
+            <label>受理结果</label><select class="filter-status"><option>请选择受理结果</option><option>待处理</option><option>审核通过</option><option>审核不通过</option><option>退回个人</option></select>
+            <button class="btn btn-primary filter-search">查询</button><button class="btn btn-ghost filter-reset">重置</button>
+          </div>
+        </div>
+        <div class="panel table-card">
+          <h2>申请记录</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th class="applicant">申请人</th><th class="phone">手机号</th><th class="unit">单位</th><th class="type">分类</th><th class="result">受理结果</th><th class="time">提交时间</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td>实习......求职</td><td>13148283200</td><td>测试1；憨憨企业</td><td>人才驿站申请</td><td><span class="tag red">审核不通过</span></td><td>2026-06-17 16:42:02</td><td><button class="link open-detail" data-detail="station">查看</button></td></tr>
+                <tr><td>面试......改实习</td><td>13148283200</td><td>嘻嘻嘻</td><td>人才驿站申请</td><td><span class="tag blue">退回个人</span></td><td>2026-06-17 16:39:15</td><td><button class="link open-detail" data-detail="station">查看</button></td></tr>
+                <tr><td>西秀</td><td>13148283200</td><td>嘻嘻；憨憨</td><td>人才驿站申请</td><td><span class="tag orange">待处理</span></td><td>2026-06-17 16:35:22</td><td><button class="link open-detail" data-detail="station">查看</button></td></tr>
+                <tr><td>策划类型数据</td><td>13148283200</td><td>彻底123</td><td>人才驿站申请</td><td><span class="tag red">审核不通过</span></td><td>2026-06-17 16:32:42</td><td><button class="link open-detail" data-detail="station">查看</button></td></tr>
+                <tr><td>实习生</td><td>13148283200</td><td>嘻嘻</td><td>人才驿站申请</td><td><span class="tag green">审核通过</span></td><td>2026-06-17 16:27:41</td><td><button class="link open-detail" data-detail="station">查看</button></td></tr>
+                <tr><td>111</td><td>11111111111</td><td>111111</td><td>人才驿站申请</td><td><span class="tag orange">待处理</span></td><td>2026-06-17 16:13:10</td><td><button class="link open-detail" data-detail="station">查看</button></td></tr>
+                <tr><td>测试</td><td>13148283200</td><td>嘻嘻</td><td>人才驿站申请</td><td><span class="tag red">审核不通过</span></td><td>2026-06-17 16:12:04</td><td><button class="link open-detail" data-detail="station">查看</button></td></tr>
+                <tr><td>实习生</td><td>13148283200</td><td>憨憨企业</td><td>人才驿站申请</td><td><span class="tag blue">退回个人</span></td><td>2026-06-17 16:07:58</td><td><button class="link open-detail" data-detail="station">查看</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="content page-content hidden" id="identifyPage">
+        <div class="panel filter">
+          <h2>筛选</h2>
+          <div class="form-row">
+            <label>申请人</label><input class="filter-name" placeholder="请输入申请人姓名">
+            <label>手机号</label><input class="filter-phone" placeholder="请输入手机号">
+            <label>受理结果</label><select class="filter-status"><option>请选择受理结果</option><option>待处理</option><option>审核通过</option><option>审核不通过</option><option>退回个人</option></select>
+            <button class="btn btn-primary filter-search">查询</button><button class="btn btn-ghost filter-reset">重置</button>
+          </div>
+        </div>
+        <div class="panel table-card">
+          <h2>申请记录</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th class="applicant">申请人</th><th class="phone">手机号</th><th class="unit">单位</th><th class="type">分类</th><th class="result">受理结果</th><th class="time">提交时间</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td>青年人才</td><td>13148283200</td><td>门爱才科技有限公司</td><td>人才认定申请</td><td><span class="tag orange">待处理</span></td><td>2026-06-17 16:42:02</td><td><button class="link open-detail" data-detail="identify">查看</button></td></tr>
+                <tr><td>李想</td><td>13721212121</td><td>北京中科胜琦科技有限公司</td><td>人才认定申请</td><td><span class="tag green">审核通过</span></td><td>2026-06-17 16:39:15</td><td><button class="link open-detail" data-detail="identify">查看</button></td></tr>
+                <tr><td>材料缺失</td><td>13148283200</td><td>憨憨企业</td><td>人才认定申请</td><td><span class="tag blue">退回个人</span></td><td>2026-06-17 16:35:22</td><td><button class="link open-detail" data-detail="identify">查看</button></td></tr>
+                <tr><td>测试人员</td><td>13148283200</td><td>测试1；憨憨企业</td><td>人才认定申请</td><td><span class="tag red">审核不通过</span></td><td>2026-06-17 16:32:42</td><td><button class="link open-detail" data-detail="identify">查看</button></td></tr>
+                <tr><td>西秀</td><td>13148283200</td><td>嘻嘻；憨憨</td><td>人才认定申请</td><td><span class="tag orange">待处理</span></td><td>2026-06-17 16:27:41</td><td><button class="link open-detail" data-detail="identify">查看</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="content page-content hidden" id="feedbackPage">
+        <div class="panel filter">
+          <h2>筛选</h2>
+          <div class="form-row">
+            <label>联系人</label><input class="filter-name" placeholder="请输入联系人姓名">
+            <label>联系方式</label><input class="filter-phone" placeholder="请输入联系方式">
+            <label>回复状态</label><select class="filter-status"><option>请选择回复状态</option><option>未回复</option><option>已回复</option></select>
+            <button class="btn btn-primary filter-search">查询</button><button class="btn btn-ghost filter-reset">重置</button>
+          </div>
+        </div>
+        <div class="panel table-card">
+          <h2>反馈记录</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th class="applicant">联系人</th><th class="phone">联系方式</th><th class="desc">问题描述</th><th class="result">回复状态</th><th class="time">提交时间</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td>王女士</td><td>13148283200</td><td>人才驿站申请提交后状态一直没有更新，希望尽快处理。</td><td><span class="tag orange">未回复</span></td><td>2026-06-17 17:02:31</td><td><button class="link open-detail" data-detail="feedback">查看</button></td></tr>
+                <tr><td>李先生</td><td>13721212121</td><td>上传附件后页面提示异常，重新登录后仍然无法查看。</td><td><span class="tag green">已回复</span></td><td>2026-06-17 16:48:22</td><td><button class="link open-detail" data-detail="feedback">查看</button></td></tr>
+                <tr><td>测试用户</td><td>11111111111</td><td>人才认定材料页面显示不完整，想确认是否已经提交成功。</td><td><span class="tag orange">未回复</span></td><td>2026-06-17 16:16:09</td><td><button class="link open-detail" data-detail="feedback">查看</button></td></tr>
+                <tr><td>赵六</td><td>13100000000</td><td>短信验证码接收较慢，影响登录后台查看审核结果。</td><td><span class="tag green">已回复</span></td><td>2026-06-09 18:08:00</td><td><button class="link open-detail" data-detail="feedback">查看</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="content page-content hidden" id="consultationPage">
+        <div class="panel filter">
+          <h2>筛选</h2>
+          <div class="form-row consult-filter-row">
+            <label>问题</label><input class="filter-name" placeholder="请输入问题">
+            <label>启用状态</label><select class="filter-status"><option>请选择启用状态</option><option>启用</option><option>停用</option></select>
+            <button class="btn btn-primary filter-search">查询</button><button class="btn btn-ghost filter-reset">重置</button>
+          </div>
+        </div>
+        <div class="panel table-card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th class="applicant">问题</th><th class="desc">自动回复内容</th><th class="result">状态</th><th class="time">更新时间</th><th class="action">操作</th></tr></thead>
+              <tbody>
+                <tr><td>如何申请人才引进？</td><td><div class="qa-reply">进入“服务-人才引进”，选择对应业务后填写个人信息、单位信息并提交材料，后台审核后可在申请查询中查看进度。</div></td><td><span class="tag green">启用</span></td><td>2026-06-24</td><td><button class="link open-detail" data-detail="consultation">查看</button></td></tr>
+                <tr><td>工作居住证申请需要哪些材料？</td><td><div class="qa-reply">通常需要身份证明、劳动合同、单位证明、学历或职称材料等，具体以页面表单提示为准。</div></td><td><span class="tag green">启用</span></td><td>2026-06-24</td><td><button class="link open-detail" data-detail="consultation">查看</button></td></tr>
+                <tr><td>人才认定有哪些类别？</td><td><div class="qa-reply">人才认定包含战略科学家、领军人才、骨干人才、青年英才、实用人才、柔性引进人才等类别。</div></td><td><span class="tag green">启用</span></td><td>2026-06-24</td><td><button class="link open-detail" data-detail="consultation">查看</button></td></tr>
+                <tr><td>子女教育有哪些保障？</td><td><div class="qa-reply">经认定的人才可按政策享受入学协调、绿色通道等服务，具体保障以人才类别和当年政策为准。</div></td><td><span class="tag orange">停用</span></td><td>2026-06-20</td><td><button class="link open-detail" data-detail="consultation">查看</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="float-ai">AI</div>
+
+  <div class="modal-mask" id="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head"><div id="modalTitle">申请详情</div><button class="close" id="closeModal" aria-label="关闭">×</button></div>
+      <div class="modal-scroll" id="modalBody"></div>
+      <div class="modal-foot"><button class="modal-btn" id="modalCloseBtn">关闭</button></div>
+    </div>
+  </div>
+
+  <template id="stationDetail">
+    <h3 class="section-title">一、基础信息</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="label">姓名</div><div class="value">实习......求职</div></div>
+      <div class="info-card"><div class="label">性别</div><div class="value">女</div></div>
+      <div class="info-card"><div class="label">出生日期</div><div class="value">2001-04-01</div></div>
+      <div class="info-card"><div class="label">证件类型</div><div class="value">身份证</div></div>
+      <div class="info-card"><div class="label">证件号码</div><div class="value">4116**********1227</div><a class="id-link" href="#">查看完整身份证号</a></div>
+      <div class="info-card"><div class="label">联系电话</div><div class="value">13148283200</div></div>
+      <div class="info-card"><div class="label">现居住地</div><div class="value">急急</div></div>
+      <div class="info-card"><div class="label">申请类别</div><div class="value">求职面试类</div></div>
+    </div>
+    <h3 class="section-title">二、学历学籍信息</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="label">学历</div><div class="value">本科</div></div>
+      <div class="info-card"><div class="label">是否国内院校</div><div class="value">是</div></div>
+      <div class="info-card"><div class="label">学校所属省份</div><div class="value">北京市</div></div>
+      <div class="info-card"><div class="label">毕业院校</div><div class="value">北京某某大学</div></div>
+      <div class="info-card"><div class="label">专业</div><div class="value">软件工程</div></div>
+      <div class="info-card"><div class="label">毕业时间</div><div class="value">2026-06</div></div>
+    </div>
+    <h3 class="section-title">三、身份证照片</h3>
+    <div class="photo-grid">
+      <div class="photo-card"><div class="file-size">118.4 KB</div><a class="photo-link" href="#">查看身份证照片</a></div>
+      <div class="photo-card"><div class="file-size">73.9 KB</div><a class="photo-link" href="#">查看身份证照片</a></div>
+    </div>
+    <h3 class="section-title">五、材料文件</h3>
+    <div class="file-grid">
+      <div class="file-card"><div class="file-title">实习协议</div><div class="file-box"><span class="pdf">PDF</span><div><div class="file-name">【火箭出行-37.98元-1个行程】高德打车电子...</div><div class="file-size">PDF 文件</div></div></div></div>
+      <div class="file-card"><div class="file-title">企业执照</div><div class="file-box"><span class="pdf">PDF</span><div><div class="file-name">【火箭出行-37.98元-1个行程】高德打车电子...</div><div class="file-size">PDF 文件</div></div></div></div>
+    </div>
+    <h3 class="section-title">五、审批历史</h3>
+    <table class="history">
+      <thead><tr><th>审批组织</th><th>审批人</th><th>审批结果</th><th>受理备注</th><th>审批时间</th></tr></thead>
+      <tbody>
+        <tr><td>区委组织部</td><td>组织部审批人</td><td><span class="tag red">审核不通过</span></td><td>---</td><td>2026-06-17 16:48:31</td></tr>
+        <tr><td>区住建委</td><td>-</td><td><span class="tag gray">终止处理</span></td><td>-</td><td>-</td></tr>
+        <tr><td>一级部门（测试部门）</td><td>-</td><td><span class="tag gray">终止处理</span></td><td>-</td><td>-</td></tr>
+      </tbody>
+    </table>
+  </template>
+
+  <template id="identifyDetail">
+    <h3 class="section-title">一、基础信息</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="label">姓名</div><div class="value">青年人才</div></div>
+      <div class="info-card"><div class="label">性别</div><div class="value">女</div></div>
+      <div class="info-card"><div class="label">出生日期</div><div class="value">2001-04-01</div></div>
+      <div class="info-card"><div class="label">证件类型</div><div class="value">身份证</div></div>
+      <div class="info-card"><div class="label">证件号码</div><div class="value">4116**********1227</div><a class="id-link" href="#">查看完整身份证号</a></div>
+      <div class="info-card"><div class="label">联系电话</div><div class="value">13148283200</div></div>
+      <div class="info-card"><div class="label">工作单位</div><div class="value">门爱才科技有限公司</div></div>
+      <div class="info-card"><div class="label">申请分类</div><div class="value">人才认定申请</div></div>
+      <div class="info-card"><div class="label">人才层级</div><div class="value">青年储备人才</div></div>
+    </div>
+    <h3 class="section-title">二、申报信息</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="label">学历</div><div class="value">本科</div></div>
+      <div class="info-card"><div class="label">毕业院校</div><div class="value">北京某某大学</div></div>
+      <div class="info-card"><div class="label">专业</div><div class="value">软件工程</div></div>
+      <div class="info-card"><div class="label">申报层级</div><div class="value">区级人才认定</div></div>
+      <div class="info-card"><div class="label">提交时间</div><div class="value">2026-06-17 16:42:02</div></div>
+      <div class="info-card"><div class="label">受理结果</div><div class="value">待处理</div></div>
+    </div>
+    <h3 class="section-title">三、附件文件</h3>
+    <div class="file-grid">
+      <div class="file-card"><div class="file-title">身份证明</div><div class="file-box"><span class="pdf">PDF</span><div><div class="file-name">身份证正反面扫描件.pdf</div><div class="file-size">1.2 MB</div></div></div></div>
+      <div class="file-card"><div class="file-title">学历证明</div><div class="file-box"><span class="pdf">PDF</span><div><div class="file-name">学历学位证明.pdf</div><div class="file-size">860 KB</div></div></div></div>
+      <div class="file-card"><div class="file-title">任职证明</div><div class="file-box"><span class="pdf">PDF</span><div><div class="file-name">劳动合同或任职证明.pdf</div><div class="file-size">940 KB</div></div></div></div>
+      <div class="file-card"><div class="file-title">承诺书</div><div class="file-box"><span class="pdf">PDF</span><div><div class="file-name">人才认定申请承诺书.pdf</div><div class="file-size">520 KB</div></div></div></div>
+    </div>
+    <h3 class="section-title">四、审批历史</h3>
+    <table class="history">
+      <thead><tr><th>审批组织</th><th>审批人</th><th>审批结果</th><th>受理备注</th><th>审批时间</th></tr></thead>
+      <tbody>
+        <tr><td>区委组织部</td><td>系统管理员</td><td><span class="tag orange">待处理</span></td><td>---</td><td>2026-06-17 16:42:02</td></tr>
+        <tr><td>人才服务中心</td><td>-</td><td><span class="tag gray">待审批</span></td><td>-</td><td>-</td></tr>
+      </tbody>
+    </table>
+  </template>
+
+  <template id="feedbackDetail">
+    <h3 class="section-title">一、反馈信息</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="label">联系人</div><div class="value">王女士</div></div>
+      <div class="info-card"><div class="label">联系方式</div><div class="value">13148283200</div></div>
+      <div class="info-card"><div class="label">提交时间</div><div class="value">2026-06-17 17:02:31</div></div>
+      <div class="info-card"><div class="label">处理状态</div><div class="value">未处理</div></div>
+      <div class="info-card"><div class="label">反馈来源</div><div class="value">小程序用户</div></div>
+      <div class="info-card"><div class="label">关联模块</div><div class="value">人才驿站申请管理</div></div>
+    </div>
+    <h3 class="section-title">二、问题描述</h3>
+    <div class="info-grid">
+      <div class="info-card" style="grid-column: 1 / -1;"><div class="label">问题描述</div><div class="value">人才驿站申请提交后状态一直没有更新，希望后台尽快核实处理；同时上传附件后偶尔无法预览。</div></div>
+    </div>
+    <h3 class="section-title">三、附件文件</h3>
+    <div class="file-grid">
+      <div class="file-card"><div class="file-title">问题截图</div><div class="file-box"><span class="pdf">PNG</span><div><div class="file-name">申请状态异常截图.png</div><div class="file-size">418 KB</div></div></div></div>
+      <div class="file-card"><div class="file-title">上传附件</div><div class="file-box"><span class="pdf">PDF</span><div><div class="file-name">用户上传失败材料.pdf</div><div class="file-size">1.1 MB</div></div></div></div>
+    </div>
+    <h3 class="section-title">四、处理记录</h3>
+    <table class="history">
+      <thead><tr><th>回复组织</th><th>回复人</th><th>回复状态</th><th>回复内容</th><th>回复时间</th></tr></thead>
+      <tbody>
+        <tr><td>平台运营组</td><td>系统管理员</td><td><span class="tag green">已回复</span></td><td>已收到反馈，相关问题已安排专人处理，请稍后重新查看申请状态。</td><td>2026-06-17 17:18:42</td></tr>
+      </tbody>
+    </table>
+  </template>
+
+  <template id="consultationDetail">
+    <h3 class="section-title">一、问题信息</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="label">问题标题</div><div class="value">如何申请人才引进？</div></div>
+      <div class="info-card"><div class="label">启用状态</div><div class="value">启用</div></div>
+      <div class="info-card"><div class="label">维护后台</div><div class="value">门爱才服务后台</div></div>
+      <div class="info-card"><div class="label">更新时间</div><div class="value">2026-06-24</div></div>
+    </div>
+    <h3 class="section-title">二、自动回复内容</h3>
+    <div class="info-grid">
+      <div class="info-card" style="grid-column: 1 / -1;"><div class="label">回复内容</div><div class="value">进入“服务-人才引进”，选择对应业务后填写个人信息、单位信息并提交材料，后台审核后可在申请查询中查看进度。</div></div>
+    </div>
+  </template>
+
+  <script>
+    const meta = {
+      station: ["人才驿站申请管理", "门爱才服务后台 / 人才驿站申请管理"],
+      identify: ["人才认定申请审批", "门爱才服务后台 / 人才认定申请审批"],
+      feedback: ["反馈意见", "门爱才服务后台 / 反馈意见"],
+      consultation: ["服务咨询查看", "门爱才服务后台 / 服务咨询查看"]
+    };
+    const title = document.getElementById("pageTitle");
+    const crumb = document.getElementById("breadcrumb");
+    document.querySelectorAll(".nav-item[data-page]").forEach(item => {
+      item.addEventListener("click", () => {
+        const page = item.dataset.page;
+        document.querySelectorAll(".nav-item[data-page]").forEach(nav => nav.classList.toggle("active", nav === item));
+        document.querySelectorAll(".page-content").forEach(section => section.classList.toggle("hidden", section.id !== page + "Page"));
+        title.textContent = meta[page][0];
+        crumb.textContent = meta[page][1];
+        document.querySelector(".main").scrollTop = 0;
+      });
+    });
+
+    const modal = document.getElementById("modal");
+    const modalBody = document.getElementById("modalBody");
+    const modalTitle = document.getElementById("modalTitle");
+    function applyTableFilter(page) {
+      const name = (page.querySelector(".filter-name")?.value || "").trim();
+      const phone = (page.querySelector(".filter-phone")?.value || "").trim();
+      const statusSelect = page.querySelector(".filter-status");
+      const status = statusSelect && statusSelect.selectedIndex > 0 ? statusSelect.value : "";
+      page.querySelectorAll("tbody tr").forEach(row => {
+        const cells = row.querySelectorAll("td");
+        const rowName = cells[0]?.textContent.trim() || "";
+        const rowPhone = cells[1]?.textContent.trim() || "";
+        const rowStatus = row.querySelector(".tag")?.textContent.trim() || "";
+        const matched = (!name || rowName.includes(name)) && (!phone || rowPhone.includes(phone)) && (!status || rowStatus === status);
+        row.style.display = matched ? "" : "none";
+      });
+    }
+    document.querySelectorAll(".filter-search").forEach(btn => {
+      btn.addEventListener("click", () => applyTableFilter(btn.closest(".page-content")));
+    });
+    document.querySelectorAll(".filter-reset").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const page = btn.closest(".page-content");
+        page.querySelectorAll(".filter-name, .filter-phone").forEach(input => input.value = "");
+        page.querySelectorAll(".filter-status").forEach(select => select.selectedIndex = 0);
+        applyTableFilter(page);
+      });
+    });
+    document.querySelectorAll(".open-detail").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const kind = btn.dataset.detail;
+        modalTitle.textContent = kind === "feedback" ? "反馈详情" : kind === "consultation" ? "自动回复详情" : "申请详情";
+        modalBody.innerHTML = document.getElementById(kind + "Detail").innerHTML;
+        modal.classList.add("show");
+      });
+    });
+    function closeModal() { modal.classList.remove("show"); }
+    document.getElementById("closeModal").addEventListener("click", closeModal);
+    document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
+    modal.addEventListener("click", event => { if (event.target === modal) closeModal(); });
+    document.addEventListener("keydown", event => { if (event.key === "Escape") closeModal(); });
+  </script>
+</body>
+</html>
