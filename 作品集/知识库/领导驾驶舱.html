@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知识助手 · 领导驾驶舱</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg-app:#f4f5f4;--bg-content:#fff;--bg-nav:#f2f3f2;
+  --sel-blue:#eaf3ff;--sel-green:#dff3eb;--text-main:#00152f;--text-dark:#202322;
+  --text-sec:#8b908d;--border:#e5e7e5;--border-blue:#d0e3f7;
+  --shadow:0 2px 8px rgba(0,0,0,0.06);--shadow-lg:0 8px 24px rgba(0,0,0,0.12);
+  --radius:8px;--radius-lg:12px;--radius-xl:18px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;
+  --green-grad:linear-gradient(135deg,#2d8a5e,#1a6b47);
+  --primary-blue:#1a6fd4;--danger-red:#e53e3e;--warn-orange:#ed8936;--success-green:#38a169;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg-app);color:var(--text-main);font-size:14px;line-height:1.5}
+button{cursor:pointer;font-family:inherit;border:none;outline:none;font-size:13px}
+input,textarea,select{font-family:inherit;outline:none;border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:13px}
+input:focus,textarea:focus,select:focus{border-color:var(--primary-blue);box-shadow:0 0 0 2px rgba(26,111,212,0.1)}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#d4d8d4;border-radius:3px}
+
+.login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#e8f0fe 0%,#dff3eb 50%,#f4f5f4 100%);z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-overlay.hidden{display:none}
+.login-card{background:var(--bg-content);border-radius:var(--radius-xl);padding:40px 36px;box-shadow:var(--shadow-lg);width:420px;max-width:90vw}
+.login-card h2{font-size:24px;font-weight:700;color:var(--text-main);text-align:center;margin-bottom:4px}
+.login-card .login-subtitle{font-size:12px;color:var(--text-sec);text-align:center;margin-bottom:24px}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:12px;font-weight:500;color:var(--text-dark);margin-bottom:4px}
+.login-field input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px}
+.login-btn{width:100%;padding:12px;border-radius:var(--radius);background:var(--primary-blue);color:#fff;font-size:15px;font-weight:500;border:none;margin-top:8px}
+.login-btn:hover{background:#1557b0}
+.login-hint{background:#f9faf9;border-radius:var(--radius);padding:10px 14px;margin-top:16px;font-size:11px;color:var(--text-sec);line-height:1.5;text-align:center}
+.login-error{color:#e53e3e;font-size:12px;text-align:center;margin-top:8px;min-height:18px}
+
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:220px;background:var(--bg-nav);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-header{padding:20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sidebar-logo{width:36px;height:36px;border-radius:10px;background:var(--green-grad);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;flex-shrink:0}
+.sidebar-title{font-size:15px;font-weight:600;color:var(--text-dark)}
+.sidebar-subtitle{font-size:11px;color:var(--text-sec)}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 0}
+.sidebar-group-title{font-size:11px;color:var(--text-sec);padding:12px 16px 6px;font-weight:500}
+.sidebar-item{padding:10px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;color:var(--text-dark);font-size:13px;transition:all 0.12s;border-left:3px solid transparent}
+.sidebar-item:hover{background:#e8ece8}
+.sidebar-item.active{background:var(--sel-green);border-left-color:#1a6b47;color:#1a6b47;font-weight:500}
+.sidebar-item-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-item-badge{background:var(--danger-red);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:auto}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border)}
+.sidebar-footer button{width:100%;padding:8px;border-radius:var(--radius);background:transparent;color:var(--text-sec);font-size:12px;border:1px solid var(--border)}
+.sidebar-footer button:hover{background:#f0f1f0;color:var(--text-dark)}
+
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg-app)}
+.main-header{padding:14px 24px;background:var(--bg-content);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.main-header h2{font-size:18px;font-weight:600}
+.main-header .header-right{display:flex;align-items:center;gap:12px}
+.main-header .user-info{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-sec)}
+.main-header .btn-logout{padding:6px 14px;border-radius:var(--radius-lg);background:#fff5f5;color:var(--danger-red);border:1px solid #fed7d7;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.12s}
+.main-header .btn-logout:hover{background:#fed7d7}
+.main-content{flex:1;overflow-y:auto;padding:24px}
+
+.admin-panel{display:none}
+.admin-panel.active{display:block}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--bg-content);border-radius:var(--radius-lg);padding:20px 24px;border:1px solid var(--border);transition:box-shadow 0.15s}
+.stat-card:hover{box-shadow:var(--shadow)}
+.stat-card-value{font-size:28px;font-weight:700;color:var(--text-main)}
+.stat-card-label{font-size:13px;color:var(--text-sec);margin-top:4px}
+.stat-card-sub{font-size:11px;color:var(--success-green);margin-top:4px}
+
+.section{margin-bottom:24px}
+.section-title{font-size:16px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+.cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+
+.data-table{background:var(--bg-content);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;margin-bottom:16px}
+.data-table table{width:100%;border-collapse:collapse}
+.data-table th{background:#f9faf9;padding:10px 16px;text-align:left;font-size:12px;font-weight:600;color:var(--text-sec);border-bottom:1px solid var(--border);white-space:nowrap}
+.data-table td{padding:10px 16px;font-size:13px;color:var(--text-dark);border-bottom:1px solid #f0f1f0}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:#f9faf9}
+
+.btn{padding:7px 16px;border-radius:var(--radius);font-size:13px;font-weight:500;transition:all 0.12s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary-blue);color:#fff}
+.btn-primary:hover{background:#1557b0}
+.btn-success{background:#dff3eb;color:#1a6b47;border:1px solid #b0dcc8}
+.btn-success:hover{background:#c8e6d4}
+.btn-danger{background:#fff5f5;color:var(--danger-red);border:1px solid #fed7d7}
+.btn-danger:hover{background:#fed7d7}
+.btn-outline{background:var(--bg-content);color:var(--text-dark);border:1px solid var(--border)}
+.btn-outline:hover{background:#f0f1f0}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-group{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+
+.search-row{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.search-row input{flex:1;max-width:320px;padding:8px 14px;border-radius:var(--radius-lg);border:1px solid var(--border)}
+.search-row select{padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);min-width:130px;background:var(--bg-content)}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-sec)}
+.empty-state .empty-icon{font-size:48px;margin-bottom:12px;opacity:0.4}
+
+.audit-timeline{padding:8px 0}
+.audit-timeline-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #f0f1f0}
+.audit-timeline-dot{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff}
+.audit-timeline-dot.pending{background:var(--warn-orange)}
+.audit-timeline-dot.approved{background:var(--success-green)}
+.audit-timeline-dot.rejected{background:var(--danger-red)}
+.audit-timeline-info{flex:1}
+.audit-timeline-title{font-size:14px;font-weight:500;color:var(--text-dark)}
+.audit-timeline-meta{font-size:12px;color:var(--text-sec);margin-top:2px}
+
+.progress-bar{height:8px;background:#f0f1f0;border-radius:4px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;border-radius:4px;transition:width 0.3s}
+.progress-fill.approved{background:var(--success-green)}
+.progress-fill.pending{background:var(--warn-orange)}
+.progress-fill.rejected{background:var(--danger-red)}
+
+.badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.badge-success{background:#dff3eb;color:#1a6b47}
+.badge-warning{background:#fffaf0;color:var(--warn-orange)}
+.badge-danger{background:#fff5f5;color:var(--danger-red)}
+.badge-info{background:#e8f0fe;color:var(--primary-blue)}
+
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:3000;display:none;align-items:center;justify-content:center}
+.modal-overlay.visible{display:flex}
+.modal{background:var(--bg-content);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:560px;box-shadow:var(--shadow-lg);max-height:85vh;overflow-y:auto}
+.modal h3{font-size:18px;font-weight:600;margin-bottom:16px}
+.modal-field{margin-bottom:14px}
+.modal-field label{display:block;font-size:13px;font-weight:500;color:var(--text-dark);margin-bottom:4px}
+.modal-field input,.modal-field select{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.modal-actions button{padding:8px 20px;border-radius:var(--radius);font-size:14px}
+.modal-cancel{background:transparent;color:var(--text-dark);border:1px solid var(--border)}
+.modal-cancel:hover{background:#f0f1f0}
+.modal-confirm{background:var(--primary-blue);color:#fff;border:none}
+.modal-confirm:hover{background:#1557b0}
+
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;margin:16px 0;padding:16px;background:#f9faf9;border-radius:var(--radius)}
+.detail-item{display:flex;flex-direction:column;gap:2px}
+.detail-item .detail-label{font-size:11px;color:var(--text-sec);font-weight:500}
+.detail-item .detail-value{font-size:13px;color:var(--text-dark)}
+
+.toast-container{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:5000;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.toast{background:#202322;color:#fff;padding:10px 24px;border-radius:var(--radius-lg);font-size:13px;box-shadow:var(--shadow-lg);opacity:0;transition:opacity 0.25s}
+.toast.show{opacity:1}
+
+.filter-bar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.filter-bar select{padding:8px 14px;border-radius:var(--radius-lg);border:1px solid var(--border);font-size:13px;background:var(--bg-content);cursor:pointer;min-width:130px}
+.filter-bar input{padding:8px 14px;border-radius:var(--radius-lg);border:1px solid var(--border);font-size:13px;flex:1;max-width:300px}
+.filter-bar input[type="date"]{flex:0 0 150px;max-width:150px;color:var(--text-dark);background:var(--bg-content)}
+
+.tab-group{display:flex;gap:0;margin-bottom:16px}
+.tab-btn{padding:8px 20px;background:var(--bg-content);border:1px solid var(--border);font-size:13px;color:var(--text-sec);cursor:pointer;transition:all 0.12s}
+.tab-btn:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.tab-btn:last-child{border-radius:0 var(--radius) var(--radius) 0}
+.tab-btn:not(:first-child){margin-left:-1px}
+.tab-btn.active{background:var(--primary-blue);color:#fff;border-color:var(--primary-blue);z-index:1}
+</style>
+</head>
+<body>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <h2>📊 领导驾驶舱</h2>
+    <p class="login-subtitle">知识助手 · 后台管理系统</p>
+    <div class="login-field"><label>用户名</label><input type="text" id="loginUsername" placeholder="请输入管理员账号" value="admin"></div>
+    <div class="login-field"><label>密码</label><input type="password" id="loginPassword" placeholder="请输入密码" value="123456"></div>
+    <button class="login-btn" id="loginBtn">登 录</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-hint">管理员账号: <b>admin</b> / 密码: <b>123456</b></div>
+  </div>
+</div>
+
+<div class="app" id="appContainer">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">舱</div>
+      <div><div class="sidebar-title">领导驾驶舱</div><div class="sidebar-subtitle">数据总览</div></div>
+    </div>
+    <div class="sidebar-nav" id="sidebarNav">
+      <div class="sidebar-group-title">总览</div>
+      <div class="sidebar-item active" data-panel="dashboard">
+        <span class="sidebar-item-icon">📊</span>控制台概览
+      </div>
+      <div class="sidebar-item" data-panel="audit">
+        <span class="sidebar-item-icon">📋</span>审核进度
+      </div>
+      <div class="sidebar-group-title">系统</div>
+      <div class="sidebar-item" data-panel="users">
+        <span class="sidebar-item-icon">👥</span>用户管理
+      </div>
+      <div class="sidebar-item" data-panel="logs">
+        <span class="sidebar-item-icon">📝</span>操作日志
+      </div>
+    </div>
+    <div class="sidebar-footer"></div>
+  </div>
+
+  <div class="main">
+    <div class="main-header" id="mainHeader">
+      <h2 id="panelTitle">📊 控制台概览</h2>
+      <div class="header-right">
+        <div class="user-info" id="userInfo"></div>
+        <button class="btn-logout" onclick="logout()">退出登录</button>
+      </div>
+    </div>
+    <div class="main-content" id="mainContent">
+
+      <!-- Dashboard -->
+      <div class="admin-panel active" id="panel-dashboard">
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="section">
+          <div class="section-title">📈 数据趋势</div>
+          <div class="cards-grid">
+            <div class="stat-card">
+              <div style="font-size:14px;font-weight:500;margin-bottom:8px">整体审核通过率</div>
+              <div style="font-size:28px;font-weight:700;color:var(--success-green)" id="approvalRate">-</div>
+              <div class="progress-bar"><div class="progress-fill approved" id="approvalProgress" style="width:0%"></div></div>
+            </div>
+            <div class="stat-card">
+              <div style="font-size:14px;font-weight:500;margin-bottom:8px">用户活跃度</div>
+              <div style="font-size:28px;font-weight:700;color:var(--primary-blue)" id="activeUserCount">-</div>
+              <div class="progress-bar"><div class="progress-fill" id="activeUserProgress" style="width:0%;background:var(--primary-blue)"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">📋 审核概览</div>
+          <div class="data-table" id="recentLogs"></div>
+        </div>
+      </div>
+
+      <!-- Audit Progress Panel -->
+      <div class="admin-panel" id="panel-audit">
+        <div class="section">
+          <div class="section-title" style="font-size:15px">📚 共享知识库审核进度</div>
+        </div>
+        <div class="stats-grid" id="kbauditStats" style="grid-template-columns:repeat(3,1fr)"></div>
+        <div class="tab-group" id="auditTabs">
+          <button class="tab-btn active" data-status="pending">待审核</button>
+          <button class="tab-btn" data-status="approved">已通过</button>
+          <button class="tab-btn" data-status="rejected">已拒绝</button>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="auditSearch" placeholder="搜索文件名、上传者..." oninput="renderAudit()">
+          <select id="auditKBFilter" onchange="renderAudit()">
+            <option value="all">全部共享知识库</option>
+          </select>
+          <select id="auditTypeFilter" onchange="renderAudit()">
+            <option value="all">全部类型</option>
+          </select>
+          <input type="date" id="auditStartDate" title="开始日期">
+          <input type="date" id="auditEndDate" title="结束日期">
+          <button class="btn btn-primary btn-sm" onclick="renderAudit()">查询</button>
+        </div>
+        <div class="data-table">
+          <table>
+            <thead><tr><th>文件名</th><th>文件类型</th><th>上传者</th><th>目标知识库</th><th>时间</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="auditTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="section" style="margin-top:32px">
+          <div class="section-title" style="font-size:15px">🔍 发现内容审核进度</div>
+        </div>
+        <div class="stats-grid" id="discoverAuditStats" style="grid-template-columns:repeat(3,1fr)"></div>
+        <div class="tab-group" id="discoverAuditTabs">
+          <button class="tab-btn active" data-status="pending">待审核</button>
+          <button class="tab-btn" data-status="approved">已发布</button>
+          <button class="tab-btn" data-status="rejected">已驳回</button>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="discoverAuditSearch" placeholder="搜索标题、作者..." oninput="renderAudit()">
+          <select id="discoverAuditCategoryFilter" onchange="renderAudit()">
+            <option value="all">全部类型</option>
+          </select>
+          <input type="date" id="discoverAuditStartDate" title="开始日期">
+          <input type="date" id="discoverAuditEndDate" title="结束日期">
+          <button class="btn btn-primary btn-sm" onclick="renderAudit()">查询</button>
+        </div>
+        <div id="discoverAuditList"></div>
+      </div>
+
+      <!-- Users -->
+      <div class="admin-panel" id="panel-users">
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="showAddUserModal()">+ 添加用户</button>
+        </div>
+        <div class="search-row">
+          <input type="text" id="userSearchInput" placeholder="搜索用户..." oninput="renderUsers()">
+          <select id="userStatusFilter" onchange="renderUsers()">
+            <option value="all">全部状态</option><option value="active">正常</option><option value="disabled">已禁用</option>
+          </select>
+          <select id="userRoleFilter" onchange="renderUsers()">
+            <option value="all">全部类型</option><option value="admin">系统管理员</option><option value="kbadmin">KB管理员</option><option value="user">普通用户</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="renderUsers()">查询</button>
+        </div>
+        <div class="data-table">
+          <table>
+            <thead><tr><th>用户名</th><th>显示名</th><th>用户类型</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Logs -->
+      <div class="admin-panel" id="panel-logs">
+        <div class="btn-group">
+          <button class="btn btn-outline btn-sm" onclick="clearLogs()">清空日志</button>
+        </div>
+        <div class="search-row">
+          <input type="text" id="logSearchInput" placeholder="搜索用户名..." oninput="renderLogs()">
+          <select id="logUserFilter" onchange="renderLogs()">
+            <option value="all">全部用户类型</option><option value="admin">系统管理员</option><option value="kbadmin">KB管理员</option><option value="user">普通用户</option>
+          </select>
+          <select id="logActionFilter" onchange="renderLogs()">
+            <option value="all">全部操作</option>
+          </select>
+          <input type="date" id="logStartDate" title="开始日期">
+          <input type="date" id="logEndDate" title="结束日期">
+          <button class="btn btn-primary btn-sm" onclick="renderLogs()">查询</button>
+        </div>
+        <div class="data-table">
+          <table>
+            <thead><tr><th>用户名</th><th>时间</th><th>用户类型</th><th>操作</th><th>目标</th><th>结果</th></tr></thead>
+            <tbody id="logsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay"><div class="modal" id="modalContent"></div></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+var $ = function(id) { return document.getElementById(id); };
+var currentUser = null;
+var currentPanel = 'dashboard';
+var auditTabStatus = 'pending';
+var discoverAuditTabStatus = 'pending';
+
+function showToast(t) {
+  var c = $('toastContainer');
+  var d = document.createElement('div'); d.className='toast'; d.textContent=t;
+  c.appendChild(d);
+  requestAnimationFrame(function(){d.classList.add('show')});
+  setTimeout(function(){d.classList.remove('show');setTimeout(function(){d.remove()},300)},2000);
+}
+
+function getNow() {
+  var d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+
+function loadData() {
+  try {
+    var d = localStorage.getItem('kb_users');
+    if (d) window.users = JSON.parse(d);
+    var a = localStorage.getItem('kb_auditFiles');
+    if (a) window.auditFiles = JSON.parse(a);
+    var l = localStorage.getItem('kb_logs');
+    if (l) window.logs = JSON.parse(l);
+    var kb = localStorage.getItem('kb_knowledgeBases');
+    if (kb) window.knowledgeBases = JSON.parse(kb);
+    var docs = localStorage.getItem('kb_documents');
+    if (docs) window.documents = JSON.parse(docs);
+    var dc = localStorage.getItem('kb_discoverContent');
+    if (dc) window.discoverContent = JSON.parse(dc);
+  } catch(e) {}
+  if (!window.users) window.users = [
+    {username:'admin',password:'123456',role:'admin',displayName:'系统管理员',avatar:'\u2699',status:'active'},
+    {username:'kbadmin',password:'123456',role:'kbadmin',displayName:'知识库管理员',avatar:'\ud83d\udcda',status:'active'},
+    {username:'user',password:'123456',role:'user',displayName:'普通用户',avatar:'\ud83d\udc64',status:'active'}
+  ];
+  if (!window.auditFiles) { try { var af = localStorage.getItem('kb_auditFiles'); if (af) window.auditFiles = JSON.parse(af); } catch(e){} }
+  if (!window.auditFiles) window.auditFiles = [];
+  if (!window.logs) window.logs = [];
+  if (!window.knowledgeBases) window.knowledgeBases = [
+    {name:'我的知识库',id:'my-knowledge',type:'personal'},
+    {name:'团队知识库',id:'team-knowledge',type:'shared'},
+    {name:'项目知识库',id:'project-knowledge',type:'shared'}
+  ];
+  if (!window.documents) window.documents = [];
+  if (!window.discoverContent) { try { var dc = localStorage.getItem('kb_discoverContent'); if (dc) window.discoverContent = JSON.parse(dc); } catch(e){} }
+  if (!window.discoverContent) window.discoverContent = [];
+  ensureAuditDemoData();
+}
+
+function ensureAuditDemoData() {
+  var fileSeeds = [
+    {id:'af-1',name:'2026年度技术规划方案',uploader:'张三',targetKB:'team-knowledge',targetKBName:'团队知识库',time:'2026-06-28 14:30',status:'pending',type:'PDF',size:'2.4MB',description:'年度技术规划方案最终版'},
+    {id:'af-2',name:'产品需求文档PRD_v2.1',uploader:'李四',targetKB:'project-knowledge',targetKBName:'项目知识库',time:'2026-06-28 11:15',status:'pending',type:'Word',size:'1.8MB',description:'Q3产品迭代需求文档'},
+    {id:'af-3',name:'后端接口设计规范',uploader:'张三',targetKB:'tech-spec',targetKBName:'技术规范库',time:'2026-06-27 16:45',status:'pending',type:'Markdown',size:'256KB',description:'后端RESTful API设计规范'},
+    {id:'af-9',name:'团队知识库培训材料',uploader:'王五',targetKB:'team-knowledge',targetKBName:'团队知识库',time:'2026-06-29 09:20',status:'pending',type:'PDF',size:'2.6MB',description:'团队知识库新人培训与协作规范'},
+    {id:'af-11',name:'团队周会纪要_0629',uploader:'钱七',targetKB:'team-knowledge',targetKBName:'团队知识库',time:'2026-06-29 17:10',status:'pending',type:'Markdown',size:'68KB',description:'本周项目同步、风险项和待办事项汇总'},
+    {id:'af-12',name:'项目复盘报告_Q2',uploader:'孙八',targetKB:'project-knowledge',targetKBName:'项目知识库',time:'2026-06-27 10:35',status:'approved',type:'Excel',size:'2.8MB',description:'Q2项目投入产出与问题复盘',approvedTime:'2026-06-27 15:20'},
+    {id:'af-13',name:'接口联调记录',uploader:'周九',targetKB:'project-knowledge',targetKBName:'项目知识库',time:'2026-06-26 09:50',status:'pending',type:'PDF',size:'1.7MB',description:'移动端和服务端接口联调记录'},
+    {id:'af-14',name:'知识库首页视觉说明',uploader:'吴十',targetKB:'team-knowledge',targetKBName:'团队知识库',time:'2026-06-23 18:05',status:'rejected',type:'Word',size:'1.1MB',description:'知识库首页改版视觉说明',rejectedTime:'2026-06-24 09:15',reason:'版本号不清晰，请补充设计说明后重新提交'},
+    {id:'af-15',name:'运维告警处理手册',uploader:'郑十一',targetKB:'ops-knowledge',targetKBName:'运营知识库',time:'2026-06-22 08:45',status:'approved',type:'PDF',size:'5.3MB',description:'生产环境告警分级与处理流程',approvedTime:'2026-06-22 11:30'},
+    {id:'af-16',name:'前端代码规范清单',uploader:'王五',targetKB:'tech-spec',targetKBName:'技术规范库',time:'2026-06-21 14:25',status:'rejected',type:'Markdown',size:'180KB',description:'前端代码规范和提交要求',rejectedTime:'2026-06-21 16:40',reason:'缺少安全规范章节'},
+    {id:'af-5',name:'数据库设计文档_v3',uploader:'李四',targetKB:'team-knowledge',targetKBName:'团队知识库',time:'2026-06-26 14:00',status:'approved',type:'PDF',size:'3.2MB',description:'系统数据库设计规范',approvedTime:'2026-06-26 16:30'},
+    {id:'af-10',name:'团队知识库权限说明',uploader:'赵六',targetKB:'team-knowledge',targetKBName:'团队知识库',time:'2026-06-25 15:40',status:'approved',type:'Word',size:'1.1MB',description:'团队知识库成员权限和资料归档说明',approvedTime:'2026-06-25 17:10'},
+    {id:'af-7',name:'旧版需求文档',uploader:'张三',targetKB:'team-knowledge',targetKBName:'团队知识库',time:'2026-06-24 15:10',status:'rejected',type:'Word',size:'900KB',description:'已过期的旧版需求文档',rejectedTime:'2026-06-24 17:00',reason:'文档内容已过期，请使用最新版本'}
+  ];
+  var discoverSeeds = [
+    {id:'dc-1',title:'AI技术在知识管理中的创新应用',description:'探讨人工智能如何改变企业知识管理的方式，包括自动化分类、智能推荐和语义搜索等前沿技术。',category:'技术前沿',tags:['AI','知识管理','自动化'],author:'张三',icon:'🤖',time:'2026-06-28 16:00',status:'pending'},
+    {id:'dc-2',title:'高效团队协作方法论',description:'分享敏捷开发中积累的高效协作经验，包含日常站会、代码审查和文档管理实践。',category:'团队管理',tags:['敏捷','协作'],author:'李四',icon:'👥',time:'2026-06-28 10:30',status:'pending'},
+    {id:'dc-7',title:'知识库分类标准示例',description:'用真实业务场景说明知识库分类、标签和权限分层方式。',category:'教育',tags:['分类','培训'],author:'王五',icon:'🏫',time:'2026-06-29 13:20',status:'pending'},
+    {id:'dc-8',title:'预算审核常见问题',description:'整理各部门预算审核时常见的问题和处理建议。',category:'财经',tags:['预算','审核'],author:'赵六',icon:'💹',time:'2026-06-27 17:30',status:'approved',approvedTime:'2026-06-27 18:10'},
+    {id:'dc-9',title:'员工健康知识卡片',description:'面向内部员工的健康管理和办公久坐提醒内容。',category:'健康',tags:['健康','办公'],author:'钱七',icon:'💊',time:'2026-06-26 09:10',status:'pending'},
+    {id:'dc-10',title:'合同条款风险提示',description:'对常见合同条款进行风险点说明，便于业务人员快速识别问题。',category:'法律',tags:['合同','风险'],author:'孙八',icon:'⚖️',time:'2026-06-25 15:05',status:'rejected',rejectedTime:'2026-06-25 18:00',reason:'需要法务复核后再发布'},
+    {id:'dc-11',title:'办公效率工具推荐',description:'整理团队常用的笔记、检索、协作和自动化工具。',category:'生活',tags:['工具','效率'],author:'周九',icon:'🧰',time:'2026-06-23 11:40',status:'approved',approvedTime:'2026-06-23 14:00'},
+    {id:'dc-4',title:'数据驱动的产品决策方法',description:'介绍如何通过数据分析来指导产品决策，包含AB测试、用户行为分析和数据看板搭建。',category:'产品',tags:['数据分析','产品决策'],author:'李四',icon:'📊',time:'2026-06-26 11:00',status:'approved',approvedTime:'2026-06-26 16:00'},
+    {id:'dc-6',title:'2025年技术栈选型总结',description:'技术栈选型总结已过时，需要补充最新版本。',category:'技术前沿',tags:['过时'],author:'张三',icon:'📅',time:'2026-06-24 13:00',status:'rejected',rejectedTime:'2026-06-24 15:30',reason:'内容时效性已过，建议更新后重新提交'}
+  ];
+  var userSeeds = [
+    {username:'zhangsan',password:'123456',role:'user',displayName:'张三',avatar:'👤',status:'active'},
+    {username:'lisi',password:'123456',role:'kbadmin',displayName:'李四',avatar:'📚',status:'active'},
+    {username:'wangwu',password:'123456',role:'user',displayName:'王五',avatar:'👤',status:'active'},
+    {username:'zhaoliu',password:'123456',role:'user',displayName:'赵六',avatar:'👤',status:'disabled'},
+    {username:'qianqi',password:'123456',role:'kbadmin',displayName:'钱七',avatar:'📚',status:'active'}
+  ];
+  var logSeeds = [
+    {action:'登录',target:'领导驾驶舱',result:'成功',time:'2026-06-29 16:09',user:'admin'},
+    {action:'查看',target:'审核进度',result:'成功',time:'2026-06-29 16:12',user:'admin'},
+    {action:'编辑用户',target:'wangwu',result:'成功',time:'2026-06-28 10:20',user:'admin'},
+    {action:'禁用',target:'zhaoliu',result:'成功',time:'2026-06-27 15:35',user:'admin'},
+    {action:'审核通过',target:'项目复盘报告_Q2.xlsx',result:'成功',time:'2026-06-27 15:20',user:'lisi'},
+    {action:'审核拒绝',target:'合同条款风险提示',result:'需要法务复核后再发布',time:'2026-06-25 18:00',user:'admin'},
+    {action:'添加用户',target:'qianqi',result:'成功',time:'2026-06-24 09:30',user:'admin'}
+  ];
+  if (!Array.isArray(window.auditFiles)) window.auditFiles = [];
+  if (!Array.isArray(window.discoverContent)) window.discoverContent = [];
+  if (!Array.isArray(window.users)) window.users = [];
+  if (!Array.isArray(window.logs)) window.logs = [];
+  fileSeeds.forEach(function(seed) {
+    var existing = window.auditFiles.find(function(item){return item.id === seed.id;});
+    if (existing) Object.assign(existing, seed);
+    else window.auditFiles.push(seed);
+  });
+  normalizeAuditFileTypes();
+  discoverSeeds.forEach(function(seed) {
+    var existing = window.discoverContent.find(function(item){return item.id === seed.id;});
+    if (existing) Object.assign(existing, seed);
+    else window.discoverContent.push(seed);
+  });
+  userSeeds.forEach(function(seed) {
+    var existing = window.users.find(function(item){return item.username === seed.username;});
+    if (existing) Object.assign(existing, seed);
+    else window.users.push(seed);
+  });
+  logSeeds.forEach(function(seed) {
+    if (!window.logs.some(function(item){return item.time === seed.time && item.action === seed.action && item.target === seed.target;})) window.logs.push(seed);
+  });
+  saveData();
+}
+
+function normalizeAuditFileTypes() {
+  var allowed = {PDF:true, Word:true, Excel:true, Markdown:true};
+  var replacements = {
+    'PPT': {type:'PDF', size:'2.6MB'},
+    'ZIP': {type:'PDF', size:'1.7MB'},
+    '图片': {type:'Word', size:'1.2MB'},
+    'TXT': {type:'Markdown', size:'68KB'}
+  };
+  window.auditFiles = (window.auditFiles || []).map(function(item) {
+    var replacement = replacements[item.type];
+    if (replacement) {
+      item.type = replacement.type;
+      item.size = replacement.size || item.size;
+    } else if (!allowed[item.type]) {
+      item.type = 'Excel';
+    }
+    item.name = (item.name || '').replace(/\.(pptx?|zip|png|jpe?g|gif|webp|txt|pdf|docx?|xlsx?|md|csv)$/i, '');
+    if (item.type === 'PDF' && /截图|图片|压缩|截图包/.test(item.name)) item.name = item.name.replace(/截图包|截图|图片|压缩包/g, '记录');
+    if (item.type === 'Word' && /视觉稿|截图/.test(item.name)) item.name = item.name.replace(/视觉稿|截图/g, '说明');
+    return item;
+  });
+}
+
+function dateOnly(value) {
+  return (value || '').split(' ')[0] || '';
+}
+
+function uniqueFieldOptions(items, getter) {
+  var seen = {};
+  var options = [];
+  items.forEach(function(item) {
+    var value = getter(item);
+    if (!value || seen[value]) return;
+    seen[value] = true;
+    options.push({value:value,label:value});
+  });
+  options.sort(function(a,b){return String(a.label).localeCompare(String(b.label), 'zh-Hans-CN');});
+  return options;
+}
+
+function refillSelect(id, allLabel, options) {
+  var select = $(id);
+  if (!select) return;
+  var selected = select.value || 'all';
+  select.innerHTML = '<option value="all">'+allLabel+'</option>';
+  options.forEach(function(option) {
+    select.innerHTML += '<option value="'+option.value+'">'+option.label+'</option>';
+  });
+  select.value = options.some(function(option){return option.value === selected;}) ? selected : 'all';
+}
+
+function saveData() {
+  try {
+    if (window.users) localStorage.setItem('kb_users', JSON.stringify(window.users));
+    if (window.logs) localStorage.setItem('kb_logs', JSON.stringify(window.logs));
+  } catch(e) {}
+}
+
+function addLog(a, t, r) {
+  window.logs.unshift({action:a,target:t,result:r,time:getNow(),user:currentUser?currentUser.username:''});
+  if (window.logs.length > 200) window.logs = window.logs.slice(0,200);
+  saveData();
+}
+
+function doLogin() {
+  var u = ($('loginUsername')?$('loginUsername').value.trim():'');
+  var p = ($('loginPassword')?$('loginPassword').value.trim():'');
+  var e = $('loginError'); if(e) e.textContent='';
+  if (!u) { if(e) e.textContent='请输入用户名'; return; }
+  if (!p) { if(e) e.textContent='请输入密码'; return; }
+  var user = window.users.find(function(x){return x.username===u&&x.password===p;});
+  if (!user) { if(e) e.textContent='用户名或密码错误'; return; }
+  if (user.role !== 'admin' && user.role !== 'kbadmin') { if(e) e.textContent='无后台管理权限'; return; }
+  if (user.status === 'disabled') { if(e) e.textContent='该账号已被禁用'; return; }
+  currentUser = user;
+  $('loginOverlay').classList.add('hidden');
+  $('userInfo').innerHTML = '<span>'+user.displayName+'</span><span class="badge badge-info">'+(user.role==='admin'?'系统管理员':'KB管理员')+'</span>';
+  addLog('登录', '领导驾驶舱', '成功');
+  switchPanel('dashboard');
+}
+
+function logout() {
+  currentUser = null;
+  $('loginOverlay').classList.remove('hidden');
+  $('loginUsername').value = '';
+  $('loginPassword').value = '';
+  hideModal();
+}
+
+$('loginPassword').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()});
+$('loginBtn').addEventListener('click',doLogin);
+
+document.querySelectorAll('.sidebar-item').forEach(function(item) {
+  item.addEventListener('click',function() { switchPanel(item.dataset.panel); });
+});
+
+function switchPanel(name) {
+  document.querySelectorAll('.sidebar-item').forEach(function(i){i.classList.remove('active')});
+  var item = document.querySelector('.sidebar-item[data-panel="'+name+'"]');
+  if (item) item.classList.add('active');
+  document.querySelectorAll('.admin-panel').forEach(function(p){p.classList.remove('active')});
+  var panel = $('panel-'+name);
+  if (panel) panel.classList.add('active');
+  currentPanel = name;
+  var titles = {dashboard:'📊 控制台概览',audit:'📋 审核进度',users:'👥 用户管理',logs:'📝 操作日志'};
+  $('panelTitle').textContent = titles[name] || name;
+  if (name==='dashboard') renderDashboard();
+  if (name==='audit') renderAudit();
+  if (name==='users') renderUsers();
+  if (name==='logs') renderLogs();
+}
+
+// Dashboard
+function renderDashboard() {
+  loadData();
+  var totalUsers = window.users.length;
+  var totalKBs = window.knowledgeBases.length;
+  var totalDocs = window.documents.length;
+  var totalAuditPending = window.auditFiles.filter(function(a){return a.status==='pending'}).length;
+  var totalDiscoverPending = (window.discoverContent||[]).filter(function(d){return d.status==='pending'}).length;
+  var totalPending = totalAuditPending + totalDiscoverPending;
+  
+  $('statsGrid').innerHTML = 
+    '<div class="stat-card"><div class="stat-card-value">'+totalUsers+'</div><div class="stat-card-label">总用户数</div></div>'+
+    '<div class="stat-card"><div class="stat-card-value">'+totalKBs+'</div><div class="stat-card-label">知识库数</div></div>'+
+    '<div class="stat-card"><div class="stat-card-value">'+totalDocs+'</div><div class="stat-card-label">文档总数</div></div>'+
+    '<div class="stat-card"><div class="stat-card-value">'+totalPending+'</div><div class="stat-card-label">总待审核</div><div class="stat-card-sub">共享KB: '+totalAuditPending+' | 发现: '+totalDiscoverPending+'</div></div>';
+
+  var total = window.auditFiles.length + (window.discoverContent||[]).length;
+  var totalApproved = window.auditFiles.filter(function(a){return a.status==='approved'}).length + (window.discoverContent||[]).filter(function(d){return d.status==='approved'}).length;
+  var rate = total > 0 ? Math.round(totalApproved/total*100) : 0;
+  $('approvalRate').textContent = rate+'%';
+  $('approvalProgress').style.width = rate+'%';
+
+  var activeUsers = window.users.filter(function(u){return u.status!=='disabled'}).length;
+  var activeRate = totalUsers > 0 ? Math.round(activeUsers/totalUsers*100) : 100;
+  $('activeUserCount').textContent = activeUsers+' / '+totalUsers;
+  $('activeUserProgress').style.width = activeRate+'%';
+
+  var allAuditItems = window.auditFiles.map(function(a) {
+    return {name:a.name, owner:a.uploader, source:'共享知识库', time:a.time, status:a.status};
+  }).concat((window.discoverContent||[]).map(function(d) {
+    return {name:d.title, owner:d.author, source:'发现内容', time:d.time, status:d.status};
+  })).sort(function(a,b){return (b.time||'').localeCompare(a.time||'');}).slice(0,6);
+  var statusText = {pending:'未处理',approved:'已处理',rejected:'已处理'};
+  var statusBadge = {pending:'badge-warning',approved:'badge-success',rejected:'badge-danger'};
+  var logHtml = '<table><thead><tr><th>名称</th><th>提交人</th><th>类型</th><th>时间</th><th>处理进度</th></tr></thead><tbody>';
+  allAuditItems.forEach(function(item) {
+    logHtml += '<tr><td>'+item.name+'</td><td>'+(item.owner||'-')+'</td><td>'+item.source+'</td><td>'+(item.time||'-')+'</td><td><span class="badge '+(statusBadge[item.status]||'badge-info')+'">'+(statusText[item.status]||'-')+'</span></td></tr>';
+  });
+  logHtml += '</tbody></table>';
+  $('recentLogs').innerHTML = logHtml;
+}
+
+// Audit Panel (Shared KB + Discover)
+// Tab binding
+(function(){
+  if ($('auditTabs')) {
+    $('auditTabs').addEventListener('click',function(e){
+      if(e.target.classList.contains('tab-btn')){
+        document.querySelectorAll('#auditTabs .tab-btn').forEach(function(b){b.classList.remove('active')});
+        e.target.classList.add('active');
+        auditTabStatus = e.target.dataset.status;
+        renderAudit();
+      }
+    });
+  }
+  if ($('discoverAuditTabs')) {
+    $('discoverAuditTabs').addEventListener('click',function(e){
+      if(e.target.classList.contains('tab-btn')){
+        document.querySelectorAll('#discoverAuditTabs .tab-btn').forEach(function(b){b.classList.remove('active')});
+        e.target.classList.add('active');
+        discoverAuditTabStatus = e.target.dataset.status;
+        renderAudit();
+      }
+    });
+  }
+})();
+
+function renderAudit() {
+  loadData();
+  
+  // === Shared KB Audit Section ===
+  var search = ($('auditSearch')?$('auditSearch').value.trim().toLowerCase():'');
+  var kbFilter = ($('auditKBFilter')?$('auditKBFilter').value:'all');
+  var typeFilter = ($('auditTypeFilter')?$('auditTypeFilter').value:'all');
+  var startDate = ($('auditStartDate')?$('auditStartDate').value:'');
+  var endDate = ($('auditEndDate')?$('auditEndDate').value:'');
+
+  refillSelect('auditKBFilter', '全部共享知识库', uniqueFieldOptions(window.auditFiles, function(a){return a.targetKBName || a.targetKB;}));
+  refillSelect('auditTypeFilter', '全部类型', uniqueFieldOptions(window.auditFiles, function(a){return a.type;}));
+
+  var filtered = window.auditFiles.filter(function(a) {
+    if (a.status !== auditTabStatus) return false;
+    if (search) {
+      var fields = [a.name,a.uploader];
+      var match = false;
+      for (var i=0;i<fields.length;i++) { if (fields[i]&&fields[i].toLowerCase().indexOf(search)>=0) { match=true; break; } }
+      if (!match) return false;
+    }
+    if (kbFilter !== 'all' && (a.targetKBName || a.targetKB) !== kbFilter) return false;
+    if (typeFilter !== 'all' && a.type !== typeFilter) return false;
+    var itemDate = dateOnly(a.time);
+    if (startDate && itemDate < startDate) return false;
+    if (endDate && itemDate > endDate) return false;
+    return true;
+  });
+  
+  var pending = window.auditFiles.filter(function(a){return a.status==='pending'});
+  var approved = window.auditFiles.filter(function(a){return a.status==='approved'});
+  var rejected = window.auditFiles.filter(function(a){return a.status==='rejected'});
+  $('kbauditStats').innerHTML =
+    '<div class="stat-card" style="border-left:3px solid var(--warn-orange)"><div class="stat-card-value" style="color:var(--warn-orange)">'+pending.length+'</div><div class="stat-card-label">共享KB待审核</div></div>'+
+    '<div class="stat-card" style="border-left:3px solid var(--success-green)"><div class="stat-card-value" style="color:var(--success-green)">'+approved.length+'</div><div class="stat-card-label">已通过</div></div>'+
+    '<div class="stat-card" style="border-left:3px solid var(--danger-red)"><div class="stat-card-value" style="color:var(--danger-red)">'+rejected.length+'</div><div class="stat-card-label">已拒绝</div></div>';
+
+  var badgeMap = {pending:'<span class="badge badge-warning">待审核</span>',approved:'<span class="badge badge-success">已通过</span>',rejected:'<span class="badge badge-danger">已拒绝</span>'};
+  var tbody = $('auditTableBody');
+  if (filtered.length===0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-sec);padding:32px">暂无数据</td></tr>';
+  } else {
+    var html = '';
+    filtered.forEach(function(a) {
+      html += '<tr><td style="font-weight:500">'+a.name+'</td><td>'+(a.type||'-')+'</td><td>'+(a.uploader||'-')+'</td><td>'+(a.targetKBName||a.targetKB||'-')+'</td><td>'+(a.time||'-')+'</td><td>'+(badgeMap[a.status]||'')+'</td><td>';
+      html += '<button class="btn btn-outline btn-sm" onclick="viewAuditDetail(\''+a.id+'\',\'kbaudit\')">👁 查看</button>';
+      html += '</td></tr>';
+    });
+    tbody.innerHTML = html;
+  }
+  // === Discover Content Audit Section ===
+  var dSearch = ($('discoverAuditSearch')?$('discoverAuditSearch').value.trim().toLowerCase():'');
+  var categoryFilter = ($('discoverAuditCategoryFilter')?$('discoverAuditCategoryFilter').value:'all');
+  var dStartDate = ($('discoverAuditStartDate')?$('discoverAuditStartDate').value:'');
+  var dEndDate = ($('discoverAuditEndDate')?$('discoverAuditEndDate').value:'');
+
+  refillSelect('discoverAuditCategoryFilter', '全部类型', uniqueFieldOptions(window.discoverContent||[], function(d){return d.category;}));
+
+  var dFiltered = (window.discoverContent||[]).filter(function(d) {
+    if (d.status !== discoverAuditTabStatus) return false;
+    if (dSearch) {
+      var fields = [d.title,d.author];
+      var match = false;
+      for (var i=0;i<fields.length;i++) { if (fields[i]&&fields[i].toLowerCase().indexOf(dSearch)>=0) { match=true; break; } }
+      if (!match) return false;
+    }
+    if (categoryFilter !== 'all' && d.category !== categoryFilter) return false;
+    var itemDate = dateOnly(d.time);
+    if (dStartDate && itemDate < dStartDate) return false;
+    if (dEndDate && itemDate > dEndDate) return false;
+    return true;
+  });
+
+  var dPending = (window.discoverContent||[]).filter(function(d){return d.status==='pending'});
+  var dApproved = (window.discoverContent||[]).filter(function(d){return d.status==='approved'});
+  var dRejected = (window.discoverContent||[]).filter(function(d){return d.status==='rejected'});
+  $('discoverAuditStats').innerHTML =
+    '<div class="stat-card" style="border-left:3px solid var(--warn-orange)"><div class="stat-card-value" style="color:var(--warn-orange)">'+dPending.length+'</div><div class="stat-card-label">发现内容待审核</div></div>'+
+    '<div class="stat-card" style="border-left:3px solid var(--success-green)"><div class="stat-card-value" style="color:var(--success-green)">'+dApproved.length+'</div><div class="stat-card-label">已发布</div></div>'+
+    '<div class="stat-card" style="border-left:3px solid var(--danger-red)"><div class="stat-card-value" style="color:var(--danger-red)">'+dRejected.length+'</div><div class="stat-card-label">已驳回</div></div>';
+
+  var dList = $('discoverAuditList');
+  var dBadgeMap = {pending:'<span class="badge badge-warning">待审核</span>',approved:'<span class="badge badge-success">已发布</span>',rejected:'<span class="badge badge-danger">已驳回</span>'};
+  var dHtml = '<div class="data-table"><table><thead><tr><th>标题</th><th>类型</th><th>作者</th><th>提交时间</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+  if (dFiltered.length===0) {
+    dHtml += '<tr><td colspan="6" style="text-align:center;color:var(--text-sec);padding:32px">暂无内容</td></tr>';
+  } else {
+    dFiltered.forEach(function(d) {
+      dHtml += '<tr><td style="font-weight:500">'+(d.title||'-')+'</td><td>'+(d.category||'-')+'</td><td>'+(d.author||'-')+'</td><td>'+(d.time||'-')+'</td><td>'+(dBadgeMap[d.status]||'')+'</td><td>';
+      dHtml += '<button class="btn btn-outline btn-sm" onclick="viewAuditDetail(\''+d.id+'\',\'discover\')">👁 查看</button>';
+      dHtml += '</td></tr>';
+    });
+  }
+  dHtml += '</tbody></table></div>';
+  dList.innerHTML = dHtml;
+}
+
+function viewAuditDetail(id, type) {
+  if (type === 'kbaudit') {
+    var af = window.auditFiles.find(function(a){return a.id===id;});
+    if (!af) return;
+    var badgeMap = {pending:'<span class="badge badge-warning">待审核</span>',approved:'<span class="badge badge-success">已通过</span>',rejected:'<span class="badge badge-danger">已拒绝</span>'};
+    var html = '<h3>👁 审核详情</h3>';
+    html += '<div class="detail-grid">';
+    html += '<div class="detail-item"><div class="detail-label">文件名</div><div class="detail-value">'+af.name+'</div></div>';
+    html += '<div class="detail-item"><div class="detail-label">文件类型</div><div class="detail-value">'+(af.type||'-')+'</div></div>';
+    html += '<div class="detail-item"><div class="detail-label">文件大小</div><div class="detail-value">'+(af.size||'-')+'</div></div>';
+    html += '<div class="detail-item"><div class="detail-label">上传者</div><div class="detail-value">'+(af.uploader||'-')+'</div></div>';
+    html += '<div class="detail-item"><div class="detail-label">目标知识库</div><div class="detail-value">'+(af.targetKBName||af.targetKB||'-')+'</div></div>';
+    html += '<div class="detail-item"><div class="detail-label">上传时间</div><div class="detail-value">'+(af.time||'-')+'</div></div>';
+    html += '<div class="detail-item"><div class="detail-label">当前状态</div><div class="detail-value">'+(badgeMap[af.status]||'')+'</div></div>';
+    html += '<div class="detail-item"><div class="detail-label">处理进度</div><div class="detail-value"><span class="badge '+(af.status==='pending'?'badge-warning':'badge-success')+'">'+(af.status==='pending'?'未处理':'已处理')+'</span></div></div>';
+    if (af.approvedTime) html += '<div class="detail-item"><div class="detail-label">审核通过时间</div><div class="detail-value">'+af.approvedTime+'</div></div>';
+    if (af.rejectedTime) html += '<div class="detail-item"><div class="detail-label">驳回时间</div><div class="detail-value">'+af.rejectedTime+'</div></div>';
+    if (af.reason) html += '<div class="detail-item" style="grid-column:1/-1"><div class="detail-label">驳回原因</div><div class="detail-value" style="color:var(--danger-red)">'+af.reason+'</div></div>';
+    if (af.description) html += '<div class="detail-item" style="grid-column:1/-1"><div class="detail-label">文件描述</div><div class="detail-value">'+af.description+'</div></div>';
+    html += '</div>';
+    html += '<div class="modal-actions"><button class="modal-cancel" onclick="hideModal()">关闭</button></div>';
+    showModal(html);
+  } else if (type === 'discover') {
+    var dc = (window.discoverContent||[]).find(function(d){return d.id===id;});
+    if (!dc) return;
+    var badgeMap = {pending:'<span class="badge badge-warning">待审核</span>',approved:'<span class="badge badge-success">已发布</span>',rejected:'<span class="badge badge-danger">已驳回</span>'};
+    var html = '<h3>👁 内容详情</h3>';
+    html += '<div class="detail-grid">';
+    html += '<div class="detail-item"><div class="detail-label">标题</div><div class="detail-value">'+dc.title+'</div></div>';
+    html += '<div class="detail-item"><div class="detail-label">作者</div><div class="detail-value">'+(dc.author||'-')+'</div></div>';
+    html += '<div class="detail-item"><div class="detail-label">分类</div><div class="detail-value">'+(dc.category||'-')+'</div></div>';
+    html += '<div class="detail-item"><div class="detail-label">提交时间</div><div class="detail-value">'+(dc.time||'-')+'</div></div>';
+    html += '<div class="detail-item"><div class="detail-label">当前状态</div><div class="detail-value">'+(badgeMap[dc.status]||'')+'</div></div>';
+    html += '<div class="detail-item"><div class="detail-label">处理进度</div><div class="detail-value"><span class="badge '+(dc.status==='pending'?'badge-warning':'badge-success')+'">'+(dc.status==='pending'?'未处理':'已处理')+'</span></div></div>';
+    if (dc.approvedTime) html += '<div class="detail-item"><div class="detail-label">发布时间</div><div class="detail-value">'+dc.approvedTime+'</div></div>';
+    if (dc.rejectedTime) html += '<div class="detail-item"><div class="detail-label">驳回时间</div><div class="detail-value">'+dc.rejectedTime+'</div></div>';
+    if (dc.reason) html += '<div class="detail-item" style="grid-column:1/-1"><div class="detail-label">驳回原因</div><div class="detail-value" style="color:var(--danger-red)">'+dc.reason+'</div></div>';
+    html += '<div class="detail-item" style="grid-column:1/-1"><div class="detail-label">内容描述</div><div class="detail-value">'+dc.description+'</div></div>';
+    html += '</div>';
+    html += '<div class="modal-actions"><button class="modal-cancel" onclick="hideModal()">关闭</button></div>';
+    showModal(html);
+  }
+}
+
+// Users
+function renderUsers() {
+  loadData();
+  var search = ($('userSearchInput')?$('userSearchInput').value.trim().toLowerCase():'');
+  var statusFilter = ($('userStatusFilter')?$('userStatusFilter').value:'all');
+  var roleFilter = ($('userRoleFilter')?$('userRoleFilter').value:'all');
+
+  var filtered = window.users.filter(function(u) {
+    if (search && u.username.toLowerCase().indexOf(search)<0 && (u.displayName||'').toLowerCase().indexOf(search)<0) return false;
+    if (statusFilter !== 'all' && u.status !== statusFilter) return false;
+    if (roleFilter!=='all' && u.role!==roleFilter) return false;
+    return true;
+  });
+  var tbody = $('usersTableBody');
+  var roleMap = {admin:'系统管理员',kbadmin:'KB管理员',user:'普通用户'};
+  var html = '';
+  filtered.forEach(function(u) {
+    html += '<tr><td>'+u.username+'</td><td>'+u.displayName+'</td><td>'+(roleMap[u.role]||u.role)+'</td>'+
+      '<td>'+(u.status==='disabled'?'<span class="badge badge-danger">已禁用</span>':'<span class="badge badge-success">正常</span>')+'</td>'+
+      '<td><button class="btn btn-outline btn-sm" onclick="editUser(\''+u.username+'\')">编辑</button> '+
+      '<button class="btn btn-sm '+(u.status==='disabled'?'btn-success':'btn-danger')+'" onclick="toggleUser(\''+u.username+'\')">'+(u.status==='disabled'?'启用':'禁用')+'</button> '+
+      '<button class="btn btn-danger btn-sm" onclick="deleteUser(\''+u.username+'\')">删除</button></td></tr>';
+  });
+  tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:var(--text-sec);padding:24px">暂无用户</td></tr>';
+}
+
+function showAddUserModal() {
+  var h = '<h3>添加用户</h3>'+
+    '<div class="modal-field"><label>用户名</label><input type="text" id="addUserName"></div>'+
+    '<div class="modal-field"><label>密码</label><input type="password" id="addUserPwd" value="123456"></div>'+
+    '<div class="modal-field"><label>显示名</label><input type="text" id="addUserDisp"></div>'+
+    '<div class="modal-field"><label>用户类型</label><select id="addUserRole"><option value="user">普通用户</option><option value="kbadmin">KB管理员</option><option value="admin">系统管理员</option></select></div>'+
+    '<div class="modal-actions"><button class="modal-cancel" onclick="hideModal()">取消</button><button class="modal-confirm" id="addUserConfirm">确定</button></div>';
+  showModal(h);
+  setTimeout(function(){
+    $('addUserConfirm').onclick=function(){
+      var n=$('addUserName').value.trim(),p=$('addUserPwd').value.trim(),d=$('addUserDisp').value.trim(),r=$('addUserRole').value;
+      if(!n){showToast('请输入用户名');return;}
+      if(window.users.find(function(u){return u.username===n})){showToast('用户名已存在');return;}
+      window.users.push({username:n,password:p,role:r,displayName:d||n,avatar:'👤',status:'active'});
+      saveData();renderUsers();renderDashboard();addLog('添加用户',n,'成功');showToast('用户 '+n+' 已添加');hideModal();
+    };
+  },0);
+}
+function editUser(username) {
+  var u=window.users.find(function(x){return x.username===username;});if(!u)return;
+  var h='<h3>编辑用户 · '+u.username+'</h3>'+
+    '<div class="modal-field"><label>显示名</label><input type="text" id="editUserDisp" value="'+(u.displayName||'')+'"></div>'+
+    '<div class="modal-field"><label>用户类型</label><select id="editUserRole"><option value="user"'+(u.role==='user'?' selected':'')+'>普通用户</option><option value="kbadmin"'+(u.role==='kbadmin'?' selected':'')+'>KB管理员</option><option value="admin"'+(u.role==='admin'?' selected':'')+'>系统管理员</option></select></div>'+
+    '<div class="modal-field"><label>新密码（留空不修改）</label><input type="password" id="editUserPwd"></div>'+
+    '<div class="modal-actions"><button class="modal-cancel" onclick="hideModal()">取消</button><button class="modal-confirm" id="editUserConfirm">确定</button></div>';
+  showModal(h);
+  setTimeout(function(){
+    $('editUserConfirm').onclick=function(){
+      u.displayName=$('editUserDisp').value.trim()||u.username;u.role=$('editUserRole').value;
+      var np=$('editUserPwd').value.trim();if(np)u.password=np;
+      saveData();renderUsers();addLog('编辑用户',u.username,'成功');showToast('用户 '+u.username+' 已更新');hideModal();
+    };
+  },0);
+}
+function toggleUser(username) {
+  var u=window.users.find(function(x){return x.username===username;});if(!u)return;
+  u.status=u.status==='disabled'?'active':'disabled';saveData();renderUsers();
+  addLog(u.status==='disabled'?'禁用':'启用',username,'成功');showToast(u.status==='disabled'?'已禁用: '+username:'已启用: '+username);
+}
+function deleteUser(username) {
+  if(username==='admin'){showToast('不能删除超级管理员');return;}
+  window.users=window.users.filter(function(u){return u.username!==username;});
+  saveData();renderUsers();renderDashboard();addLog('删除用户',username,'成功');showToast('已删除: '+username);
+}
+
+// Logs
+function renderLogs() {
+  loadData();
+  var search = ($('logSearchInput')?$('logSearchInput').value.trim().toLowerCase():'');
+  var userFilter = ($('logUserFilter')?$('logUserFilter').value:'all');
+  var actionFilter = ($('logActionFilter')?$('logActionFilter').value:'all');
+  var startDate = ($('logStartDate')?$('logStartDate').value:'');
+  var endDate = ($('logEndDate')?$('logEndDate').value:'');
+
+  refillSelect('logActionFilter', '全部操作', uniqueFieldOptions(window.logs, function(l){return l.action;}));
+
+  var filtered = window.logs.filter(function(l) {
+    var user = (l.user || '').toLowerCase();
+    var userRole = getUserRole(l.user);
+    if (search && user.indexOf(search)<0) return false;
+    if (userFilter !== 'all' && userRole !== userFilter) return false;
+    if (actionFilter !== 'all' && l.action !== actionFilter) return false;
+    var itemDate = dateOnly(l.time);
+    if (startDate && itemDate < startDate) return false;
+    if (endDate && itemDate > endDate) return false;
+    return true;
+  });
+  var tbody=$('logsTableBody'),html='';
+  filtered.forEach(function(l){html+='<tr><td>'+(l.user||'-')+'</td><td>'+l.time+'</td><td>'+getUserRoleLabel(l.user)+'</td><td>'+l.action+'</td><td>'+l.target+'</td><td>'+l.result+'</td></tr>';});
+  tbody.innerHTML=html||'<tr><td colspan="6" style="text-align:center;color:var(--text-sec);padding:24px">暂无日志</td></tr>';
+}
+function clearLogs(){window.logs=[];saveData();renderLogs();renderDashboard();addLog('清空','操作日志','成功');showToast('日志已清空');}
+
+function getUserRole(username) {
+  var u = (window.users || []).find(function(item){return item.username === username;});
+  return u ? u.role : '';
+}
+
+function getUserRoleLabel(username) {
+  var roleMap = {admin:'系统管理员',kbadmin:'KB管理员',user:'普通用户'};
+  return roleMap[getUserRole(username)] || '-';
+}
+
+// Modal
+function showModal(html){$('modalContent').innerHTML=html;$('modalOverlay').classList.add('visible');}
+function hideModal(){$('modalOverlay').classList.remove('visible');}
+$('modalOverlay').addEventListener('click',function(e){if(e.target===$('modalOverlay'))hideModal();});
+
+// Init
+loadData();
+$('loginOverlay').classList.remove('hidden');
+setInterval(function(){
+  if(currentUser&&currentPanel==='dashboard')renderDashboard();
+  if(currentUser&&currentPanel==='audit')renderAudit();
+},30000);
+</script>
+</body>
+</html>
